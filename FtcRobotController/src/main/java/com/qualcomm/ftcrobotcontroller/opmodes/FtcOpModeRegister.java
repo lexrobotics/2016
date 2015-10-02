@@ -70,5 +70,6 @@ public class FtcOpModeRegister implements OpModeRegister {
      * The NullOp op mode
      */
         manager.register("NullOp", NullOp.class);
+        manager.register("IMU", IMUTest.class);
     }
 }
