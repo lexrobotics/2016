@@ -29,10 +29,10 @@ public class TeleOp extends OpMode {
 
         gamepad1.setJoystickDeadzone(0.1f);
 
-        frontRightPower =  gamepad1.right_stick_y;
-        backRightPower =  gamepad1.right_stick_y;
-        frontLeftPower = gamepad1.left_stick_y;
-        backLeftPower =  gamepad1.left_stick_y;
+        frontRightPower =  -gamepad1.right_stick_y;
+        backRightPower =  -gamepad1.right_stick_y;
+        frontLeftPower = -gamepad1.left_stick_y;
+        backLeftPower =  -gamepad1.left_stick_y;
 
         frontRightPower = Range.clip(frontRightPower, -1, 1);
         backRightPower = Range.clip(backRightPower, -1, 1);
