@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
+import java.lang.InterruptedException;
+
 /**
  * Created by lhscompsci on 9/28/15.
  */
@@ -29,14 +31,37 @@ public class TeleOp extends OpMode {
     @Override
     public void loop() {
         gamepad1.setJoystickDeadzone(0.1f);
-        gamepad2.setJoystickDeadzone(0.1f);
 
-        motorArmAngle.setPower(gamepad2.right_stick_y);
-        motorArmExtend.setPower(gamepad2.right_stick_x);
         motorFrontLeft.setPower(-gamepad1.left_stick_y);
         motorBackRight.setPower(-gamepad1.right_stick_y);
         motorBackLeft.setPower(-gamepad1.left_stick_y);
         motorFrontRight.setPower(-gamepad1.right_stick_y);
-    }
 
+        if (gamepad1.right_bumper) {
+            motorArmAngle.setPower(f0.5);
+        }
+        else if(gamepad1.right_trigger > 0.5) {
+            motorArmAngle.setPower(-0.5);
+        }
+        else {
+            motorArmAngle.setPower(0);
+        }
+
+        if (gamepad1.left_bumper) {
+            motorArmAngle.setPower(0.5);
+        }
+        else if(gamepad1.left_trigger > 0.5) {
+            motorArmAngle.setPower(-0.5);
+        }
+        else {
+            motorArmAngle.setPower(0);
+        }
+
+        try {
+            Thread.sleep(15)
+        }
+        catch(InterruptedException e){
+            e.printStackTrace();
+        }
+    }
 }
