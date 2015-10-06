@@ -9,6 +9,15 @@ import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
+//COLOR VALUES
+//with blue light r:0 g:0 b:1
+//with red light r:1 g:0 b:0
+//with wall r:0 g:0 b:0
+//with ceiling r:1 g:2 b:3
+//max dist 6 inches
+
+
+
 
 /**
  * Created by luke on 10/5/15.
@@ -21,12 +30,12 @@ public class ColorBasic extends LinearOpMode{
         hardwareMap.logDevices();
         sensorRGB = hardwareMap.colorSensor.get("mr");
 
-        sensorRGB.enableLed(true);
+        sensorRGB.enableLed(false);
         waitOneFullHardwareCycle();
         waitForStart();
 
         while (opModeIsActive()){
-            sensorRGB.enableLed(true);
+            sensorRGB.enableLed(false);
             telemetry.addData("Clear", sensorRGB.alpha());
             telemetry.addData("Red  ", sensorRGB.red());
             telemetry.addData("Green", sensorRGB.green());
@@ -44,3 +53,4 @@ public class ColorBasic extends LinearOpMode{
 //    }
 
 }
+*5
