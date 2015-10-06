@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.util.Range;
 public class TeleOp extends OpMode {
     DcMotor motorFrontLeft, motorFrontRight;
     DcMotor motorBackLeft, motorBackRight;
+    DcMotor motorArmExtend;
+    DcMotor motorArmAngle;
 
     @Override
     public void init() {
@@ -17,6 +19,8 @@ public class TeleOp extends OpMode {
         motorFrontRight = hardwareMap.dcMotor.get("right1");
         motorBackLeft = hardwareMap.dcMotor.get("left2");
         motorBackRight = hardwareMap.dcMotor.get("right2");
+        motorArmExtend = hardwareMap.dcMotor.get("armExtend");
+        motorArmAngle = hardwareMap.dcMotor.get("armAngle");
 
         motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
         motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -24,25 +28,15 @@ public class TeleOp extends OpMode {
 
     @Override
     public void loop() {
-        float frontLeftPower, frontRightPower;
-        float backLeftPower, backRightPower;
-
         gamepad1.setJoystickDeadzone(0.1f);
+        gamepad2.setJoystickDeadzone(0.1f);
 
-        frontRightPower =  -gamepad1.right_stick_y;
-        backRightPower =  -gamepad1.right_stick_y;
-        frontLeftPower = -gamepad1.left_stick_y;
-        backLeftPower =  -gamepad1.left_stick_y;
-
-        frontRightPower = Range.clip(frontRightPower, -1, 1);
-        backRightPower = Range.clip(backRightPower, -1, 1);
-        frontLeftPower = Range.clip(frontLeftPower, -1, 1);
-        backLeftPower = Range.clip(backLeftPower, -1, 1);
-
-        motorFrontLeft.setPower(frontLeftPower);
-        motorBackRight.setPower(backRightPower);
-        motorBackLeft.setPower(backLeftPower);
-        motorFrontRight.setPower(frontRightPower);
+        motorArmAngle.setPower(gamepad2.right_stick_y);
+        motorArmExtend.setPower(gamepad2.right_stick_x);
+        motorFrontLeft.setPower(-gamepad1.left_stick_y);
+        motorBackRight.setPower(-gamepad1.right_stick_y);
+        motorBackLeft.setPower(-gamepad1.left_stick_y);
+        motorFrontRight.setPower(-gamepad1.right_stick_y);
     }
 
 }
