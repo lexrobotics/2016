@@ -12,23 +12,19 @@ import com.qualcomm.robotcore.hardware.LED;
 
 public class VivekSensor extends LinearOpMode{
     ColorSensor colorSensor;
-    DeviceInterfaceModule cdim;
-//    int count;
-    LED led;
-//    TouchSensor t;
 
     public void runOpMode() throws InterruptedException{
 //        count = 0;
         hardwareMap.logDevices();
 
-        cdim = hardwareMap.deviceInterfaceModule.get("dim");
+//        cdim = hardwareMap.deviceInterfaceModule.get("dim");
         colorSensor = hardwareMap.colorSensor.get("mr");
 
 //        led = hardwareMap.led.get("led");
 //        t = hardwareMap.touchSensor.get("t");
-
+        colorSensor.enableLed(true);
+        waitOneFullHardwareCycle();
         waitForStart();
-
 
         float hsvValues[] = {0F,0F,0F};
         final float values[] = hsvValues;
