@@ -70,5 +70,8 @@ public class FtcOpModeRegister implements OpModeRegister {
      * The NullOp op mode
      */
         manager.register("NullOp", NullOp.class);
+        manager.register("ColorSense", ColorSense.class);
+        manager.register("VivekSensor", VivekSensor.class);
+        manager.register("ColorBasic", ColorBasic.class);
     }
 }
