@@ -25,7 +25,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 public class ColorBasic extends LinearOpMode{
     ColorSensor sensorRGB;
 
-    int x;
+    @Override
     public void runOpMode() throws InterruptedException{
         hardwareMap.logDevices();
         sensorRGB = hardwareMap.colorSensor.get("mr");
@@ -53,4 +53,3 @@ public class ColorBasic extends LinearOpMode{
 //    }
 
 }
-*5

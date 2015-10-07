@@ -25,6 +25,7 @@ public class MRRGBExample extends LinearOpMode {
     ColorSensor sensorRGB;
 
 
+    @Override
     public void runOpMode() throws InterruptedException {
 
         // write some device information (connection info, name and type)
