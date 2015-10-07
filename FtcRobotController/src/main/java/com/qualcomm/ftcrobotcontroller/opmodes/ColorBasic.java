@@ -1,11 +1,5 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
-import android.app.Activity;
-import android.graphics.Color;
-import android.view.View;
-
-import com.qualcomm.ftccommon.DbgLog;
-import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
@@ -42,6 +36,7 @@ public class ColorBasic extends LinearOpMode{
             telemetry.addData("Blue ", sensorRGB.blue());
             waitOneFullHardwareCycle();
         }
+
 
     }
 
