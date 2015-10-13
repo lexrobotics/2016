@@ -11,6 +11,8 @@ import lib.Robot;
  * Created by luke on 10/7/15.
  */
 public class ColorSweep extends LinearOpMode {
+    // Demo class for the new Robot classes.
+
     @Override
     public void runOpMode () {
         Robot dave = new Robot(hardwareMap);

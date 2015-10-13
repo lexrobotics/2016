@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
  * Created by luke on 10/5/15.
  */
 public class ColorBasic extends LinearOpMode{
+    // Testing opMode for the colorSensor.
     ColorSensor sensorRGB;
 
     @Override
