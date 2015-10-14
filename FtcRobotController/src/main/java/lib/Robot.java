@@ -1,10 +1,16 @@
 package lib;
+import com.qualcomm.ftcrobotcontroller.opmodes.ColorSweep;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.robocol.Telemetry;
 import com.qualcomm.robotcore.util.Hardware;
 import java.util.HashMap;
+
+//import  com.qualcomm.robotcore.eventloop.opmode.LinearOpMode.*;
 
 /**
  * Created by luke on 10/7/15.
@@ -15,14 +21,20 @@ public class Robot {
     // Drivetrain handles functions specific to our drive type (four-wheel, two-wheel, treads, etc).
     private HardwareMap hmap;
     private DriveTrain drivetrain;
+    private Telemetry tel;
 
     // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
     private HashMap<String, Object> motors;
     private HashMap<String, Object> sensors;
     private HashMap<String, Object> servos;
 
-    public Robot (HardwareMap hmap) {
+    public Robot (HardwareMap hmap, Telemetry tel) {
+
         this.hmap = hmap;
+        this.sensors = new HashMap<String, Object>();
+        this.motors = new HashMap<String, Object>();
+        this.servos = new HashMap<String, Object>();
+        this.tel = tel;
     }
 
     // If someone tries to get a device not registered in a hashmap.
@@ -68,8 +80,21 @@ public class Robot {
 
     // tillSense for colors.
     public void colorSweep(String color) {
-        while(this.getDominantColor().equals(color)) {
-            drivetrain.move(0.5F);
+        ColorSensor c = (ColorSensor) sensors.get("color_sensor");
+        c.enableLed(true);
+        drivetrain.move(0.1F);
+        while(!this.getDominantColor().equals(color)) {
+            this.tel.addData("Dominant", getDominantColor());
+            tel.addData("Blue", c.blue());
+            tel.addData("Red", c.red());
+            tel.addData("Green", c.green());
+            tel.addData("Alpha", c.alpha());
+            try {
+                Thread.sleep(5);
+            }
+            catch (java.lang.InterruptedException ex){
+
+            }
         }
     }
 

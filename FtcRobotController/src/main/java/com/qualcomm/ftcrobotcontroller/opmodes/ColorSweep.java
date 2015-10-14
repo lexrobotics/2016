@@ -14,9 +14,10 @@ public class ColorSweep extends LinearOpMode {
     // Demo class for the new Robot classes.
 
     @Override
-    public void runOpMode () {
-        Robot dave = new Robot(hardwareMap);
-        dave.registerDriveMotors("left_motors", true, "right_motors", true);
+    public void runOpMode() throws InterruptedException {
+        waitForStart();
+        Robot dave = new Robot(hardwareMap, telemetry);
+        dave.registerDriveMotors("left_motors", true, "right_motors", false);
         dave.registerColorSensor("mr");
         dave.colorSweep("red");
 
