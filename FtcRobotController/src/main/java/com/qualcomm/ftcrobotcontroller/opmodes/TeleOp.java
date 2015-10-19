@@ -48,13 +48,13 @@ public class TeleOp extends OpMode {
         }
 
         if (gamepad1.left_bumper) {
-            motorArmAngle.setPower(0.5);
+            motorArmExtend.setPower(0.5);
         }
         else if(gamepad1.left_trigger > 0.5) {
-            motorArmAngle.setPower(-0.5);
+            motorArmExtend.setPower(-0.5);
         }
         else {
-            motorArmAngle.setPower(0);
+            motorArmExtend.setPower(0);
         }
 
         try {
