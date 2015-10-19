@@ -30,4 +30,8 @@ public class UltraSonic {
         serv.setPosition((offset + theta) / 180.0);
     }
 
+    public double getDistance(){
+        // return distance in cm by dividing by (5V / 1024 cm);
+        return us.getValue() / (5.0 / 1024.0);
+    }
 }
