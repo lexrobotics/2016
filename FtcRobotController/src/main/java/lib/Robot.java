@@ -22,21 +22,20 @@ public class Robot {
     private HardwareMap hmap;
     private DriveTrain drivetrain;
     private Telemetry tel;
-    private ColorSweep colorsweeper;
+    private LinearOpMode opm;
 
     // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
     private HashMap<String, Object> motors;
     private HashMap<String, Object> sensors;
     private HashMap<String, Object> servos;
 
-    public Robot (HardwareMap hmap, Telemetry tel, ColorSweep colorsweeper) {
+    public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode _opm) {
 
         this.hmap = hmap;
         this.sensors = new HashMap<String, Object>();
         this.motors = new HashMap<String, Object>();
         this.servos = new HashMap<String, Object>();
-        this.colorsweeper = colorsweeper;
-
+        this.opm = _opm;
         this.tel = tel;
     }
 
@@ -86,22 +85,22 @@ public class Robot {
         // Color sensor max accurate range without blinder: approx 5 inches
         ColorSensor c = (ColorSensor) sensors.get("color_sensor");
         c.enableLed(true);
-        drivetrain.move(0.1F);
-        while(!getDominantColor().equals(color)) {
+        drivetrain.move(-0.25F);
+        while(!(getDominantColor().equals(color))) {
             tel.addData("Dominant", getDominantColor());
             tel.addData("Blue", c.blue());
             tel.addData("Red", c.red());
             tel.addData("Green", c.green());
             tel.addData("Alpha", c.alpha());
-
             try {
-                // REALLY suspicious to me.
-                colorsweeper.waitOneFullHardwareCycle();
+                opm.waitOneFullHardwareCycle();
             }
-            catch (java.lang.InterruptedException ex){
+            catch(InterruptedException ex){
 
             }
         }
+        drivetrain.move(0.0F);
+
     }
 
     // register the drive motors on the robot with the drivetrain instance.
