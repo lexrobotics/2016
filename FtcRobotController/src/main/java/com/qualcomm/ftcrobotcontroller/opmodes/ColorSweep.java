@@ -16,10 +16,11 @@ public class ColorSweep extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         waitForStart();
-        Robot dave = new Robot(hardwareMap, telemetry);
+        Robot dave = new Robot(hardwareMap, telemetry, this);
         dave.registerDriveMotors("left_motors", true, "right_motors", false);
         dave.registerColorSensor("mr");
         dave.colorSweep("red");
+//        this.waitOneFullHardwareCycle();
 
     }
 

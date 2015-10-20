@@ -31,7 +31,6 @@ public class UltraSonic
         // theta is measured in degrees
         serv.setPosition((offset + theta) / 180.0);
     }
-
     public double getDistance()
     {
         return Math.pow(us.getValue() * 1024, 0.25);
