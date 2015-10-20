@@ -5,7 +5,9 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 /**
  * Created by luke on 10/13/15.
  */
-public class UltraSonic {
+
+public class UltraSonic
+{
     AnalogInput us;
     Servo serv;
     double offset;
@@ -30,9 +32,9 @@ public class UltraSonic {
         // 0 < theta < 180
         serv.setPosition((offset + theta) / 180.0);
     }
-
-    public double getDistance(){
-        // return distance in cm by dividing by (5V / 1024 cm);
-        return us.getValue() / (5.0 / 1024.0);
+    public double getDistance()
+    {
+        return Math.pow(us.getValue() * 1024, 0.25);
     }
+
 }
