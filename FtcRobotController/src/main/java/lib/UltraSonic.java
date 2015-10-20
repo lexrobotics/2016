@@ -5,7 +5,9 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 /**
  * Created by luke on 10/13/15.
  */
-public class UltraSonic {
+
+public class UltraSonic
+{
     AnalogInput us;
     Servo serv;
     double offset;
@@ -28,6 +30,11 @@ public class UltraSonic {
     public void setAngle(double theta){
         // theta is measured in degrees
         serv.setPosition((offset + theta) / 180.0);
+    }
+
+    public double getDistance()
+    {
+        return Math.pow(us.getValue() * 1024, 0.25);
     }
 
 }
