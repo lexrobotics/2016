@@ -18,22 +18,25 @@ import java.util.HashMap;
 public class Robot {
 
     // Hardware map pulls device Objects from the robot.
-    // Drivetrain handles functions specific to our drive type (four-wheel, two-wheel, treads, etc).
+    // Drivetrain handles functions specific to our drive type (four-wheeld, two-wheel, treads, etc).
     private HardwareMap hmap;
     private DriveTrain drivetrain;
     private Telemetry tel;
+    private ColorSweep colorsweeper;
 
     // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
     private HashMap<String, Object> motors;
     private HashMap<String, Object> sensors;
     private HashMap<String, Object> servos;
 
-    public Robot (HardwareMap hmap, Telemetry tel) {
+    public Robot (HardwareMap hmap, Telemetry tel, ColorSweep colorsweeper) {
 
         this.hmap = hmap;
         this.sensors = new HashMap<String, Object>();
         this.motors = new HashMap<String, Object>();
         this.servos = new HashMap<String, Object>();
+        this.colorsweeper = colorsweeper;
+
         this.tel = tel;
     }
 
@@ -65,13 +68,13 @@ public class Robot {
     // so it doesn't really need its own class.
     public String getDominantColor() {
         ColorSensor sen = (ColorSensor) sensors.get("color_sensor");
-        int r = sen.red(), b = sen.blue(), g = sen.green(), a = sen.alpha();
+        int r = sen.red(), b = sen.blue(), g = sen.green();
 
         if ((r > 0) && (b + g == 0))
             return "red";
         if ((b > 0) && (r + g == 0))
             return "blue";
-        if (r == 1 && b == 1 && g == 1)
+        if ((r == 1) && (b == 1) && (g == 1))
             return "white";
         if (r + g + b == 0)
             return "clear";
@@ -80,17 +83,20 @@ public class Robot {
 
     // tillSense for colors.
     public void colorSweep(String color) {
+        // Color sensor max accurate range without blinder: approx 5 inches
         ColorSensor c = (ColorSensor) sensors.get("color_sensor");
         c.enableLed(true);
         drivetrain.move(0.1F);
-        while(!this.getDominantColor().equals(color)) {
-            this.tel.addData("Dominant", getDominantColor());
+        while(!getDominantColor().equals(color)) {
+            tel.addData("Dominant", getDominantColor());
             tel.addData("Blue", c.blue());
             tel.addData("Red", c.red());
             tel.addData("Green", c.green());
             tel.addData("Alpha", c.alpha());
+
             try {
-                Thread.sleep(5);
+                // REALLY suspicious to me.
+                colorsweeper.waitOneFullHardwareCycle();
             }
             catch (java.lang.InterruptedException ex){
 
