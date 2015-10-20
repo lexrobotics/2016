@@ -55,20 +55,11 @@ public class FtcOpModeRegister implements OpModeRegister {
      * If two or more op modes are registered with the same name, the app will display an error.
      */
 
-
-    /*
-     * The following op modes are example op modes provided by QualComm.
-     * Uncomment the lines to make the op modes available to the driver station.
-     */
-        //manager.register("LinearK9TeleOp", LinearK9TeleOp.class);
-        //manager.register("LinearIrExample", LinearIrExample.class);
-        //manager.register("IrSeekerOp", IrSeekerOp.class);
-        //manager.register("CompassCalibration", CompassCalibration.class);
-        //manager.register("NxtTeleOp", NxtTeleOp.class);
-
     /*
      * The NullOp op mode
      */
         manager.register("NullOp", NullOp.class);
     }
+}
+  }
 }
