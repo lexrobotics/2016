@@ -1,5 +1,6 @@
 # 2 Bits and a Byte 2016 FTC Repo
 
+Javadoc: [https://rawgit.com/ftctechnh/ftc_app/master/doc/javadoc/com/qualcomm/robotcore/hardware/package-summary.html](https://rawgit.com/ftctechnh/ftc_app/master/doc/javadoc/com/qualcomm/robotcore/hardware/package-summary.html)
 ## Phone Configuration
 Setup: [https://www.youtube.com/watch?v=n597U6rcl2Y](https://www.youtube.com/watch?v=n597U6rcl2Y)
 TL;DW:
