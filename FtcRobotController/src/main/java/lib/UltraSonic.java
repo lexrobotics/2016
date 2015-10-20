@@ -33,7 +33,7 @@ public class UltraSonic
     }
     public double getDistance()
     {
-        return Math.pow(us.getValue() * 1024, 0.25);
+        return us.getValue();
     }
 
 }
