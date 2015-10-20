@@ -27,6 +27,7 @@ public class UltraSonic {
 
     public void setAngle(double theta){
         // theta is measured in degrees
+        // 0 < theta < 180
         serv.setPosition((offset + theta) / 180.0);
     }
 
