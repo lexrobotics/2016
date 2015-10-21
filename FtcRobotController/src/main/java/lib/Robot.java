@@ -28,6 +28,9 @@ public class Robot {
 
     // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
     private HashMap<String, Object> motors;
+
+    public HashMap<String, Object> getSensors() { return sensors; }
+
     private HashMap<String, Object> sensors;
     private HashMap<String, Object> servos;
 
