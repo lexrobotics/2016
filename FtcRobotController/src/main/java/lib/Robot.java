@@ -15,6 +15,7 @@ import java.util.HashMap;
 /**
  * Created by luke on 10/7/15.
  */
+
 public class Robot {
 
     // Hardware map pulls device Objects from the robot.
@@ -29,13 +30,13 @@ public class Robot {
     private HashMap<String, Object> sensors;
     private HashMap<String, Object> servos;
 
-    public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode _opm) {
+    public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
 
         this.hmap = hmap;
         this.sensors = new HashMap<String, Object>();
         this.motors = new HashMap<String, Object>();
         this.servos = new HashMap<String, Object>();
-        this.opm = _opm;
+        this.opm = opm;
         this.tel = tel;
     }
 
@@ -51,6 +52,10 @@ public class Robot {
         sensors.put("color_sensor", hmap.colorSensor.get(colorName));
     }
 
+    public void registerGyroSensor(String gyroName) {
+        sensors.put("gyro_sensor", hmap.gyroSensor.get(gyroName));
+    }
+
     public void registerUltraSonicSensor(String usName) {
         sensors.put(usName, new UltraSonic(hmap.analogInput.get(usName)));
     }
@@ -62,6 +67,16 @@ public class Robot {
     public void registerServo(String servoName) {
         sensors.put(servoName, hmap.servo.get(servoName));
     }
+
+    /*=============================================================================
+      _____       _           _     ______                _   _
+     |  __ \     | |         | |   |  ____|              | | (_)
+     | |__) |___ | |__   ___ | |_  | |__ _   _ _ __   ___| |_ _  ___  _ __  ___
+     |  _  // _ \| '_ \ / _ \| __| |  __| | | | '_ \ / __| __| |/ _ \| '_ \/ __|
+     | | \ \ (_) | |_) | (_) | |_  | |  | |_| | | | | (__| |_| | (_) | | | \__ \
+     |_|  \_\___/|_.__/ \___/ \__| |_|   \__,_|_| |_|\___|\__|_|\___/|_| |_|___/
+
+     *===========================================================================*/
 
     // This just gets the color reading from the color sensor. We can really only use it in one way,
     // so it doesn't really need its own class.
@@ -106,7 +121,8 @@ public class Robot {
     // register the drive motors on the robot with the drivetrain instance.
     public void registerDriveMotors(String left, boolean leftRev,
                                     String right, boolean rightRev) {
-        drivetrain = new TwoWheelDrive( hmap.dcMotor.get(left), leftRev,
+        drivetrain = new TwoWheelDrive(this,
+                                        hmap.dcMotor.get(left), leftRev,
                                         hmap.dcMotor.get(right), rightRev);
     }
 
@@ -115,7 +131,8 @@ public class Robot {
                                     String backLeft, boolean backLeftRev,
                                     String backRight, boolean backRightRev) {
 
-        drivetrain = new FourWheelDrive(hmap.dcMotor.get(frontLeft), frontLeftRev,
+        drivetrain = new FourWheelDrive(this,
+                                        hmap.dcMotor.get(frontLeft), frontLeftRev,
                                         hmap.dcMotor.get(frontRight), frontRightRev,
                                         hmap.dcMotor.get(backLeft), backLeftRev,
                                         hmap.dcMotor.get(backRight), backRightRev);

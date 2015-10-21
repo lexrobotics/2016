@@ -8,8 +8,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class TwoWheelDrive implements DriveTrain {
 
     private DcMotor leftMotor, rightMotor;
+    private Robot robot;
 
-    public TwoWheelDrive (DcMotor leftMotor, boolean leftRev, DcMotor rightMotor, boolean rightRev) {
+    public TwoWheelDrive (Robot robot, DcMotor leftMotor, boolean leftRev, DcMotor rightMotor, boolean rightRev) {
+        this.robot = robot;
         this.leftMotor = leftMotor;
         this.rightMotor = rightMotor;
         if (leftRev) leftMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -21,6 +23,8 @@ public class TwoWheelDrive implements DriveTrain {
         this.leftMotor.setPower(power);
         this.rightMotor.setPower(power);
     }
+
+
 
 
 }
