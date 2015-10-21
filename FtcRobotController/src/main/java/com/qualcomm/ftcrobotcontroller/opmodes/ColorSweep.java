@@ -20,7 +20,7 @@ public class ColorSweep extends LinearOpMode {
         dave.registerDriveMotors("left_motors", true, "right_motors", false);
         dave.registerColorSensor("mr");
         dave.registerLightSensor("mrs");
-        // dave.colorSweep("blue");
+        dave.colorSweep("blue", 0.1);
         hardwareMap.servo.get("button_pusher").setPosition(1.0);
         while(opModeIsActive()){
             waitOneFullHardwareCycle();
