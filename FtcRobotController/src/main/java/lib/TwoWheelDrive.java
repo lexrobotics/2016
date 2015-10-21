@@ -24,6 +24,13 @@ public class TwoWheelDrive implements DriveTrain {
         this.rightMotor.setPower(power);
     }
 
+    public void moveDistance(float power, int distance){
+        while ((leftMotor.getCurrentPosition() + rightMotor.getCurrentPosition()) / 2 > distance){
+            leftMotor.setPower(power);
+            rightMotor.setPower(power);
+        }
+    }
+
 
 
 

@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import com.qualcomm.robotcore.util.Hardware;
 import java.util.HashMap;
@@ -56,6 +57,10 @@ public class Robot {
         sensors.put("gyro_sensor", hmap.gyroSensor.get(gyroName));
     }
 
+    public void registerLightSensor(String lightName){
+        sensors.put("light_sensor", hmap.lightSensor.get(lightName));
+    }
+
     public void registerUltraSonicSensor(String usName) {
         sensors.put(usName, new UltraSonic(hmap.analogInput.get(usName)));
     }
@@ -96,17 +101,45 @@ public class Robot {
     }
 
     // tillSense for colors.
-    public void colorSweep(String color) {
+    public void colorSweep(String color, double threshold) {
         // Color sensor max accurate range without blinder: approx 5 inches
-        ColorSensor c = (ColorSensor) sensors.get("color_sensor");
-        c.enableLed(true);
+//        ColorSensor c = (ColorSensor) sensors.get("color_sensor");
+//        c.enableLed(true);
+//        drivetrain.move(-0.25F);
+//        while(!(getDominantColor().equals(color))) {
+//            tel.addData("Dominant", getDominantColor());
+//            tel.addData("Blue", c.blue());
+//            tel.addData("Red", c.red());
+//            tel.addData("Green", c.green());
+//            tel.addData("Alpha", c.alpha());
+//            try {
+//                opm.waitOneFullHardwareCycle();
+//            }
+//            catch(InterruptedException ex){
+//
+//            }
+//        }
+//        drivetrain.move(0.0F);
+
+        LightSensor li = (LightSensor) sensors.get("light_sensor");
+        String stored_color = "";
+        String dominant = getDominantColor();
+        double[] lights = new double[20];
+        int index = 0;
+        int streak = 0;
+        double average = 0;
+
         drivetrain.move(-0.25F);
-        while(!(getDominantColor().equals(color))) {
-            tel.addData("Dominant", getDominantColor());
-            tel.addData("Blue", c.blue());
-            tel.addData("Red", c.red());
-            tel.addData("Green", c.green());
-            tel.addData("Alpha", c.alpha());
+
+        while(!(dominant.equals("red") || dominant.equals("blue"))) {
+            dominant = getDominantColor();
+        }
+        stored_color = dominant;
+
+        streak = 0;
+        for(int i =0; i<20; i++){
+            lights[i]=li.getLightDetected();
+            average += lights[i];
             try {
                 opm.waitOneFullHardwareCycle();
             }
@@ -114,7 +147,36 @@ public class Robot {
 
             }
         }
-        drivetrain.move(0.0F);
+        average /= 20.0;
+        double reading=0;
+        while (true){
+            reading = li.getLightDetected();
+            if(reading - average > threshold){
+                streak++;
+                if(streak > 10){
+                    break;
+                }
+            }
+            else {
+                streak = 0;
+                average = (average *20)-lights[index] + reading;
+                lights[index] = reading;
+                index++;
+                index = index%20;
+            }
+
+
+        }
+
+        // It seems like the conversion is necessary because drivetrain was deckared as a DriveTrain.
+        if (stored_color.equals(color)){
+            ((TwoWheelDrive)drivetrain).moveDistance(0.25f, 20);
+        }
+
+        else {
+            ((TwoWheelDrive) drivetrain).moveDistance(0.25f, 20);
+        }
+
 
     }
 
