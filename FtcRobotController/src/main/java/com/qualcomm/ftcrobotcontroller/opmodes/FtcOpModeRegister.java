@@ -54,8 +54,6 @@ public class FtcOpModeRegister implements OpModeRegister {
      *
      * If two or more op modes are registered with the same name, the app will display an error.
      */
-
-
     /*
      * The following op modes are example op modes provided by QualComm.
      * Uncomment the lines to make the op modes available to the driver station.
@@ -73,5 +71,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("ColorSweep", ColorSweep.class);
         manager.register("UltraSonic", UltraSonicOpMode.class);
         manager.register("Gyro", GyroSensorOpMode.class);
+        manager.register("NullOp", NullOp.class);
+        manager.register("TeleOp", TeleOp.class);
     }
 }
