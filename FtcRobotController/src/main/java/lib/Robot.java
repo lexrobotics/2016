@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.LightSensor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import com.qualcomm.robotcore.util.Hardware;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class Robot {
     }
 
     public void registerLightSensor(String lightName){
-        sensors.put("light_sensor", hmap.lightSensor.get(lightName));
+        sensors.put("light_sensor", hmap.opticalDistanceSensor.get(lightName));
     }
 
     public void registerUltraSonicSensor(String usName) {
@@ -106,7 +107,7 @@ public class Robot {
 //        }
 //        drivetrain.move(0.0F);
 
-        LightSensor li = (LightSensor) sensors.get("light_sensor");
+        LightSensor li = (OpticalDistanceSensor) sensors.get("light_sensor");
         String stored_color = "";
         String dominant = getDominantColor();
         double[] lights = new double[20];
@@ -121,7 +122,6 @@ public class Robot {
         }
         stored_color = dominant;
 
-        streak = 0;
         for(int i =0; i<20; i++){
             lights[i]=li.getLightDetected();
             average += lights[i];
@@ -134,6 +134,7 @@ public class Robot {
         }
         average /= 20.0;
         double reading=0;
+
         while (true){
             reading = li.getLightDetected();
             if(reading - average > threshold){
@@ -149,17 +150,17 @@ public class Robot {
                 index++;
                 index = index%20;
             }
-
-
         }
 
-        // It seems like the conversion is necessary because drivetrain was deckared as a DriveTrain.
+        // It seems like the conversion is necessary because drivetrain was declared as the abstract parent DriveTrain.
         if (stored_color.equals(color)){
-            ((TwoWheelDrive)drivetrain).moveDistance(0.25f, 20);
+            tel.addData("Color", "CORRECT");
+//            ((TwoWheelDrive)drivetrain).moveDistance(0.25f, 20);
         }
 
         else {
-            ((TwoWheelDrive) drivetrain).moveDistance(0.25f, 20);
+            tel.addData("Color", "WRONG");
+//            ((TwoWheelDrive) drivetrain).moveDistance(-0.25f, 20);
         }
 
 
