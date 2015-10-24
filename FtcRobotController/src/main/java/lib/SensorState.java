@@ -31,32 +31,32 @@ public class SensorState implements Runnable{
     }
 
     // Sensor registration
-    public void registerUltrasonic(String name, boolean update, int data_length){
+    public synchronized void registerUltrasonic(String name, boolean update, int data_length){
         sensors.put(name, hmap.analogInput.get(name));
         types.put(name, sensorType.ULTRASONIC);
         registerSensor(name, update, data_length);
     }
 
-    public void registerGyro(String name, boolean update, int data_length){
+    public synchronized void registerGyro(String name, boolean update, int data_length){
         sensors.put(name, hmap.gyroSensor.get(name));
         types.put(name, sensorType.GYRO);
         registerSensor(name, update, data_length);
     }
 
-    public void registerEncoder(String name, boolean update, int data_length){
+    public synchronized void registerEncoder(String name, boolean update, int data_length){
         sensors.put(name, hmap.dcMotor.get(name));
         types.put(name, sensorType.ENCODER);
         registerSensor(name, update, data_length);
     }
 
-    public void registerLight(String name, boolean update, int data_length){
+    public synchronized void registerLight(String name, boolean update, int data_length){
         sensors.put(name, hmap.lightSensor.get(name));
         types.put(name, sensorType.LIGHT);
         registerSensor(name, update, data_length);
     }
 
     // Not storing color values over time.
-    public void registerColor(String name, boolean update){
+    public synchronized void registerColor(String name, boolean update){
         sensors.put(name, hmap.colorSensor.get(name));
         types.put(name, sensorType.COLOR);
         updates.put(name, update);
@@ -64,7 +64,7 @@ public class SensorState implements Runnable{
         sensor_data.put(name, new double[5]);
     }
 
-    public void registerSensor(String name, boolean update, int data_length){
+    private void registerSensor(String name, boolean update, int data_length){
         updates.put(name, update);
         // Leave space for the recent index, which must be returned as well from getSensorData()
         sensor_data.put(name, new double[data_length + 1]);
@@ -72,7 +72,7 @@ public class SensorState implements Runnable{
     }
 
     // Sensor writing
-    public void changeUpdateStatus(String name, boolean update){
+    public synchronized void changeUpdateStatus(String name, boolean update){
         updates.put(name, update);
     }
 
@@ -87,7 +87,7 @@ public class SensorState implements Runnable{
         indices.put(name, index);
     }
 
-    public void updateColorSensor(String key){
+    private void updateColorSensor(String key){
         double[] data = sensor_data.get(key);
         ColorSensor sen = (ColorSensor) sensors.get(key);
         data[0] = sen.alpha();
@@ -97,18 +97,17 @@ public class SensorState implements Runnable{
         sensor_data.put(key, data);
     }
 
-    public double[] getSensorData(String name){
+    public synchronized double[] getSensorData(String name){
         // The last entry in the returned array is the index of the most recently acquired reading.
         // If the sensor is a colorsensor, the last entry is always 0.
-        synchronized(this){
-            double[] data = sensor_data.get(name);
-            data[data.length - 1] = indices.get(name);
-            return sensor_data.get(name);
-        }
+        //
+        double[] data = sensor_data.get(name);
+        data[data.length - 1] = indices.get(name);
+        return sensor_data.get(name);
     }
 
     // Might be more efficient to synchronize on this instead.
-    public synchronized void run() {
+    public void run() {
         double value = 0.0;
 
         while (true){
@@ -143,7 +142,7 @@ public class SensorState implements Runnable{
                         }
                     }
                 }
-                // I need to give getSensorData time to grab the lock.
+                // I need to give getSensorData and the registration functions time to grab the lock.
                 Thread.sleep(30);
             } catch (InterruptedException ex){
                 break;

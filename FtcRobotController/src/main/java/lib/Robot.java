@@ -19,6 +19,7 @@ import java.util.HashMap;
  */
 
 public class Robot {
+    public static SensorState state;
 
     // Hardware map pulls device Objects from the robot.
     // Drivetrain handles functions specific to our drive type (four-wheeld, two-wheel, treads, etc).
@@ -43,6 +44,8 @@ public class Robot {
         this.servos = new HashMap<String, Object>();
         this.opm = opm;
         this.tel = tel;
+        Thread state_thread = new Thread(state);
+        state_thread.start();
     }
 
     // If someone tries to get a device not registered in a hashmap.
