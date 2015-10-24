@@ -11,12 +11,21 @@ import lib.Robot;
  * Created by luke on 10/7/15.
  */
 public class ColorSweep extends LinearOpMode {
+    // Demo class for the new Robot classes.
+
     @Override
-    public void runOpMode () {
-        Robot dave = new Robot(hardwareMap);
-        dave.registerDriveMotors("left_motors", true, "right_motors", true);
+    public void runOpMode() throws InterruptedException {
+        waitForStart();
+        Robot dave = new Robot(hardwareMap, telemetry, this);
+        dave.registerDriveMotors("left_motors", true, "right_motors", false);
         dave.registerColorSensor("mr");
-        dave.colorSweep("red");
+        dave.registerLightSensor("mrs");
+        dave.colorSweep("blue", 0.1);
+        hardwareMap.servo.get("button_pusher").setPosition(1.0);
+        while(opModeIsActive()){
+            waitOneFullHardwareCycle();
+        }
+//        this.waitOneFullHardwareCycle();
 
     }
 

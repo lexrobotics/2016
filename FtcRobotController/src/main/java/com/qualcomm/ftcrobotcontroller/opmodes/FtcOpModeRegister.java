@@ -43,8 +43,8 @@ public class FtcOpModeRegister implements OpModeRegister {
      * The Op Mode Manager will call this method when it wants a list of all
      * available op modes. Add your op mode to the list to enable it.
      *
-     * @param manager op mode manager
-     */
+
+04n     */
     public void register(OpModeManager manager) {
 
     /*
@@ -54,8 +54,6 @@ public class FtcOpModeRegister implements OpModeRegister {
      *
      * If two or more op modes are registered with the same name, the app will display an error.
      */
-
-
     /*
      * The following op modes are example op modes provided by QualComm.
      * Uncomment the lines to make the op modes available to the driver station.
@@ -70,9 +68,10 @@ public class FtcOpModeRegister implements OpModeRegister {
      * The NullOp op mode
      */
         manager.register("NullOp", NullOp.class);
-        manager.register("ColorSense", ColorSense.class);
-        manager.register("MRRGBExample", MRRGBExample.class);
-        manager.register("VivekSensor", VivekSensor.class);
-        manager.register("ColorBasic", ColorBasic.class);
+        manager.register("ColorSweep", ColorSweep.class);
+        manager.register("UltraSonic", UltraSonicOpMode.class);
+        manager.register("Gyro", GyroSensorOpMode.class);
+        manager.register("NullOp", NullOp.class);
+        manager.register("TeleOp", TeleOp.class);
     }
 }

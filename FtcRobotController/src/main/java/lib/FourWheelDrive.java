@@ -9,11 +9,14 @@ public class FourWheelDrive implements DriveTrain{
 
     private DcMotor frontLeftMotor, frontRightMotor,
                     backLeftMotor, backRightMotor;
+    private Robot robot;
 
-    public FourWheelDrive (DcMotor frontLeftMotor, boolean frontLeftRev,
+    public FourWheelDrive (Robot robot,
+                           DcMotor frontLeftMotor, boolean frontLeftRev,
                            DcMotor frontRightMotor, boolean frontRightRev,
                            DcMotor backLeftMotor, boolean backLeftRev,
                            DcMotor backRightMotor, boolean backRightRev) {
+        this.robot = robot;
         this.frontLeftMotor = frontLeftMotor;
         this.frontRightMotor = frontRightMotor;
         this.backLeftMotor = backLeftMotor;
@@ -32,6 +35,4 @@ public class FourWheelDrive implements DriveTrain{
         this.backLeftMotor.setPower(power);
         this.backRightMotor.setPower(power);
     }
-
-
 }
