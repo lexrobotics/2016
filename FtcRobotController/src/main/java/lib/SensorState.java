@@ -21,13 +21,17 @@ public class SensorState implements Runnable{
     private HashMap<String, sensorType> types;      // Stores enums marking each sensor type for appropriate data retrieval
     private HardwareMap hmap;
 
-    public SensorState(HardwareMap hmap) {
+    // interval determines how long run() waits between updates.
+    private int interval;
+
+    public SensorState(HardwareMap hmap, int interval) {
         sensors = new HashMap<String, Object>();
         updates = new HashMap<String, Boolean>();
         sensor_data = new HashMap<String, double[]>();
         indices = new HashMap<String, Integer>();
         types = new HashMap<String, sensorType>();
         this.hmap = hmap;
+        this.interval = interval;
     }
 
     // Sensor registration
@@ -97,6 +101,12 @@ public class SensorState implements Runnable{
         sensor_data.put(key, data);
     }
 
+    /*
+    REALLY IMPORTANT
+
+    ALL SEQUENTIAL CALLS TO getSensorData MUST BE SEPARATED IN TIME BY AT LEAST A FEW NANOSECONDS
+    OTHERWISE RUN() CAN'T UPDATE ANYTHING
+     */
     public synchronized double[] getSensorData(String name){
         // The last entry in the returned array is the index of the most recently acquired reading.
         // If the sensor is a colorsensor, the last entry is always 0.
@@ -143,7 +153,7 @@ public class SensorState implements Runnable{
                     }
                 }
                 // I need to give getSensorData and the registration functions time to grab the lock.
-                Thread.sleep(30);
+                Thread.sleep(interval);
             } catch (InterruptedException ex){
                 break;
             }

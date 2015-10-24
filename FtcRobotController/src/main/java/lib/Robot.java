@@ -44,6 +44,9 @@ public class Robot {
         this.servos = new HashMap<String, Object>();
         this.opm = opm;
         this.tel = tel;
+
+        // 30 millisecond delay between updates.
+        state = new SensorState(hmap, 30);
         Thread state_thread = new Thread(state);
         state_thread.start();
     }
