@@ -85,13 +85,14 @@ public class SensorState implements Runnable{
 
         double[] data = sensor_data.get(name);
 
-        // Loop back around to beginning.
+        // Increment index, or loop back around to beginning if at end.
         index = (index + 1)% (data.length - 1);
         data[index] = value;
         indices.put(name, index);
     }
 
     private void updateColorSensor(String key){
+        // I don't know a good way to do this that avoids the unnecessary data pull without memory leaks or a lot of deallocation.
         double[] data = sensor_data.get(key);
         ColorSensor sen = (ColorSensor) sensors.get(key);
         data[0] = sen.alpha();
@@ -113,20 +114,21 @@ public class SensorState implements Runnable{
         //
         double[] data = sensor_data.get(name);
         data[data.length - 1] = indices.get(name);
-        return sensor_data.get(name);
+        return data;
     }
 
-    // Might be more efficient to synchronize on this instead.
     public void run() {
         double value = 0.0;
 
         while (true){
             try {
 
+                // Can't let any reading happen while updating values
                 synchronized (this) {
                     // For every sensor name
                     for (String key : sensors.keySet()) {
 
+                        // only update if an update is requested
                         if (updates.get(key)) {
                             switch (types.get(key)) {
                                 case GYRO:
