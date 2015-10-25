@@ -10,10 +10,17 @@ import com.qualcomm.robotcore.hardware.LightSensor;
 import java.util.HashMap;
 
 public class SensorState implements Runnable{
+    // To make this as useful as possible compared to last year, interval should probably be pretty long (~50 - 100 milli)
+    // Assuming autonomous lasts for 30 seconds, we only need array sizes of around 300 to 600, and then we never need to block loop.
+
+    // As long as the private methods are ONLY CALLED FROM run(), no synchronization errors should occur.
+
+    // To make run() more readable
     private enum sensorType {
         GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER
     }
 
+    // We could do one hashmap of custom sensor objects, but we'll never use those outside of here, and this is not so inefficient.
     private HashMap<String, Object> sensors;
     private HashMap<String, Boolean> updates;       // Whether or not to update the sensor on each pass.
     private HashMap<String, double[]> sensor_data;  // Arrays of recent sensor data, reading chronologically from index up.
@@ -35,6 +42,7 @@ public class SensorState implements Runnable{
     }
 
     // Sensor registration
+    // Have to be synchronized to avoid conflict with run()
     public synchronized void registerUltrasonic(String name, boolean update, int data_length){
         sensors.put(name, hmap.analogInput.get(name));
         types.put(name, sensorType.ULTRASONIC);
@@ -85,9 +93,10 @@ public class SensorState implements Runnable{
 
         double[] data = sensor_data.get(name);
 
-        // Increment index, or loop back around to beginning if at end.
-        index = (index + 1)% (data.length - 1);
+        // Increment index, or loop back around to beginning if at end. -1 for index at end in return.
+        index = (index + 1) % (data.length - 1);
         data[index] = value;
+        sensor_data.put(name, data);
         indices.put(name, index);
     }
 
@@ -105,7 +114,7 @@ public class SensorState implements Runnable{
     /*
     REALLY IMPORTANT
 
-    ALL SEQUENTIAL CALLS TO getSensorData MUST BE SEPARATED IN TIME BY AT LEAST A FEW NANOSECONDS
+    ALL SEQUENTIAL CALLS TO getSensorData MUST BE SEPARATED IN TIME BY AT LEAST A FEW NANOSECONDS (probably < 10)
     OTHERWISE RUN() CAN'T UPDATE ANYTHING
      */
     public synchronized double[] getSensorData(String name){
