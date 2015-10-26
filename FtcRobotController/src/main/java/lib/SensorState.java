@@ -111,19 +111,18 @@ public class SensorState implements Runnable{
         sensor_data.put(key, data);
     }
 
-    /*
-    REALLY IMPORTANT
-
-    ALL SEQUENTIAL CALLS TO getSensorData MUST BE SEPARATED IN TIME BY AT LEAST A FEW NANOSECONDS (probably < 10)
-    OTHERWISE RUN() CAN'T UPDATE ANYTHING
-     */
-    public synchronized double[] getSensorData(String name){
+    public double[] getSensorData(String name){
         // The last entry in the returned array is the index of the most recently acquired reading.
         // If the sensor is a colorsensor, the last entry is always 0.
-        //
-        double[] data = sensor_data.get(name);
-        data[data.length - 1] = indices.get(name);
-        return data;
+        try {
+            Thread.sleep(0, 10);
+        } catch (InterruptedException ex){}
+
+        synchronized (this) {
+            double[] data = sensor_data.get(name);
+            data[data.length - 1] = indices.get(name);
+            return data;
+        }
     }
 
     public void run() {
