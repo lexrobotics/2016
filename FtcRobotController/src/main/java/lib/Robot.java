@@ -186,12 +186,13 @@ public class Robot {
         }
     }
 
+
     // register the drive motors on the robot with the drivetrain instance.
     public void registerDriveMotors(String left, boolean leftRev,
-                                    String right, boolean rightRev) {
+                                    String right, boolean rightRev, int diameter) {
         drivetrain = new TwoWheelDrive(this,
                                         hmap.dcMotor.get(left), leftRev,
-                                        hmap.dcMotor.get(right), rightRev);
+                                        hmap.dcMotor.get(right), rightRev, diameter);
     }
 
     public void registerDriveMotors(String frontLeft, boolean frontLeftRev,
