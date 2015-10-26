@@ -1,5 +1,6 @@
 package lib;
 
+
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -16,7 +17,7 @@ public class SensorState implements Runnable{
     // As long as the private methods are ONLY CALLED FROM run(), no synchronization errors should occur.
 
     // To make run() more readable
-    private enum sensorType {
+    public enum sensorType {
         GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER
     }
 
@@ -27,6 +28,10 @@ public class SensorState implements Runnable{
     private HashMap<String, Integer> indices;       // Stores the index of the most recent entry of sensor data.
     private HashMap<String, sensorType> types;      // Stores enums marking each sensor type for appropriate data retrieval
     private HashMap<String, String[]> rev_types;      // Stores sensor_names indexed by type (like in sensorType) but in Strings. Inverse of types.
+    // Later, should change to HashMap<sensorType, String[]> rev_types;
+    // Theoretically, after transition to Sensor objects, this would be one of two remaining HashMaps.
+    // The other would be HashMap<String, Sensor> sensors
+
     private HardwareMap hmap;
 
     // interval determines how long run() waits between updates.
@@ -211,3 +216,20 @@ class SensorData{
         this.values = values;
     }
 }
+
+//class Sensor {
+//    // Potential container to replace the HashMap mess. Could also use SensorData instead of index + values.
+//    public int index;
+//    public double[] values;
+//    public Object sensor;
+//    public boolean update;
+//    public SensorState.sensorType type;
+//
+//    public Sensor(int index, double[] values, Object sensor, boolean update, SensorState.sensorType type) {
+//        this.index = index;
+//        this.values = values;
+//        this.sensor = sensor;
+//        this.update = update;
+//        this.type = type;
+//    }
+//}
