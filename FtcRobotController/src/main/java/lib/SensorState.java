@@ -41,6 +41,10 @@ public class SensorState implements Runnable{
         rev_types = new HashMap<String, String[]>();
 
         rev_types.put("ULTRASONIC", new String[0]);
+        rev_types.put("LIGHT", new String[0]);
+        rev_types.put("GYRO", new String[0]);
+        rev_types.put("COLOR", new String[0]);
+        rev_types.put("ENCODER", new String[0]);
 
         this.hmap = hmap;
         this.interval = interval;
