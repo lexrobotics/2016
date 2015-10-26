@@ -117,7 +117,7 @@ public class Robot {
         int streak = 0;                         // Streak of high light values
         double average = 0;                     // Average of light values
 
-        drivetrain.move(-0.25F);
+        drivetrain.move(-0F);
 
         // Get the first detected red or blue surface
         while(!(dominant.equals("red") || dominant.equals("blue"))) {
