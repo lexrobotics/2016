@@ -26,6 +26,7 @@ public class SensorState implements Runnable{
     private HashMap<String, double[]> sensor_data;  // Arrays of recent sensor data, reading chronologically from index up.
     private HashMap<String, Integer> indices;       // Stores the index of the most recent entry of sensor data.
     private HashMap<String, sensorType> types;      // Stores enums marking each sensor type for appropriate data retrieval
+    private HashMap<String, String[]> rev_types;      // Stores sensor_names indexed by type (like in sensorType) but in Strings. Inverse of types.
     private HardwareMap hmap;
 
     // interval determines how long run() waits between updates.
@@ -37,43 +38,29 @@ public class SensorState implements Runnable{
         sensor_data = new HashMap<String, double[]>();
         indices = new HashMap<String, Integer>();
         types = new HashMap<String, sensorType>();
+        rev_types = new HashMap<String, String[]>();
+
+        rev_types.put("ULTRASONIC", new String[0]);
+
         this.hmap = hmap;
         this.interval = interval;
     }
 
-    // Sensor registration
-    // Have to be synchronized to avoid conflict with run()
-    public synchronized void registerUltrasonic(String name, boolean update, int data_length){
-        sensors.put(name, hmap.analogInput.get(name));
-        types.put(name, sensorType.ULTRASONIC);
-        registerSensor(name, update, data_length);
+    public String[] getRevTypes(String type){
+        return rev_types.get(type);
     }
 
-    public synchronized void registerGyro(String name, boolean update, int data_length){
-        sensors.put(name, hmap.gyroSensor.get(name));
-        types.put(name, sensorType.GYRO);
-        registerSensor(name, update, data_length);
-    }
+    private void addToRevTypes(String name, String type){
+        // Pull out the old list of sensors of this type. Transfer them to a new list, and also add the new sensor.
+        String[] old_sensors = rev_types.get(type);
+        int old_length = old_sensors.length;
+        String[] new_sensors = new String[old_length + 1];
 
-    public synchronized void registerEncoder(String name, boolean update, int data_length){
-        sensors.put(name, hmap.dcMotor.get(name));
-        types.put(name, sensorType.ENCODER);
-        registerSensor(name, update, data_length);
-    }
-
-    public synchronized void registerLight(String name, boolean update, int data_length){
-        sensors.put(name, hmap.lightSensor.get(name));
-        types.put(name, sensorType.LIGHT);
-        registerSensor(name, update, data_length);
-    }
-
-    // Not storing color values over time.
-    public synchronized void registerColor(String name, boolean update){
-        sensors.put(name, hmap.colorSensor.get(name));
-        types.put(name, sensorType.COLOR);
-        updates.put(name, update);
-        indices.put(name, 0);
-        sensor_data.put(name, new double[5]);
+        for (int i = 0; i < old_length; i++){
+            new_sensors[i] = old_sensors[i];
+        }
+        new_sensors[old_length] = name;
+        rev_types.put(type, new_sensors);
     }
 
     private void registerSensor(String name, boolean update, int data_length){
@@ -88,9 +75,49 @@ public class SensorState implements Runnable{
         updates.put(name, update);
     }
 
+    // Sensor registration
+    // Have to be synchronized to avoid conflict with run()
+    public synchronized void registerUltrasonic(String name, boolean update, int data_length){
+        sensors.put(name, hmap.analogInput.get(name));
+        types.put(name, sensorType.ULTRASONIC);
+        addToRevTypes(name, "ULTRASONIC");
+        registerSensor(name, update, data_length);
+
+    }
+
+    public synchronized void registerGyro(String name, boolean update, int data_length){
+        sensors.put(name, hmap.gyroSensor.get(name));
+        types.put(name, sensorType.GYRO);
+        addToRevTypes(name, "GYRO");
+        registerSensor(name, update, data_length);
+    }
+
+    public synchronized void registerEncoder(String name, boolean update, int data_length){
+        sensors.put(name, hmap.dcMotor.get(name));
+        types.put(name, sensorType.ENCODER);
+        addToRevTypes(name, "ENCODER");
+        registerSensor(name, update, data_length);
+    }
+
+    public synchronized void registerLight(String name, boolean update, int data_length){
+        sensors.put(name, hmap.lightSensor.get(name));
+        types.put(name, sensorType.LIGHT);
+        addToRevTypes(name, "LIGHT");
+        registerSensor(name, update, data_length);
+    }
+
+    // Not storing color values over time.
+    public synchronized void registerColor(String name, boolean update){
+        sensors.put(name, hmap.colorSensor.get(name));
+        types.put(name, sensorType.COLOR);
+        addToRevTypes(name, "COLOR");
+        updates.put(name, update);
+        indices.put(name, 0);
+        sensor_data.put(name, new double[5]);
+    }
+
     private void updateArray(String name, double value){
         int index = indices.get(name);
-
         double[] data = sensor_data.get(name);
 
         // Increment index, or loop back around to beginning if at end. -1 for index at end in return.

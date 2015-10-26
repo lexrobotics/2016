@@ -22,6 +22,9 @@ public class ColorSweep extends LinearOpMode {
         dave.registerLightSensor("mrs");
         dave.colorSweep("blue", 0.1);
         hardwareMap.servo.get("button_pusher").setPosition(1.0);
+
+//        Robot.state.registerColor("mr", true);
+
         while(opModeIsActive()){
             waitOneFullHardwareCycle();
         }

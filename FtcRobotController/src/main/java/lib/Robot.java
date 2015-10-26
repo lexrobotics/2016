@@ -18,8 +18,9 @@ import java.util.HashMap;
  * Created by luke on 10/7/15.
  */
 
+
 public class Robot {
-    public static SensorState state;
+//    public static SensorState state;
 
     // Hardware map pulls device Objects from the robot.
     // Drivetrain handles functions specific to our drive type (four-wheeld, two-wheel, treads, etc).
@@ -45,10 +46,10 @@ public class Robot {
         this.opm = opm;
         this.tel = tel;
 
-        // 30 millisecond delay between updates.
-        state = new SensorState(hmap, 30);
-        Thread state_thread = new Thread(state);
-        state_thread.start();
+        // 100 millisecond delay between updates.
+//        state = new SensorState(hmap, 100);
+//        Thread state_thread = new Thread(state);
+//        state_thread.start();
     }
 
     // If someone tries to get a device not registered in a hashmap.
@@ -110,42 +111,32 @@ public class Robot {
         return "none";
     }
 
-    // tillSense for colors.
+    // tillSense for colors. If the first color we detect is the color argument (our teams color)
+    // Then we will hit that button.
+    // Otherwise, we go to the next light.
     public void colorSweep(String color, double threshold) {
-        // Color sensor max accurate range without blinder: approx 5 inches
-//        ColorSensor c = (ColorSensor) sensors.get("color_sensor");
-//        c.enableLed(true);
-//        drivetrain.move(-0.25F);
-//        while(!(getDominantColor().equals(color))) {
-//            tel.addData("Dominant", getDominantColor());
-//            tel.addData("Blue", c.blue());
-//            tel.addData("Red", c.red());
-//            tel.addData("Green", c.green());
-//            tel.addData("Alpha", c.alpha());
-//            try {
-//                opm.waitOneFullHardwareCycle();
-//            }
-//            catch(InterruptedException ex){
-//
-//            }
-//        }
-//        drivetrain.move(0.0F);
-
         LightSensor li = (OpticalDistanceSensor) sensors.get("light_sensor");
-        String stored_color = "";
-        String dominant = getDominantColor();
-        double[] lights = new double[20];
-        int index = 0;
-        int streak = 0;
-        double average = 0;
+        String stored_color = "";               // First detected color
+        String dominant = getDominantColor();   // Current dominant color detected
+        double[] lights = new double[20];       // Record of light values
+        int index = 0;                          // Index of most recent light value
+        int streak = 0;                         // Streak of high light values
+        double average = 0;                     // Average of light values
 
         drivetrain.move(-0.25F);
 
+        // Get the first detected red or blue surface
         while(!(dominant.equals("red") || dominant.equals("blue"))) {
             dominant = getDominantColor();
+            try {
+                Thread.sleep(1, 1);
+            } catch (InterruptedException ex){}
         }
+
+        tel.addData("Top color detected","a");
         stored_color = dominant;
 
+        // Build up a record of some normal light values
         for(int i =0; i<20; i++){
             lights[i]=li.getLightDetected();
             average += lights[i];
@@ -157,8 +148,10 @@ public class Robot {
             }
         }
         average /= 20.0;
-        double reading=0;
+        double reading = 0;
 
+        // Look for a streak of values all above the average of the collected values array.
+        // Values that are above average are not added to the array, so that we don't get stuck when we drive over a white line.
         while (true){
             reading = li.getLightDetected();
             if(reading - average > threshold){
@@ -174,20 +167,23 @@ public class Robot {
                 index++;
                 index = index%20;
             }
+            try{
+                Thread.sleep(1);
+            } catch (InterruptedException ex){}
         }
 
         // It seems like the conversion is necessary because drivetrain was declared as the abstract parent DriveTrain.
+        // First color detected is team color, so get that button.
         if (stored_color.equals(color)){
             tel.addData("Color", "CORRECT");
 //            ((TwoWheelDrive)drivetrain).moveDistance(0.25f, 20);
         }
 
+        // First color detected is wrong color, so hit other button, which must be the right button.
         else {
             tel.addData("Color", "WRONG");
 //            ((TwoWheelDrive) drivetrain).moveDistance(-0.25f, 20);
         }
-
-
     }
 
     // register the drive motors on the robot with the drivetrain instance.
