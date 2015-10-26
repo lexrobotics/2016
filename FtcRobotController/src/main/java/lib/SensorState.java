@@ -69,8 +69,7 @@ public class SensorState implements Runnable{
 
     private void registerSensor(String name, boolean update, int data_length){
         updates.put(name, update);
-        // Leave space for the recent index, which must be returned as well from getSensorData()
-        sensor_data.put(name, new double[data_length + 1]);
+        sensor_data.put(name, new double[data_length]);
         indices.put(name, 0);
     }
 
@@ -124,8 +123,8 @@ public class SensorState implements Runnable{
         int index = indices.get(name);
         double[] data = sensor_data.get(name);
 
-        // Increment index, or loop back around to beginning if at end. -1 for index at end in return.
-        index = (index + 1) % (data.length - 1);
+        // Increment index, or loop back around to beginning if at end.
+        index = (index + 1) % (data.length);
         data[index] = value;
         sensor_data.put(name, data);
         indices.put(name, index);
@@ -142,7 +141,7 @@ public class SensorState implements Runnable{
         sensor_data.put(key, data);
     }
 
-    public double[] getSensorData(String name){
+    public SensorData getSensorData(String name){
         // The last entry in the returned array is the index of the most recently acquired reading.
         // If the sensor is a colorsensor, the last entry is always 0.
         try {
@@ -150,9 +149,7 @@ public class SensorState implements Runnable{
         } catch (InterruptedException ex){}
 
         synchronized (this) {
-            double[] data = sensor_data.get(name);
-            data[data.length - 1] = indices.get(name);
-            return data;
+            return new SensorData(indices.get(name), sensor_data.get(name));
         }
     }
 
@@ -199,5 +196,18 @@ public class SensorState implements Runnable{
                 break;
             }
         }
+    }
+}
+
+
+class SensorData{
+    // values is all the sensor data in chronological order, starting at index and wrapping around.
+
+    public int index;
+    public double[] values;
+
+    public SensorData(int index, double[] values) {
+        this.index = index;
+        this.values = values;
     }
 }

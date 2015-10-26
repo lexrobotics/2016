@@ -10,14 +10,15 @@ public class TwoWheelDrive implements DriveTrain {
     // Diameter and moveDistance should be measured in inches.
 
     private DcMotor leftMotor, rightMotor;
-    private Robot robot;
+//    private Robot robot;
     double wheel_circumference;
 //    private GyroSensor gyro = (GyroSensor)robot.getSensors().get("gyro_sensors");
     private int robotHeading;
 
-    public TwoWheelDrive (Robot robot, DcMotor leftMotor, boolean leftRev, DcMotor rightMotor, boolean rightRev, double wheel_diameter) {
+    // Using SensorState, we would not need to keep a reference to Robot
+    public TwoWheelDrive (DcMotor leftMotor, boolean leftRev, DcMotor rightMotor, boolean rightRev, double wheel_diameter) {
         this.wheel_circumference = wheel_diameter * Math.PI;
-        this.robot = robot;
+//        this.robot = robot;
         this.leftMotor = leftMotor;
         this.rightMotor = rightMotor;
         if (leftRev) leftMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -30,14 +31,7 @@ public class TwoWheelDrive implements DriveTrain {
         this.rightMotor.setPower(power);
     }
 
-//    public void move(float power)
-//    {
-//        leftMotor.setPower(power);
-//        rightMotor.setPower(power);
-//    }
-
-
-    public void moveDistance(float power, double d){
+    public void moveDistance(double power, double d){
         // 1120 ticks in the encoder
         double distance = (d/wheel_circumference) * 1120;
 
@@ -55,8 +49,4 @@ public class TwoWheelDrive implements DriveTrain {
 //            rightMotor.setPower(-power);
 //        }
 //    }
-
-
-
-
 }
