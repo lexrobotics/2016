@@ -10,17 +10,14 @@ public class FourWheelDrive implements DriveTrain{
 
     private DcMotor frontLeftMotor, frontRightMotor,
                     backLeftMotor, backRightMotor;
-    private Robot robot;
     private double wheel_circumference;
 
-    public FourWheelDrive (Robot robot,
-                           DcMotor frontLeftMotor, boolean frontLeftRev,
+    public FourWheelDrive (DcMotor frontLeftMotor, boolean frontLeftRev,
                            DcMotor frontRightMotor, boolean frontRightRev,
                            DcMotor backLeftMotor, boolean backLeftRev,
                            DcMotor backRightMotor, boolean backRightRev,
                            double wheel_diameter) {
         this.wheel_circumference = Math.PI * wheel_diameter;
-        this.robot = robot;
         this.frontLeftMotor = frontLeftMotor;
         this.frontRightMotor = frontRightMotor;
         this.backLeftMotor = backLeftMotor;
