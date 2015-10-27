@@ -32,6 +32,12 @@ public class SensorState implements Runnable{
     // Theoretically, after transition to Sensor objects, this would be one of two remaining HashMaps.
     // The other would be HashMap<String, Sensor> sensors
 
+    // Other good possible change:
+    // Instead of repeating registration functions, let them pass in a sensorType
+    // Then use a HashMap that looks like {ULTRASONIC: hmap.analogInput, GYRO: hmap.gyroSensor, ... ... }
+    // Call .get() on the corresponding hashmaps in there.
+    // Might need to use variable types, as all sensor types will be different.
+
     private HardwareMap hmap;
 
     // interval determines how long run() waits between updates.
