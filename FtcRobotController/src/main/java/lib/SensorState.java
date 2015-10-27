@@ -1,6 +1,5 @@
 package lib;
 
-
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,21 +12,23 @@ import java.util.HashMap;
 public class SensorState implements Runnable{
     // To make this as useful as possible compared to last year, interval should probably be pretty long (~50 - 100 milli)
     // Assuming autonomous lasts for 30 seconds, we only need array sizes of around 300 to 600, and then we never need to block loop.
-
     // As long as the private methods are ONLY CALLED FROM run(), no synchronization errors should occur.
+
+
 
     // To make run() more readable
     public enum sensorType {
         GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER
     }
 
-    // We could do one hashmap of custom sensor objects, but we'll never use those outside of here, and this is not so inefficient.
-    private HashMap<String, Object> sensors;
-    private HashMap<String, Boolean> updates;       // Whether or not to update the sensor on each pass.
-    private HashMap<String, double[]> sensor_data;  // Arrays of recent sensor data, reading chronologically from index up.
-    private HashMap<String, Integer> indices;       // Stores the index of the most recent entry of sensor data.
-    private HashMap<String, sensorType> types;      // Stores enums marking each sensor type for appropriate data retrieval
-    private HashMap<String, String[]> rev_types;      // Stores sensor_names indexed by type (like in sensorType) but in Strings. Inverse of types.
+
+    // New version would require only 3 hashmaps.
+    private HashMap<sensorType, HardwareMap.DeviceMapping> maps;    // HashMap of DeviceMappings from HardwareMap to grab sensor objects.
+    private HashMap<String, Sensor> sensors;                        // Stores Sensor objects (definition at bottom)
+    private HashMap<sensorType, Sensor[]> types_inv;                // Allows recovery of all sensors of a certain type.
+
+
+
     // Later, should change to HashMap<sensorType, String[]> rev_types;
     // Theoretically, after transition to Sensor objects, this would be one of two remaining HashMaps.
     // The other would be HashMap<String, Sensor> sensors
@@ -36,120 +37,93 @@ public class SensorState implements Runnable{
     // Instead of repeating registration functions, let them pass in a sensorType
     // Then use a HashMap that looks like {ULTRASONIC: hmap.analogInput, GYRO: hmap.gyroSensor, ... ... }
     // Call .get() on the corresponding hashmaps in there.
-    // Might need to use variable types, as all sensor types will be different.
-
-    private HardwareMap hmap;
+    // Might need to use variable types, as all sensor types will be different. No, actually thats fine.
 
     // interval determines how long run() waits between updates.
     private int interval;
 
     public SensorState(HardwareMap hmap, int interval) {
-        sensors = new HashMap<String, Object>();
-        updates = new HashMap<String, Boolean>();
-        sensor_data = new HashMap<String, double[]>();
-        indices = new HashMap<String, Integer>();
-        types = new HashMap<String, sensorType>();
-        rev_types = new HashMap<String, String[]>();
+        maps = new HashMap<sensorType, HardwareMap.DeviceMapping>();
+        sensors = new HashMap<String, Sensor>();
+        types_inv = new HashMap<sensorType, Sensor[]>();
 
-        rev_types.put("ULTRASONIC", new String[0]);
-        rev_types.put("LIGHT", new String[0]);
-        rev_types.put("GYRO", new String[0]);
-        rev_types.put("COLOR", new String[0]);
-        rev_types.put("ENCODER", new String[0]);
-
-        this.hmap = hmap;
         this.interval = interval;
+
+        // For conversion to single registration function
+        maps.put(sensorType.ULTRASONIC, hmap.colorSensor);
+        maps.put(sensorType.LIGHT, hmap.colorSensor);
+        maps.put(sensorType.GYRO, hmap.colorSensor);
+        maps.put(sensorType.COLOR, hmap.colorSensor);
+        maps.put(sensorType.ENCODER, hmap.colorSensor);
+
+        // For conversion to using only enums for access.
+        types_inv.put(sensorType.ULTRASONIC, new Sensor[0]);
+        types_inv.put(sensorType.LIGHT, new Sensor[0]);
+        types_inv.put(sensorType.GYRO, new Sensor[0]);
+        types_inv.put(sensorType.COLOR, new Sensor[0]);
+        types_inv.put(sensorType.ENCODER, new Sensor[0]);
     }
 
-    public String[] getRevTypes(String type){
-        return rev_types.get(type);
+    // For registration in one function
+    public synchronized void registerSensor(String name, sensorType type, boolean update, int data_length){
+        Object sensor_obj = maps.get(type).get(name);
+        Sensor sen;
+
+        if (type == sensorType.COLOR){
+            sen = new Sensor(0, new double[5], sensor_obj, update, type);
+        }
+        else {
+            sen = new Sensor(0, new double[0], sensor_obj, update, type);
+        }
+        sensors.put(name, sen);
+        addToRevTypes(sen, type);
     }
 
-    private void addToRevTypes(String name, String type){
+    public Sensor[] getSensorsFromType(sensorType type){
+        return types_inv.get(type);
+    }
+
+    private void addToRevTypes(Sensor sen, sensorType type){
         // Pull out the old list of sensors of this type. Transfer them to a new list, and also add the new sensor.
-        String[] old_sensors = rev_types.get(type);
+        Sensor[] old_sensors = types_inv.get(type);
         int old_length = old_sensors.length;
-        String[] new_sensors = new String[old_length + 1];
+        Sensor[] new_sensors = new Sensor[old_length + 1];
 
         for (int i = 0; i < old_length; i++){
             new_sensors[i] = old_sensors[i];
         }
-        new_sensors[old_length] = name;
-        rev_types.put(type, new_sensors);
-    }
 
-    private void registerSensor(String name, boolean update, int data_length){
-        updates.put(name, update);
-        sensor_data.put(name, new double[data_length]);
-        indices.put(name, 0);
+        new_sensors[old_length] = sen;
+        types_inv.put(type, new_sensors);
     }
 
     // Sensor writing
     public synchronized void changeUpdateStatus(String name, boolean update){
-        updates.put(name, update);
-    }
-
-    // Sensor registration
-    // Have to be synchronized to avoid conflict with run()
-    public synchronized void registerUltrasonic(String name, boolean update, int data_length){
-        sensors.put(name, hmap.analogInput.get(name));
-        types.put(name, sensorType.ULTRASONIC);
-        addToRevTypes(name, "ULTRASONIC");
-        registerSensor(name, update, data_length);
-
-    }
-
-    public synchronized void registerGyro(String name, boolean update, int data_length){
-        sensors.put(name, hmap.gyroSensor.get(name));
-        types.put(name, sensorType.GYRO);
-        addToRevTypes(name, "GYRO");
-        registerSensor(name, update, data_length);
-    }
-
-    public synchronized void registerEncoder(String name, boolean update, int data_length){
-        sensors.put(name, hmap.dcMotor.get(name));
-        types.put(name, sensorType.ENCODER);
-        addToRevTypes(name, "ENCODER");
-        registerSensor(name, update, data_length);
-    }
-
-    public synchronized void registerLight(String name, boolean update, int data_length){
-        sensors.put(name, hmap.lightSensor.get(name));
-        types.put(name, sensorType.LIGHT);
-        addToRevTypes(name, "LIGHT");
-        registerSensor(name, update, data_length);
-    }
-
-    // Not storing color values over time.
-    public synchronized void registerColor(String name, boolean update){
-        sensors.put(name, hmap.colorSensor.get(name));
-        types.put(name, sensorType.COLOR);
-        addToRevTypes(name, "COLOR");
-        updates.put(name, update);
-        indices.put(name, 0);
-        sensor_data.put(name, new double[5]);
+        sensors.get(name).update = update;
     }
 
     private void updateArray(String name, double value){
-        int index = indices.get(name);
-        double[] data = sensor_data.get(name);
+        Sensor sen = sensors.get(name);
+        int index = sen.index;
+        double[] data = sen.values;
 
         // Increment index, or loop back around to beginning if at end.
         index = (index + 1) % (data.length);
         data[index] = value;
-        sensor_data.put(name, data);
-        indices.put(name, index);
+        sen.values = data;
+        sen.index = index;
     }
 
     private void updateColorSensor(String key){
         // I don't know a good way to do this that avoids the unnecessary data pull without memory leaks or a lot of deallocation.
-        double[] data = sensor_data.get(key);
-        ColorSensor sen = (ColorSensor) sensors.get(key);
-        data[0] = sen.alpha();
-        data[1] = sen.blue();
-        data[2] = sen.green();
-        data[3] = sen.red();
-        sensor_data.put(key, data);
+        Sensor sen = sensors.get(key);
+        double[] data = sen.values;
+        ColorSensor sen_obj = (ColorSensor) sen.sensor;
+        data[0] = sen_obj.alpha();
+        data[1] = sen_obj.blue();
+        data[2] = sen_obj.green();
+        data[3] = sen_obj.red();
+        sen.values = data;
     }
 
     public SensorData getSensorData(String name){
@@ -159,8 +133,9 @@ public class SensorState implements Runnable{
             Thread.sleep(0, 10);
         } catch (InterruptedException ex){}
 
+        Sensor sen = sensors.get(name);
         synchronized (this) {
-            return new SensorData(indices.get(name), sensor_data.get(name));
+            return new SensorData(sen.index, sen.values);
         }
     }
 
@@ -174,27 +149,28 @@ public class SensorState implements Runnable{
                 synchronized (this) {
                     // For every sensor name
                     for (String key : sensors.keySet()) {
+                        Sensor sen = sensors.get(key);
 
                         // only update if an update is requested
-                        if (updates.get(key)) {
-                            switch (types.get(key)) {
+                        if (sen.update) {
+                            switch (sen.type) {
                                 case GYRO:
-                                    value = ((GyroSensor) sensors.get(key)).getRotation();
+                                    value = ((GyroSensor) sen.sensor).getRotation();
                                     updateArray(key, value);
                                     break;
                                 case ENCODER:
-                                    value = ((DcMotor) sensors.get(key)).getCurrentPosition();
+                                    value = ((DcMotor) sen.sensor).getCurrentPosition();
                                     updateArray(key, value);
                                     break;
                                 case ULTRASONIC:
-                                    value = ((AnalogInput) sensors.get(key)).getValue();
+                                    value = ((AnalogInput) sen.sensor).getValue();
                                     updateArray(key, value);
                                     break;
                                 case COLOR:
                                     updateColorSensor(key);
                                     break;
                                 case LIGHT:
-                                    value = ((LightSensor) sensors.get(key)).getLightDetected();
+                                    value = ((LightSensor) sen.sensor).getLightDetected();
                                     updateArray(key, value);
                                     break;
                             }
@@ -223,19 +199,19 @@ class SensorData{
     }
 }
 
-//class Sensor {
-//    // Potential container to replace the HashMap mess. Could also use SensorData instead of index + values.
-//    public int index;
-//    public double[] values;
-//    public Object sensor;
-//    public boolean update;
-//    public SensorState.sensorType type;
-//
-//    public Sensor(int index, double[] values, Object sensor, boolean update, SensorState.sensorType type) {
-//        this.index = index;
-//        this.values = values;
-//        this.sensor = sensor;
-//        this.update = update;
-//        this.type = type;
-//    }
-//}
+class Sensor {
+    // Potential container to replace the HashMap mess. Could also use SensorData instead of index + values.
+    public int index;
+    public double[] values;
+    public Object sensor;
+    public boolean update;
+    public SensorState.sensorType type;
+
+    public Sensor(int index, double[] values, Object sensor, boolean update, SensorState.sensorType type) {
+        this.index = index;
+        this.values = values;
+        this.sensor = sensor;
+        this.update = update;
+        this.type = type;
+    }
+}
