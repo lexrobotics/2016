@@ -11,12 +11,15 @@ import com.qualcomm.robotcore.util.Range;
 public class TeleOp extends OpMode {
     final static double NOODLER_POWER = 1.0;
     final static double NOODLER_REVERSE_POWER = -1.0;
-    final static double DUMP_MAX_RANGE = 0.6;
-    final static double DUMP_MIN_RANGE = 0.4;
+    final static double DUMP_SPEED_FORWARDS_SLOW = 0.55;
+    final static double DUMP_SPEED_REVERSE_SLOW = 0.45;
+    final static double DUMP_SPEED_FORWARDS = 0.6;
+    final static double DUMP_SPEED_REVERSE = 0.4;
     final static double LIFT_MAX_RANGE = 1.0;
     final static double LIFT_MIN_RANGE = 0.0;
 
-    final static double LIFT_DELTA = 0.03;
+    final static double LIFT_DELTA_DOWN = 0.03;
+    final static double LIFT_DELTA_UP = 0.01;
 
     DcMotor leftDrivePair, rightDrivePair;
     DcMotor noodler;
@@ -73,14 +76,22 @@ public class TeleOp extends OpMode {
         }
 
         if(gamepad2.dpad_up)
-            liftServoPosition += LIFT_DELTA;
+            liftServoPosition += LIFT_DELTA_UP;
         else if(gamepad2.dpad_down)
-            liftServoPosition -= LIFT_DELTA;
+            liftServoPosition -= LIFT_DELTA_DOWN;
 
-        if(gamepad2.a)
-            dumpServoPosition = DUMP_MAX_RANGE;
-        else if(gamepad2.y)
-            dumpServoPosition = DUMP_MIN_RANGE;
+        if (gamepad2.a) {
+            if(gamepad2.left_bumper || gamepad2.right_bumper)
+                dumpServoPosition = DUMP_SPEED_FORWARDS_SLOW;
+            else
+                dumpServoPosition = DUMP_SPEED_FORWARDS;
+        }
+        else if (gamepad2.y) {
+            if(gamepad2.left_bumper || gamepad2.right_bumper)
+                dumpServoPosition = DUMP_SPEED_REVERSE_SLOW;
+            else
+                dumpServoPosition = DUMP_SPEED_REVERSE;
+        }
         else if(liftServoPosition > 0.4)
             dumpServoPosition = 0.48;
         else
