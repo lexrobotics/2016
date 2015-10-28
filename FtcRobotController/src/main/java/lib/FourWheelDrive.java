@@ -6,17 +6,18 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * Created by luke on 10/7/15.
  */
 public class FourWheelDrive implements DriveTrain{
+    // All lengths are measured in inches.
 
     private DcMotor frontLeftMotor, frontRightMotor,
                     backLeftMotor, backRightMotor;
-    private Robot robot;
+    private double wheel_circumference;
 
-    public FourWheelDrive (Robot robot,
-                           DcMotor frontLeftMotor, boolean frontLeftRev,
+    public FourWheelDrive (DcMotor frontLeftMotor, boolean frontLeftRev,
                            DcMotor frontRightMotor, boolean frontRightRev,
                            DcMotor backLeftMotor, boolean backLeftRev,
-                           DcMotor backRightMotor, boolean backRightRev) {
-        this.robot = robot;
+                           DcMotor backRightMotor, boolean backRightRev,
+                           double wheel_diameter) {
+        this.wheel_circumference = Math.PI * wheel_diameter;
         this.frontLeftMotor = frontLeftMotor;
         this.frontRightMotor = frontRightMotor;
         this.backLeftMotor = backLeftMotor;
@@ -34,5 +35,20 @@ public class FourWheelDrive implements DriveTrain{
         this.frontRightMotor.setPower(power);
         this.backLeftMotor.setPower(power);
         this.backRightMotor.setPower(power);
+    }
+
+    public void moveDistance(double power, double distance){
+        // 1120 ticks in the encoder
+        distance = (distance/wheel_circumference) * 1120;
+
+        while ((backLeftMotor.getCurrentPosition() +
+                backRightMotor.getCurrentPosition() +
+                frontLeftMotor.getCurrentPosition() +
+                frontRightMotor.getCurrentPosition()) / 4 > distance){
+            backLeftMotor.setPower(power);
+            backRightMotor.setPower(power);
+            frontLeftMotor.setPower(power);
+            frontRightMotor.setPower(power);
+        }
     }
 }
