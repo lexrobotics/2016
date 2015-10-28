@@ -51,4 +51,10 @@ public class FourWheelDrive implements DriveTrain{
             frontRightMotor.setPower(power);
         }
     }
+
+    public void turnWithEncoders(float power, int degrees)
+    {
+
+    }
+
 }

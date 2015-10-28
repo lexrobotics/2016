@@ -11,23 +11,20 @@ import lib.Robot;
 import lib.TwoWheelDrive;
 
 
-public class ColorSweep extends LinearOpMode {
+public class TurnWithEncoder extends LinearOpMode {
     // Demo class for the new Robot classes.
 
     @Override
     public void runOpMode() throws InterruptedException {
         waitForStart();
         Robot dave = new Robot(hardwareMap, telemetry, this);
-        TwoWheelDrive dave_train = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
-                                                        hardwareMap.dcMotor.get("rightdrive"), false, 4);
+        TwoWheelDrive dave_train = new TwoWheelDrive(   hardwareMap.dcMotor.get("left_motors"), true,
+                hardwareMap.dcMotor.get("right_motors"), false, 4);
 
-//        dave.registerDriveTrain(dave_train);
-//        dave.registerColorSensor("mr");
-//        dave.registerLightSensor("mrs");
-//        dave.colorSweep("blue", 10);
+        dave.registerDriveTrain(dave_train);
+        dave.registerColorSensor("mr");
+        dave.registerLightSensor("mrs");
 
-        dave_train.moveDistance(-0.25F, 74);
-
-
+        dave_train.turnWithEncoders(0.25F, 1120);
     }
 }

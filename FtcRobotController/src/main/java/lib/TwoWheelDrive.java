@@ -45,18 +45,29 @@ public class TwoWheelDrive implements DriveTrain {
               Math.abs((leftMotor.getCurrentPosition() - leftEncoder))) / 2;
     }
 
-    public void moveDistance(double power, double d){
+    public void moveDistance(double power, double d) {
         // 1120 ticks in the encoder
         resetEncoders();
         double distance = (d/wheel_circumference) * 1120;
 
-        while (Math.abs(getEncoders()) < distance){
+        while (Math.abs(getEncoders()) < distance) {
             leftMotor.setPower(power);
             rightMotor.setPower(power);
         }
 
         leftMotor.setPower(0);
         rightMotor.setPower(0);
+    }
+
+    @Override
+    public void turnWithEncoders(float power, int degrees) {
+        resetEncoders();
+
+        while (getEncoders() < degrees)
+        {
+            this.leftMotor.setPower(-power);
+            this.rightMotor.setPower(power);
+        }
     }
 
 //    public void turnWithGyro(float power, double heading)
