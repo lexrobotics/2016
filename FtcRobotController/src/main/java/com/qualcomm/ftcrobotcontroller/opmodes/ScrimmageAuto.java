@@ -12,8 +12,8 @@ public class ScrimmageAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException{
         waitForStart();
-        TwoWheelDrive drivetrain = new TwoWheelDrive(   hardwareMap.dcMotor.get("left_motors"), true,
-                hardwareMap.dcMotor.get("right_motors"), false, 4);
-        drivetrain.moveDistance(-0.25F, 74);
+        TwoWheelDrive drivetrain = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
+                hardwareMap.dcMotor.get("rightdrive"), false, 4);
+        drivetrain.moveDistance(-0.25F, 78);
     }
 }
