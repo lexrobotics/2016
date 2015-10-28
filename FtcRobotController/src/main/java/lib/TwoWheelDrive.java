@@ -35,8 +35,8 @@ public class TwoWheelDrive implements DriveTrain {
     }
 
     public void resetEncoders() {
-        rightEncoder = Math.abs(rightMotor.getCurrentPosition());
-        leftEncoder = Math.abs(leftMotor.getCurrentPosition());
+        rightEncoder = rightMotor.getCurrentPosition();
+        leftEncoder = leftMotor.getCurrentPosition();
     }
 
     public int getEncoders() {
@@ -50,7 +50,7 @@ public class TwoWheelDrive implements DriveTrain {
         resetEncoders();
         double distance = (d/wheel_circumference) * 1120;
 
-        while (getEncoders() < distance){
+        while (Math.abs(getEncoders()) < distance){
             leftMotor.setPower(power);
             rightMotor.setPower(power);
         }

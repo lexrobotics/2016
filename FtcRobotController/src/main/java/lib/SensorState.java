@@ -48,26 +48,32 @@ public class SensorState implements Runnable{
         GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER
     }
 
+    public enum RGB{
+        RED, BLUE, WHITE, CLEAR, NONE
+    }
+
     // All public for now for debugging.
     public HashMap<sensorType, HardwareMap.DeviceMapping> maps;    // HashMap of DeviceMappings from HardwareMap to grab sensor objects in registration.
     public HashMap<String, SensorContainer> sensors;                        // Stores SensorContainer objects (definition at bottom)
     public HashMap<sensorType, SensorContainer[]> types_inv;                // Allows recovery of all sensors of a certain type.
 
     // interval determines how long run() waits between updates.
-    public int interval;
+    private int milli_interval;
+    private int nano_interval;
 
-    public SensorState(HardwareMap hmap, int interval) {
+    public SensorState(HardwareMap hmap, int milli_interval, int nano_interval) {
         maps = new HashMap<sensorType, HardwareMap.DeviceMapping>();
         sensors = new HashMap<String, SensorContainer>();
         types_inv = new HashMap<sensorType, SensorContainer[]>();
 
-        this.interval = interval;
+        this.milli_interval = milli_interval;
+        this.nano_interval = nano_interval;
 
-        maps.put(sensorType.ULTRASONIC, hmap.colorSensor);
-        maps.put(sensorType.LIGHT, hmap.colorSensor);
-        maps.put(sensorType.GYRO, hmap.colorSensor);
+        maps.put(sensorType.ULTRASONIC, hmap.ultrasonicSensor);
+        maps.put(sensorType.LIGHT, hmap.lightSensor);
+        maps.put(sensorType.GYRO, hmap.gyroSensor);
         maps.put(sensorType.COLOR, hmap.colorSensor);
-        maps.put(sensorType.ENCODER, hmap.colorSensor);
+        maps.put(sensorType.ENCODER, hmap.dcMotor);
 
         types_inv.put(sensorType.ULTRASONIC, new SensorContainer[0]);
         types_inv.put(sensorType.LIGHT, new SensorContainer[0]);
@@ -119,16 +125,13 @@ public class SensorState implements Runnable{
         sen.index = index;
     }
 
-    private void updateColorSensor(String key){
+    private void updateColorSensor(String key, RGB color){
         // I don't know a good way to do this that avoids the unnecessary data pull without memory leaks or a lot of deallocation.
         SensorContainer sen = sensors.get(key);
-        double[] data = sen.values;
-        ColorSensor sen_obj = (ColorSensor) sen.sensor;
-        data[0] = sen_obj.alpha();
-        data[1] = sen_obj.red();
-        data[2] = sen_obj.green();
-        data[3] = sen_obj.blue();
-        sen.values = data;
+        int index = sen.index;
+        index = (index + 1) % (sen.values.length);
+//        sen.values[index] = color;
+        sen.index = index;
     }
 
     public SensorData getSensorData(String name){
@@ -142,6 +145,25 @@ public class SensorState implements Runnable{
             SensorContainer sen = sensors.get(name);
             return new SensorData(sen.index, sen.values);
         }
+    }
+
+
+    // This just gets the color reading from the color sensor. We can really only use it in one way,
+    // so it doesn't really need its own class.
+    public synchronized RGB getDominantColor(String name) {
+        SensorContainer sen = sensors.get(name);
+        ColorSensor sen_obj = (ColorSensor) sen.sensor;
+        int r = sen_obj.red(), b = sen_obj.blue(), g = sen_obj.green();
+
+        if ((r > 0) && (b + g == 0))
+            return RGB.RED;
+        if ((b > 0) && (r + g == 0))
+            return RGB.BLUE;
+        if ((r == 1) && (b == 1) && (g == 1))
+            return RGB.WHITE;
+        if (r + g + b == 0)
+            return RGB.CLEAR;
+        return RGB.NONE;
     }
 
     public void run() {
@@ -172,7 +194,7 @@ public class SensorState implements Runnable{
                                     updateArray(key, value);
                                     break;
                                 case COLOR:
-                                    updateColorSensor(key);
+//                                    updateColorSensor(key);
                                     break;
                                 case LIGHT:
                                     value = ((LightSensor) sen.sensor).getLightDetected();
@@ -184,7 +206,7 @@ public class SensorState implements Runnable{
                     }
                 }
                 // I need to give getSensorData and the registration functions time to grab the lock.
-                Thread.sleep(interval);
+                Thread.sleep(milli_interval, nano_interval);
             } catch (InterruptedException ex){
                 break;
             }

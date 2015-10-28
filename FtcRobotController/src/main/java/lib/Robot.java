@@ -167,7 +167,7 @@ public class Robot {
             }
             else {
                 streak = 0;
-                average = ((average *20.0)-lights[index] + reading)/average;
+                average = ((average *20.0)-lights[index] + reading)/20.0;
                 lights[index] = reading;
                 index++;
                 index = index%20;
@@ -181,17 +181,17 @@ public class Robot {
 
         // It seems like the conversion is necessary because drivetrain was declared as the abstract parent DriveTrain.
         // First color detected is team color, so get that button.
-//        if (stored_color.equals(color)){
-//            tel.addData("Color", "CORRECT");
-//            drivetrain.move(0F);
-////            ((TwoWheelDrive)drivetrain).moveDistance(0.25f, 20);
-//        }
-//
-//        // First color detected is wrong color, so hit other button, which must be the right button.
-//        else {
-//            tel.addData("Color", "WRONG");
-//            drivetrain.move(0F);
-////            ((TwoWheelDrive) drivetrain).moveDistance(-0.25f, 20);
-//        }
+        if (stored_color.equals(color)){
+            tel.addData("Color", "CORRECT");
+//            drivetrain.moveD(-0.1,2);
+            ((TwoWheelDrive)drivetrain).moveDistance(0.1, 1);
+        }
+
+        // First color detected is wrong color, so hit other button, which must be the right button.
+        else {
+            tel.addData("Color", "WRONG");
+            ((TwoWheelDrive)drivetrain).moveDistance(-0.1, 2);
+
+        }
     }
 }

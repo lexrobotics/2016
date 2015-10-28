@@ -73,5 +73,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("Gyro", GyroSensorOpMode.class);
 //        manager.register("NullOp", NullOp.class);
         manager.register("TeleOp", TeleOp.class);
+        manager.register("ScrimmageAuto", ScrimmageAuto.class);
+        manager.register("SensorStateOpMode", SensorStateOpMode.class);
     }
 }
