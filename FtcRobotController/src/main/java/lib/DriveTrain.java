@@ -8,5 +8,5 @@ public interface DriveTrain {
     // This can be four wheel drive, two wheel drive, treads, etc, so we need to implement
     // this interface in other classes.
     public void move(float power);
-    public void moveWithCorrection(double power);
+//    public void moveWithCorrection(double power);
 }
