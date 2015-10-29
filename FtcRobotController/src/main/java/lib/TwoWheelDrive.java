@@ -59,8 +59,9 @@ public class TwoWheelDrive implements DriveTrain {
         rightMotor.setPower(0);
     }
 
-    public void turnWithGyro(double power, int degrees) {
-
+    public void turnWithGyro(double power, double degrees) {
+//        double goal = gyro.getRotation + degrees;
+//        while (gyro.getRotation() - initial < )
     }
 
 //    public void turnWithGyro(float power, double heading)
