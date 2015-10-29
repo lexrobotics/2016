@@ -11,14 +11,17 @@ import lib.SensorState;
  * Created by luke on 10/27/15.
  */
 public class SensorStateOpMode extends OpMode {
-    private SensorState color_state;
-    private SensorState sensor_state;
-    private SensorState.SensorData data;
+//    private SensorState color_state;
+    private SensorState state;
+//    private SensorState.SensorData data;
+    SensorState.ColorType data;
 
     @Override
     public void loop(){
-        data = color_state.getSensorDataArray("mr");
-        telemetry.addData("r / g / b", data.values[1] + " / " + data.values[2] + " / " + data.values[2]);
+//        data = color_state.getSensorDataArray("mr");
+        data = state.getColorData("color");
+//        telemetry.addData("r / g / b", data.values[1] + " / " + data.values[2] + " / " + data.values[2]);
+        telemetry.addData("Color", data);
         try {
             Thread.sleep(10);
         } catch (InterruptedException ex){
@@ -28,14 +31,18 @@ public class SensorStateOpMode extends OpMode {
 
     @Override
     public void init(){
-        color_state = new SensorState(hardwareMap, 0, 500000);
-        color_state.registerSensor("mr", SensorState.SensorType.COLOR, true, -1);
+        state = new SensorState(hardwareMap, 0, 500000);
+        state.registerSensor("color", SensorState.SensorType.COLOR, true, 60);
 
-//        sensor_state = new SensorState(hardwareMap, 50, 0);
+//        sensor_state = new SensorState(hardwareMap, 50, 0);22
 //        sensor_state.registerSensor()
 
-        SensorState.SensorData data;
-        new Thread(color_state).start();
-        new Thread(sensor_state).start();
+//        SensorState.SensorData data;
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException ex){}
+//        (new Thread(state)).start();
+//        new Thread(color_state).start();
+//        new Thread(sensor_state).start();
     }
 }

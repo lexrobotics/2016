@@ -128,45 +128,42 @@ public class SensorState implements Runnable{
         types_inv.put(SensorType.ENCODER, new SensorContainer[0]);
     }
 
+    // INITALIZATION
     public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length){
+        // Add a SensorContainer object to the sensors HashMap
         Object sensor_obj = maps.get(type).get(name);
         SensorContainer sen;
 
-        if (type == SensorType.COLOR)
+        // SensorContainers for ColorSensors have a different structure.
+        if (type == SensorType.COLOR) {
             sen = new SensorContainer(0, new ColorType[data_length], sensor_obj, update, type, name);
+            ((ColorSensor) sen.sensor).enableLed(false);
+        }
         else
             sen = new SensorContainer(0, new double[data_length], sensor_obj, update, type, name);
         sensors.put(name, sen);
-        addToRevTypes(sen, type);
+        addToRevTypes(sen);
     }
 
-    public synchronized String[] getSensorsFromType(SensorType type){
-        // I'm pretty sure this needs to be synchronized because an operation on one of the sensors might be underway.
-        SensorContainer[] sens = types_inv.get(type);
-        String[] ret = new String[sens.length];
-
-        for (int i = 0; i < sens.length; i++){
-            ret[i] = sens[i].name;
-        }
-
-        return ret;
-    }
-
-    private void addToRevTypes(SensorContainer sen, SensorType type){
+    private void addToRevTypes(SensorContainer sen){
         // Pull out the old list of sensors of this type. Transfer them to a new list, and also add the new sensor.
+        SensorType type = sen.type;
         SensorContainer[] old_sensors = types_inv.get(type);
         int old_length = old_sensors.length;
+        // Make a new list that is one longer than the old one.
         SensorContainer[] new_sensors = new SensorContainer[old_length + 1];
 
+        // Transfer all
         for (int i = 0; i < old_length; i++){
             new_sensors[i] = old_sensors[i];
         }
 
+        // Add new one
         new_sensors[old_length] = sen;
         types_inv.put(type, new_sensors);
     }
 
-    // SensorContainer writing
+    // SENSORCONTAINER WRITING
     public synchronized void changeUpdateStatus(String name, boolean update){
         sensors.get(name).update = update;
     }
@@ -183,20 +180,53 @@ public class SensorState implements Runnable{
         // I don't know a good way to do this that avoids the unnecessary data pull without memory leaks or a lot of deallocation.
         SensorContainer sen = sensors.get(key);
         int index = sen.index;
-        index = (index + 1) % (sen.values.length);
+        index = (index + 1) % (sen.colors.length);
         sen.colors[index] = color;
         sen.index = index;
     }
 
+    private synchronized ColorType getDominantColor(String name) {
+        SensorContainer sen = sensors.get(name);
+        ColorSensor sen_obj = (ColorSensor) sen.sensor;
+        int r = sen_obj.red(), b = sen_obj.blue(), g = sen_obj.green();
+
+        if ((r > 0) && (b + g == 0))
+            return ColorType.RED;
+        if ((b > 0) && (r + g == 0))
+            return ColorType.BLUE;
+        if ((r == 1) && (b == 1) && (g == 1))
+            return ColorType.WHITE;
+        if (r + g + b == 0)
+            return ColorType.CLEAR;
+        return ColorType.NONE;
+    }
+
+
+    // USER FUNCTIONS
+    public synchronized String[] getSensorsFromType(SensorType type){
+        // I'm pretty sure this needs to be synchronized because an operation on one of the sensors might be underway.
+        // Returns an array of all the names of all the sensors of the given type.
+        SensorContainer[] sens = types_inv.get(type);
+        String[] ret = new String[sens.length];
+
+        for (int i = 0; i < sens.length; i++){
+            ret[i] = sens[i].name;
+        }
+
+        return ret;
+    }
+
     public SensorData getSensorDataArray(String name){
-        // The last entry in the returned array is the index of the most recently acquired reading.
-        // If the sensor is a colorsensor, the last entry is always 0.
-//        try {
-//            // Make sure that even if this function is called several times consecutively, it will not block run()
-//            Thread.sleep(0, 10);
-//        } catch (InterruptedException ex){}
+        // Returns a SensorContainer object containing an array of values and an index for all sensors.
+        try {
+            // Make sure that even if this function is called several times consecutively, it will not block run()
+            Thread.sleep(0, 10);
+        } catch (InterruptedException ex){}
+
         synchronized (this) {
             SensorContainer sen = sensors.get(name);
+
+            // ColorSensors are annoying and different.
             if (sen.type == SensorType.COLOR)
                 return new SensorData(sen.index, sen.colors);
             else
@@ -205,6 +235,13 @@ public class SensorState implements Runnable{
     }
 
     public double getSensorData(String name){
+        // Get SensorData immediately, if you need a single value without waiting for the interval
+
+        try {
+            // Make sure that even if this function is called several times consecutively, it will not block run()
+            Thread.sleep(0, 10);
+        } catch (InterruptedException ex){}
+
         synchronized (this) {
             SensorContainer sen = sensors.get(name);
             switch (sen.type) {
@@ -222,29 +259,19 @@ public class SensorState implements Runnable{
     }
 
     public ColorType getColorData(String name){
+        // If we're returning a single value, we have to have two different functions for the two different return types.
+
+        try {
+            // Make sure that even if this function is called several times consecutively, it will not block run()
+            Thread.sleep(0, 10);
+        } catch (InterruptedException ex){}
+
         synchronized (this) {
             return getDominantColor(name);
         }
     }
 
-    // This just gets the color reading from the color sensor. We can really only use it in one way,
-    // so it doesn't really need its own class.
-    private synchronized ColorType getDominantColor(String name) {
-        SensorContainer sen = sensors.get(name);
-        ColorSensor sen_obj = (ColorSensor) sen.sensor;
-        int r = sen_obj.red(), b = sen_obj.blue(), g = sen_obj.green();
-
-        if ((r > 0) && (b + g == 0))
-            return ColorType.RED;
-        if ((b > 0) && (r + g == 0))
-            return ColorType.BLUE;
-        if ((r == 1) && (b == 1) && (g == 1))
-            return ColorType.WHITE;
-        if (r + g + b == 0)
-            return ColorType.CLEAR;
-        return ColorType.NONE;
-    }
-
+    // ACTUAL THREAD CODE
     public void run() {
         double value = 0.0;
         ColorType color;
