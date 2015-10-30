@@ -35,6 +35,9 @@ import java.util.HashMap;
  * // Get data directly from a ColorSensor. (Without waiting)
  * SensorState.Color getColorData(...)
  *
+ * // Return the average value over a specified number of recent points.
+ * getAvgSensorData(...)
+ *
  * The get...Data functions might want to have a Thread.sleep. Needs more testing.
  */
 
@@ -63,24 +66,26 @@ public class SensorState implements Runnable{
         public SensorState.ColorType[] colors;        // For ColorSensors
         public Object sensor;
         public boolean update;
-        String name;
+        public String name;
         public SensorState.SensorType type;
+        public int avg;
 
-        public SensorContainer(int index, Object sensor, boolean update, SensorState.SensorType type, String name) {
-            this.index = index;
+        private SensorContainer(Object sensor, boolean update, SensorState.SensorType type, String name) {
+            this.index = 0;
             this.sensor = sensor;
             this.update = update;
             this.type = type;
             this.name = name;
         }
 
-        public SensorContainer(int index, double[] values, Object sensor, boolean update, SensorState.SensorType type, String name) {
-            this(index, sensor, update, type, name);
+        public SensorContainer(double[] values, Object sensor, boolean update, SensorState.SensorType type, String name) {
+            this(sensor, update, type, name);
             this.values = values;
+            avg = 0;
         }
 
-        public SensorContainer(int index, SensorState.ColorType[] colors, Object sensor, boolean update, SensorState.SensorType type, String name) {
-            this(index, sensor, update, type, name);
+        public SensorContainer(SensorState.ColorType[] colors, Object sensor, boolean update, SensorState.SensorType type, String name) {
+            this(sensor, update, type, name);
             this.colors = colors;
         }
     }
@@ -136,11 +141,17 @@ public class SensorState implements Runnable{
 
         // SensorContainers for ColorSensors have a different structure.
         if (type == SensorType.COLOR) {
-            sen = new SensorContainer(0, new ColorType[data_length], sensor_obj, update, type, name);
+            sen = new SensorContainer(new ColorType[data_length], sensor_obj, update, type, name);
             ((ColorSensor) sen.sensor).enableLed(false);
         }
-        else
-            sen = new SensorContainer(0, new double[data_length], sensor_obj, update, type, name);
+        else {
+            // Initialize with zeroes so that averaging doesn't have any issues.
+            double[] values = new double[data_length];
+            for (int i = 0; i < data_length; i++){
+                values[i] = 0.0;
+            }
+            sen = new SensorContainer(values, sensor_obj, update, type, name);
+        }
         sensors.put(name, sen);
         addToRevTypes(sen);
     }
@@ -225,7 +236,6 @@ public class SensorState implements Runnable{
 
         synchronized (this) {
             SensorContainer sen = sensors.get(name);
-
             // ColorSensors are annoying and different.
             if (sen.type == SensorType.COLOR)
                 return new SensorData(sen.index, sen.colors);
@@ -256,6 +266,31 @@ public class SensorState implements Runnable{
             }
             return 0.0;
         }
+    }
+
+    public synchronized double getAvgSensorData(String name, int points){
+        // As usual, won't work on ColorSensors
+        // Averages over (points) data points of recent sensor values.
+
+        SensorContainer senC = sensors.get(name);
+        double[] data = senC.values;
+        int len = data.length;
+        // Makes a different kind of mod for negative numbers.
+        // This way, -3mod10 is 7, not -3
+
+
+        // WRONG WRONG NEEDS TO BE CORRECTED
+        // If index is 9 and senC.index is 1, it needs to run through all of them until it wraps back to 1
+//        int index = senC.index - points;
+//        double avg = 0;
+//        for (int i = index; i < senC.index; i++){
+//            avg += data[i];
+//        }
+
+//        // Indices could wrap around weirdly.
+//        avg /= Math.abs(senC.index - index);
+//        return avg;
+        return 0.0;
     }
 
     public ColorType getColorData(String name){
@@ -301,6 +336,7 @@ public class SensorState implements Runnable{
                                     updateArray(key, value);
                                     break;
                                 case COLOR:
+                                    color = getDominantColor(key);
                                     color = getDominantColor(key);
                                     updateColorSensor(key, color);
                                     break;
