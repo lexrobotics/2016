@@ -20,7 +20,7 @@ public class SensorStateOpMode extends OpMode {
     @Override
     public void loop(){
 //        data = color_state.getSensorDataArray("mr");
-        data = state.getSensorDataArray("color");
+        data = state.getSensorDataObject("color");
 //        telemetry.addData("r / g / b", data.values[1] + " / " + data.values[2] + " / " + data.values[2]);
         int index = data.index;
         int index1 = data.index - 1;

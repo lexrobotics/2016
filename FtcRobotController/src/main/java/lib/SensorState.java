@@ -227,7 +227,7 @@ public class SensorState implements Runnable{
         return ret;
     }
 
-    public SensorData getSensorDataArray(String name){
+    public SensorData getSensorDataObject(String name){
         // Returns a SensorContainer object containing an array of values and an index for all sensors.
         try {
             // Make sure that even if this function is called several times consecutively, it will not block run()
@@ -244,7 +244,7 @@ public class SensorState implements Runnable{
         }
     }
 
-    public double getSensorData(String name){
+    public double getSensorReading(String name){
         // Get SensorData immediately, if you need a single value without waiting for the interval
 
         try {
@@ -275,22 +275,22 @@ public class SensorState implements Runnable{
         SensorContainer senC = sensors.get(name);
         double[] data = senC.values;
         int len = data.length;
-        // Makes a different kind of mod for negative numbers.
-        // This way, -3mod10 is 7, not -3
+        int index = senC.index;
+        double sum = 0;
+        index = (index - (points - 1)) % len;
 
+        if (index < 0){
+            index = len + index;
+        }
 
-        // WRONG WRONG NEEDS TO BE CORRECTED
-        // If index is 9 and senC.index is 1, it needs to run through all of them until it wraps back to 1
-//        int index = senC.index - points;
-//        double avg = 0;
-//        for (int i = index; i < senC.index; i++){
-//            avg += data[i];
-//        }
-
-//        // Indices could wrap around weirdly.
-//        avg /= Math.abs(senC.index - index);
-//        return avg;
-        return 0.0;
+        for (int i = index; i != senC.index + 1; i++){
+            if (i >= len){
+                i = 0;
+            }
+            sum += data[i];
+        }
+        sum /= points;
+        return sum;
     }
 
     public ColorType getColorData(String name){
