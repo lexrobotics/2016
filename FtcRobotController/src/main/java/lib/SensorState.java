@@ -311,11 +311,13 @@ public class SensorState implements Runnable{
         int fl = sen.filter_length;
         double avg = sen.avg;
 
+        int start_index = (index - filter_length + 1) % values.length;
+        if (start_index < 0) {start_index += length;}
+
+        sen.filter_length = filter_length;
+        sen.old_avg_index = start_index;
+
         if (old_avg_index == -1){
-            int start_index = (index - filter_length)%values.length;
-            if (start_index < 0) {start_index += length;}
-            sen.old_avg_index = start_index;
-            sen.filter_length = filter_length;
             for (int i = 0; i < filter_length; i++){
                 start_index++;
                 if (start_index == length){
@@ -323,8 +325,8 @@ public class SensorState implements Runnable{
                 }
                 avg += values[start_index];
             }
-            return avg / filter_length;
             sen.avg = avg;
+            return avg / filter_length;
             // In this case, filter_length must also be -1
             // Do full averaging over filter_length
         }
@@ -332,12 +334,24 @@ public class SensorState implements Runnable{
         else if(filter_length != fl){
             int difference = Math.abs(filter_length - fl);
             avg *= filter_length;
-            sen.filter_length = filter_length;
-//            sen.old_avg_index =
             if (filter_length < fl){
-
+                for (int i = old_avg_index + 1; i < start_index; i++){
+                    if (i >= length){i = 0;}
+                    avg -= values[i];
+                }
+//                delete everything from old_avg_index + 1 to start_index, including old_avg_index + 1 but not including start_index
             }
-            // We have a change in the averaging. Extend or contract the average
+            if (filter_length > fl){
+                for (int i = start_index + 1; i < old_avg_index; i++){
+                    if (i >= length){i = 0;}
+                    avg += values[i];
+                }
+//                Add everything from start_index + 1 to old_avg_index, including start_index + 1 but not including old_avg_index;
+            }
+            avg += getSensorReading(name);
+            avg /= filter_length;
+            sen.avg = avg;
+            return avg;
         }
 
         else {
