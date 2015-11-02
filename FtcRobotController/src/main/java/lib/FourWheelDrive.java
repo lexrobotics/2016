@@ -30,7 +30,19 @@ public class FourWheelDrive implements DriveTrain{
     }
 
     @Override
-    public void move(float power) {
+    public void setLeftMotors(double power){
+        this.backLeftMotor.setPower(power);
+        this.frontLeftMotor.setPower(power);
+    }
+
+    @Override
+    public void setRightMotors(double power){
+        this.backRightMotor.setPower(power);
+        this.frontRightMotor.setPower(power);
+    }
+
+    @Override
+    public void move(double power) {
         this.frontLeftMotor.setPower(power);
         this.frontRightMotor.setPower(power);
         this.backLeftMotor.setPower(power);

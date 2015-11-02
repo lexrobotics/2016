@@ -15,6 +15,7 @@ public class TwoWheelDrive implements DriveTrain {
 //    private GyroSensor gyro = (GyroSensor)robot.getSensors().get("gyro_sensors");
     private int robotHeading;
     private int rightEncoder, leftEncoder;
+    private Thread move_thread;
 
     // Using SensorState, we would not need to keep a reference to Robot
     public TwoWheelDrive (DcMotor leftMotor, boolean leftRev, DcMotor rightMotor, boolean rightRev, double wheel_diameter) {
@@ -29,9 +30,28 @@ public class TwoWheelDrive implements DriveTrain {
     }
 
     @Override
+    public void setLeftMotors(double power){
+        this.leftMotor.setPower(power);
+    }
+
+    @Override
+    public void setRightMotors(double power){
+        this.rightMotor.setPower(power);
+    }
+
+    @Override
     public void move(double power) {
         this.leftMotor.setPower(power);
         this.rightMotor.setPower(power);
+    }
+
+    public void move(double power, String gyro_name) {
+        move_thread = new Thread(new MovementThread(this, gyro_name));
+        move_thread.start();
+    }
+
+    public void stopMove(){
+        move_thread.interrupt();
     }
 
     public void resetEncoders() {

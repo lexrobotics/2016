@@ -9,5 +9,7 @@ public interface DriveTrain {
     // this interface in other classes.
     public void turnWithEncoders(float power, int degrees);
     public void move(double power);
+    public void setLeftMotors(double power);
+    public void setRightMotors(double power);
 //    public void moveWithCorrection(double power);
 }
