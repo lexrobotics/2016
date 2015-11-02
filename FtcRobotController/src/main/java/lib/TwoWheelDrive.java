@@ -29,7 +29,7 @@ public class TwoWheelDrive implements DriveTrain {
     }
 
     @Override
-    public void move(float power) {
+    public void move(double power) {
         this.leftMotor.setPower(power);
         this.rightMotor.setPower(power);
     }
@@ -45,12 +45,12 @@ public class TwoWheelDrive implements DriveTrain {
               Math.abs((leftMotor.getCurrentPosition() - leftEncoder))) / 2;
     }
 
-    public void moveDistance(double power, double d){
+    public void moveDistance(double power, double d) {
         // 1120 ticks in the encoder
         resetEncoders();
         double distance = (d/wheel_circumference) * 1120;
 
-        while (Math.abs(getEncoders()) < distance){
+        while (Math.abs(getEncoders()) < distance) {
             leftMotor.setPower(power);
             rightMotor.setPower(power);
         }
@@ -59,8 +59,17 @@ public class TwoWheelDrive implements DriveTrain {
         rightMotor.setPower(0);
     }
 
-    public void turnWithGyro(double power, int degrees) {
+    public void turnWithGyro(double power, int degrees) {}
 
+    @Override
+    public void turnWithEncoders(float power, int degrees) {
+        resetEncoders();
+
+        while (getEncoders() < degrees)
+        {
+            this.leftMotor.setPower(-power);
+            this.rightMotor.setPower(power);
+        }
     }
 
 //    public void turnWithGyro(float power, double heading)
