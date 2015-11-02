@@ -29,7 +29,7 @@ public class TwoWheelDrive implements DriveTrain {
     }
 
     @Override
-    public void move(float power) {
+    public void move(double power) {
         this.leftMotor.setPower(power);
         this.rightMotor.setPower(power);
     }

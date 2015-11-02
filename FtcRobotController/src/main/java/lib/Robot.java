@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import java.util.HashMap;
 
@@ -24,15 +25,10 @@ public class Robot {
     private HardwareMap hmap;
     private DriveTrain drivetrain;
     private Telemetry tel;
-    private LinearOpMode opm;
-
     // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
     private HashMap<String, Object> motors;
-
-    public HashMap<String, Object> getSensors() { return sensors; }
-
-    private HashMap<String, Object> sensors;
-    private HashMap<String, Object> servos;
+    private HashMap<String, Servo> servos;
+    private UltraServoHelper ultraservohelper;
 
     public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
 
@@ -42,6 +38,7 @@ public class Robot {
         this.servos = new HashMap<String, Object>();
         this.opm = opm;
         this.tel = tel;
+        this.ultraservohelper = new UltraServoHelper();
 
         // 100 millisecond delay between updates.
 //        state = new SensorState(hmap, 100);
@@ -63,31 +60,33 @@ public class Robot {
         this.drivetrain = d;
     }
 
-    // The register functions take a String that corresponds to a device in the hardware map, and
-    // add an Object corresponding to that device to the right hashmap.
-    public void registerColorSensor(String colorName) {
-        sensors.put("color_sensor", hmap.colorSensor.get(colorName));
+    public void registerUltrasonicServo(String sensorName, String servoName) {
+        ultraservohelper.registerServo(sensorName,servos.get(servoName));
     }
 
-    public void registerGyroSensor(String gyroName) {
-        sensors.put("gyro_sensor", hmap.gyroSensor.get(gyroName));
+    public void tillSenseTowards(String sensorName,int servoPosition, double power, int distance, int filterlength) {
+        ultraservohelper.setPosition(sensorName,servoPosition);
+        drivetrain.move(power);
+        while(state.getAvgSensorData(sensorName,filterlength) > distance){
+            try{
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public void tillSenseAway(String sensorName,int servoPosition, double power, int distance, int filterlength){
+        ultraservohelper.setPosition(sensorName,servoPosition);
+        drivetrain.move(power);
+        while(state.getAvgSensorData(sensorName,filterlength) < distance){
+            try{
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public void registerLightSensor(String lightName){
-        sensors.put("light_sensor", hmap.analogInput.get(lightName));
-    }
-
-    public void registerUltraSonicSensor(String usName) {
-        sensors.put(usName, new UltraSonic(hmap.analogInput.get(usName)));
-    }
-
-    public void registerUltraSonicSensor(String usName, String servoName) {
-        sensors.put(usName, new UltraSonic(hmap.analogInput.get(usName), hmap.servo.get(servoName)));
-    }
-
-    public void registerServo(String servoName) {
-        sensors.put(servoName, hmap.servo.get(servoName));
-    }
 
     // This just gets the color reading from the color sensor. We can really only use it in one way,
     // so it doesn't really need its own class.

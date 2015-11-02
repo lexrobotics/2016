@@ -16,6 +16,6 @@ public class UltraServoHelper {
         nameToServo.put(name, serv);
     }
     void setPosition(String name, int angle){
-        nameToServo.get(name).setPosition(angle/180);
+        nameToServo.get(name).setPosition(angle/180.0);
     }
 }
