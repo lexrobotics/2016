@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 
 public class Robot {
-//    public static SensorState state;
+    public static SensorState state;
 
     // Hardware map pulls device Objects from the robot.
     // Drivetrain handles functions specific to our drive type (four-wheeld, two-wheel, treads, etc).
@@ -33,10 +33,6 @@ public class Robot {
     public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
 
         this.hmap = hmap;
-        this.sensors = new HashMap<String, Object>();
-        this.motors = new HashMap<String, Object>();
-        this.servos = new HashMap<String, Object>();
-        this.opm = opm;
         this.tel = tel;
         this.ultraservohelper = new UltraServoHelper();
 
@@ -87,32 +83,31 @@ public class Robot {
         }
     }
 
-
     // This just gets the color reading from the color sensor. We can really only use it in one way,
     // so it doesn't really need its own class.
-    public String getDominantColor() {
-        ColorSensor sen = (ColorSensor) sensors.get("color_sensor");
-        int r = sen.red(), b = sen.blue(), g = sen.green();
-
-        if ((r > 0) && (b + g == 0))
-            return "red";
-        if ((b > 0) && (r + g == 0))
-            return "blue";
-        if ((r == 1) && (b == 1) && (g == 1))
-            return "white";
-        if (r + g + b == 0)
-            return "clear";
-        return "none";
-    }
+//    public String getDominantColor(String colorname) {
+//        ColorSensor sen = (ColorSensor) sensors.get("color_sensor");
+//        int r = sen.red(), b = sen.blue(), g = sen.green();
+//
+//        if ((r > 0) && (b + g == 0))
+//            return "red";
+//        if ((b > 0) && (r + g == 0))
+//            return "blue";
+//        if ((r == 1) && (b == 1) && (g == 1))
+//            return "white";
+//        if (r + g + b == 0)
+//            return "clear";
+//        return "none";
+//    }
 
     // tillSense for colors. If the first color we detect is the color argument (our teams color)
     // Then we will hit that button.
     // Otherwise, we go to the next light.
-    public void colorSweep(String color, double threshold) {
+    public void colorSweep(String color, double threshold, String lightname, String colorname) {
 
-        AnalogInput li = (AnalogInput) sensors.get("light_sensor");
-        String stored_color = "";               // First detected color
-        String dominant = getDominantColor();   // Current dominant color detected
+//        AnalogInput li = (AnalogInput) sensors.get("light_sensor");
+        SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
+        SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
         double[] lights = new double[20];       // Record of light values
         int index = 0;                          // Index of most recent light value
         int streak = 0;                         // Streak of high light values
@@ -121,29 +116,23 @@ public class Robot {
         drivetrain.move(-0.10F);
 
         // Get the first detected red or blue surface
-        while(!(dominant.equals("red") || dominant.equals("blue"))) {
-            dominant = getDominantColor();
+        while(!(dominant == SensorState.ColorType.RED || dominant == SensorState.ColorType.BLUE)) {
+            dominant = state.getColorData(colorname);
             try {
                 Thread.sleep(1, 1);
             } catch (InterruptedException ex){}
         }
 
         stored_color = dominant;
-        tel.addData("Top color detected",stored_color);
+        tel.addData("Top color detected", stored_color);
 
         // Build up a record of some normal light values
-        for(int i =0; i<20; i++){
-            lights[i]=li.getValue();
-            average += lights[i];
-            try {
-                opm.waitOneFullHardwareCycle();
-            }
-            catch(InterruptedException ex){
+        try{
+            Thread.sleep(20);
+        } catch (InterruptedException ex){}
+        lights = state.getSensorDataObject(lightname).values;
 
-            }
-        }
-
-        average /= 20.0;
+        average /= lights.length;
         double reading = 0;
         tel.addData("Average", average);
 
@@ -155,7 +144,7 @@ public class Robot {
             tel.addData("Step", i);
             tel.addData("Average", average);
 
-            reading = li.getValue();
+            reading = state.getSensorReading(lightname);
             tel.addData("Reading", reading);
 
             if(reading - average > threshold){
@@ -166,10 +155,10 @@ public class Robot {
             }
             else {
                 streak = 0;
-                average = ((average *20.0)-lights[index] + reading)/20.0;
+                average = ((average * lights.length)-lights[index] + reading)/lights.length;
                 lights[index] = reading;
                 index++;
-                index = index%20;
+                index = index%lights.length;
             }
             try{
                 Thread.sleep(1);

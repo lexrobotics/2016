@@ -7,6 +7,7 @@ public interface DriveTrain {
     // DriveTrain describes the drive setup of the robot.
     // This can be four wheel drive, two wheel drive, treads, etc, so we need to implement
     // this interface in other classes.
-    public void move(double power);
     public void turnWithEncoders(float power, int degrees);
+    public void move(double power);
+//    public void moveWithCorrection(double power);
 }
