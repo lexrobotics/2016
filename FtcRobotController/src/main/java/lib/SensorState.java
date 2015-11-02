@@ -69,6 +69,7 @@ public class SensorState implements Runnable{
         public String name;
         public SensorState.SensorType type;
         public int avg;
+        public int old_avg_index;
 
         private SensorContainer(Object sensor, boolean update, SensorState.SensorType type, String name) {
             this.index = 0;
@@ -76,12 +77,13 @@ public class SensorState implements Runnable{
             this.update = update;
             this.type = type;
             this.name = name;
+            this.old_avg_index = -1;
         }
 
         public SensorContainer(double[] values, Object sensor, boolean update, SensorState.SensorType type, String name) {
             this(sensor, update, type, name);
             this.values = values;
-            avg = 0;
+//            avg = 0;
         }
 
         public SensorContainer(SensorState.ColorType[] colors, Object sensor, boolean update, SensorState.SensorType type, String name) {
@@ -120,7 +122,8 @@ public class SensorState implements Runnable{
         this.milli_interval = milli_interval;
         this.nano_interval = nano_interval;
 
-        maps.put(SensorType.ULTRASONIC, hmap.ultrasonicSensor);
+//        maps.put(SensorType.ULTRASONIC, hmap.ultrasonicSensor);
+        maps.put(SensorType.ULTRASONIC, hmap.analogInput);
         maps.put(SensorType.LIGHT, hmap.lightSensor);
         maps.put(SensorType.GYRO, hmap.gyroSensor);
         maps.put(SensorType.COLOR, hmap.colorSensor);
@@ -268,30 +271,32 @@ public class SensorState implements Runnable{
         }
     }
 
-    public synchronized double getAvgSensorData(String name, int points){
-        // As usual, won't work on ColorSensors
-        // Averages over (points) data points of recent sensor values.
+//    public synchronized double getAvgSensorData(String name, int points){
+//        // As usual, won't work on ColorSensors
+//        // Averages over (points) data points of recent sensor values.
+//
+//        SensorContainer senC = sensors.get(name);
+//        double[] data = senC.values;
+//        int len = data.length;
+//        int index = senC.index;
+//        double sum = 0;
+//        index = (index - (points - 1)) % len;
+//
+//        if (index < 0){
+//            index = len + index;
+//        }
+//
+//        for (int i = index; i != senC.index + 1; i++){
+//            if (i >= len){
+//                i = 0;
+//            }
+//            sum += data[i];
+//        }
+//        sum /= points;
+//        return sum;
+//    }
 
-        SensorContainer senC = sensors.get(name);
-        double[] data = senC.values;
-        int len = data.length;
-        int index = senC.index;
-        double sum = 0;
-        index = (index - (points - 1)) % len;
 
-        if (index < 0){
-            index = len + index;
-        }
-
-        for (int i = index; i != senC.index + 1; i++){
-            if (i >= len){
-                i = 0;
-            }
-            sum += data[i];
-        }
-        sum /= points;
-        return sum;
-    }
 
     public ColorType getColorData(String name){
         // If we're returning a single value, we have to have two different functions for the two different return types.
@@ -336,7 +341,6 @@ public class SensorState implements Runnable{
                                     updateArray(key, value);
                                     break;
                                 case COLOR:
-                                    color = getDominantColor(key);
                                     color = getDominantColor(key);
                                     updateColorSensor(key, color);
                                     break;

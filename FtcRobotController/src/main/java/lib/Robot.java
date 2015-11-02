@@ -24,23 +24,10 @@ public class Robot {
     private HardwareMap hmap;
     private DriveTrain drivetrain;
     private Telemetry tel;
-    private LinearOpMode opm;
 
-    // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
-    private HashMap<String, Object> motors;
-
-    public HashMap<String, Object> getSensors() { return sensors; }
-
-    private HashMap<String, Object> sensors;
-    private HashMap<String, Object> servos;
-
-    public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
+    public Robot (HardwareMap hmap, Telemetry tel) {
 
         this.hmap = hmap;
-        this.sensors = new HashMap<String, Object>();
-        this.motors = new HashMap<String, Object>();
-        this.servos = new HashMap<String, Object>();
-        this.opm = opm;
         this.tel = tel;
     }
 
@@ -54,53 +41,52 @@ public class Robot {
     // REGISTRATION FUNCTIONS
     // It makes more sense to have the opmode construct a drivetrain and pass it to Robot than to repeat
     // constructors in Robot and the drivetrain classes.
-
     public void registerDriveTrain(DriveTrain d){
         this.drivetrain = d;
     }
-
-    // The register functions take a String that corresponds to a device in the hardware map, and
-    // add an Object corresponding to that device to the right hashmap.
-    public void registerColorSensor(String colorName) {
-        sensors.put("color_sensor", hmap.colorSensor.get(colorName));
-    }
-
-    public void registerGyroSensor(String gyroName) {
-        sensors.put("gyro_sensor", hmap.gyroSensor.get(gyroName));
-    }
-
-    public void registerLightSensor(String lightName){
-        sensors.put("light_sensor", hmap.analogInput.get(lightName));
-    }
-
-    public void registerUltraSonicSensor(String usName) {
-        sensors.put(usName, new UltraSonic(hmap.analogInput.get(usName)));
-    }
-
-    public void registerUltraSonicSensor(String usName, String servoName) {
-        sensors.put(usName, new UltraSonic(hmap.analogInput.get(usName), hmap.servo.get(servoName)));
-    }
-
-    public void registerServo(String servoName) {
-        sensors.put(servoName, hmap.servo.get(servoName));
-    }
+//
+//    // The register functions take a String that corresponds to a device in the hardware map, and
+//    // add an Object corresponding to that device to the right hashmap.
+//    public void registerColorSensor(String colorName) {
+//        sensors.put("color_sensor", hmap.colorSensor.get(colorName));
+//    }
+//
+//    public void registerGyroSensor(String gyroName) {
+//        sensors.put("gyro_sensor", hmap.gyroSensor.get(gyroName));
+//    }
+//
+//    public void registerLightSensor(String lightName){
+//        sensors.put("light_sensor", hmap.analogInput.get(lightName));
+//    }
+//
+//    public void registerUltraSonicSensor(String usName) {
+//        sensors.put(usName, new UltraSonic(hmap.analogInput.get(usName)));
+//    }
+//
+//    public void registerUltraSonicSensor(String usName, String servoName) {
+//        sensors.put(usName, new UltraSonic(hmap.analogInput.get(usName), hmap.servo.get(servoName)));
+//    }
+//
+//    public void registerServo(String servoName) {
+//        sensors.put(servoName, hmap.servo.get(servoName));
+//    }
 
     // This just gets the color reading from the color sensor. We can really only use it in one way,
     // so it doesn't really need its own class.
-    public String getDominantColor() {
-        ColorSensor sen = (ColorSensor) sensors.get("color_sensor");
-        int r = sen.red(), b = sen.blue(), g = sen.green();
-
-        if ((r > 0) && (b + g == 0))
-            return "red";
-        if ((b > 0) && (r + g == 0))
-            return "blue";
-        if ((r == 1) && (b == 1) && (g == 1))
-            return "white";
-        if (r + g + b == 0)
-            return "clear";
-        return "none";
-    }
+//    public String getDominantColor(String colorname) {
+//        ColorSensor sen = (ColorSensor) sensors.get("color_sensor");
+//        int r = sen.red(), b = sen.blue(), g = sen.green();
+//
+//        if ((r > 0) && (b + g == 0))
+//            return "red";
+//        if ((b > 0) && (r + g == 0))
+//            return "blue";
+//        if ((r == 1) && (b == 1) && (g == 1))
+//            return "white";
+//        if (r + g + b == 0)
+//            return "clear";
+//        return "none";
+//    }
 
     // tillSense for colors. If the first color we detect is the color argument (our teams color)
     // Then we will hit that button.
@@ -132,20 +118,9 @@ public class Robot {
         try{
             Thread.sleep(20);
         } catch (InterruptedException ex){}
-        lights = state.getSensorDataArray(lightname).values;
+        lights = state.getSensorDataObject(lightname).values;
 
-//        for(int i =0; i<20; i++){
-//            lights[i]=li.getValue();
-//            average += lights[i];
-//            try {
-//                opm.waitOneFullHardwareCycle();
-//            }
-//            catch(InterruptedException ex){
-//
-//            }
-//        }
-
-        average /= 20.0;
+        average /= lights.length;
         double reading = 0;
         tel.addData("Average", average);
 
@@ -157,7 +132,7 @@ public class Robot {
             tel.addData("Step", i);
             tel.addData("Average", average);
 
-            reading = state.getSensorData(lightname);
+            reading = state.getSensorReading(lightname);
             tel.addData("Reading", reading);
 
             if(reading - average > threshold){
@@ -168,10 +143,10 @@ public class Robot {
             }
             else {
                 streak = 0;
-                average = ((average *20.0)-lights[index] + reading)/20.0;
+                average = ((average * lights.length)-lights[index] + reading)/lights.length;
                 lights[index] = reading;
                 index++;
-                index = index%20;
+                index = index%lights.length;
             }
             try{
                 Thread.sleep(1);

@@ -20,7 +20,13 @@ public class MovementThread implements Runnable{
 
     @Override
     public void run() {
+        while (true) {
+            try{
+//                if
+                Thread.sleep(50);
 
+            } catch (InterruptedException ex){}
+        }
     }
 
     public synchronized void setExpectedHeading(int angle) {
@@ -28,6 +34,6 @@ public class MovementThread implements Runnable{
     }
 
     public void getActualHeading() {
-        actualHeading = Robot.state.getSensorData(gyro_name);
+        actualHeading = Robot.state.getSensorReading(gyro_name);
     }
 }
