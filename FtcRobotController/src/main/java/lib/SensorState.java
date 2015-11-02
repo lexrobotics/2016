@@ -68,8 +68,11 @@ public class SensorState implements Runnable{
         public boolean update;
         public String name;
         public SensorState.SensorType type;
-        public int avg;
+
+        // For averaging
+        public double avg;
         public int old_avg_index;
+        public int filter_length;
 
         private SensorContainer(Object sensor, boolean update, SensorState.SensorType type, String name) {
             this.index = 0;
@@ -77,7 +80,9 @@ public class SensorState implements Runnable{
             this.update = update;
             this.type = type;
             this.name = name;
+
             this.old_avg_index = -1;
+            this.filter_length = -1;
         }
 
         public SensorContainer(double[] values, Object sensor, boolean update, SensorState.SensorType type, String name) {
@@ -295,6 +300,54 @@ public class SensorState implements Runnable{
 //        sum /= points;
 //        return sum;
 //    }
+
+    public synchronized double getAvgSensorData(String name, int filter_length){
+        SensorContainer sen = sensors.get(name);
+        double[] values = sen.values;
+        int length = values.length;
+        int old_avg_index = sen.old_avg_index;
+        int index = sen.index;
+        assert filter_length < values.length;
+        int fl = sen.filter_length;
+        double avg = sen.avg;
+
+        if (old_avg_index == -1){
+            int start_index = (index - filter_length)%values.length;
+            if (start_index < 0) {start_index += length;}
+            sen.old_avg_index = start_index;
+            sen.filter_length = filter_length;
+            for (int i = 0; i < filter_length; i++){
+                start_index++;
+                if (start_index == length){
+                    start_index = 0;
+                }
+                avg += values[start_index];
+            }
+            return avg / filter_length;
+            sen.avg = avg;
+            // In this case, filter_length must also be -1
+            // Do full averaging over filter_length
+        }
+
+        else if(filter_length != fl){
+            int difference = Math.abs(filter_length - fl);
+            avg *= filter_length;
+            sen.filter_length = filter_length;
+//            sen.old_avg_index =
+            if (filter_length < fl){
+
+            }
+            // We have a change in the averaging. Extend or contract the average
+        }
+
+        else {
+            avg *= filter_length;
+            avg -= values[old_avg_index];
+            avg += getSensorReading(name);
+            avg /= filter_length;
+            return avg;
+        }
+    }
 
 
 
