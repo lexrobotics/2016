@@ -61,8 +61,8 @@ public class TwoWheelDrive implements DriveTrain {
 
     public int getEncoders() {
 
-      return (Math.abs((rightMotor.getCurrentPosition() - rightEncoder)) +
-              Math.abs((leftMotor.getCurrentPosition() - leftEncoder))) / 2;
+      return (Math.abs(rightMotor.getCurrentPosition() - rightEncoder) +
+              Math.abs(leftMotor.getCurrentPosition() - leftEncoder)) / 2;
     }
 
     public void moveDistance(double power, double d) {

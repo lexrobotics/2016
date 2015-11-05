@@ -22,8 +22,8 @@ public class TurnWithEncoder extends LinearOpMode {
                 hardwareMap.dcMotor.get("right_motors"), false, 4);
 
         dave.registerDriveTrain(dave_train);
-        dave.registerColorSensor("mr");
-        dave.registerLightSensor("mrs");
+//        dave.registerColorSensor("mr");
+//        dave.registerLightSensor("mrs");
 
         dave_train.turnWithEncoders(0.25F, 1120);
     }

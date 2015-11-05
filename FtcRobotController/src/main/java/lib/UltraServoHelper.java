@@ -10,7 +10,7 @@ import java.util.HashMap;
 public class UltraServoHelper {
     HashMap<String, Servo> nameToServo;
     void UltraServoHelper() {
-        nameToServo = new HashMap<String, Servo>;
+        nameToServo = new HashMap<String, Servo>();
     }
     void registerServo(String name, Servo serv){
         nameToServo.put(name, serv);

@@ -76,5 +76,8 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("ScrimmageAuto", ScrimmageAuto.class);
         manager.register("SensorStateOpMode", SensorStateOpMode.class);
         manager.register("TurnWithEncoder", TurnWithEncoder.class);
+        manager.register("MoveStraight", MoveStraight.class);
+        manager.register("UltraTesting", UltraTesting.class);
+
     }
 }

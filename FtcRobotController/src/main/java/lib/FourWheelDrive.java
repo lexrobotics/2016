@@ -69,4 +69,7 @@ public class FourWheelDrive implements DriveTrain{
 
     }
 
+    public void resetEncoders(){}
+    public int getEncoders(){return 0;}
+
 }

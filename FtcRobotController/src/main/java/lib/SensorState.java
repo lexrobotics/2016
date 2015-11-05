@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.LightSensor;
+import com.qualcomm.robotcore.robocol.Telemetry;
 
 import java.util.HashMap;
 
@@ -129,7 +130,7 @@ public class SensorState implements Runnable{
 
 //        maps.put(SensorType.ULTRASONIC, hmap.ultrasonicSensor);
         maps.put(SensorType.ULTRASONIC, hmap.analogInput);
-        maps.put(SensorType.LIGHT, hmap.lightSensor);
+        maps.put(SensorType.LIGHT, hmap.analogInput);
         maps.put(SensorType.GYRO, hmap.gyroSensor);
         maps.put(SensorType.COLOR, hmap.colorSensor);
         maps.put(SensorType.ENCODER, hmap.dcMotor);
@@ -205,9 +206,12 @@ public class SensorState implements Runnable{
     }
 
     private synchronized ColorType getDominantColor(String name) {
-        SensorContainer sen = sensors.get(name);
-        ColorSensor sen_obj = (ColorSensor) sen.sensor;
+        ColorSensor sen_obj = (ColorSensor) sensors.get(name).sensor;
         int r = sen_obj.red(), b = sen_obj.blue(), g = sen_obj.green();
+//        Robot.tel.addData("Red: " ,r);
+//        Robot.tel.addData("Blue: " ,b);
+//        Robot.tel.addData("Green: " ,g);
+
 
         if ((r > 0) && (b + g == 0))
             return ColorType.RED;
@@ -268,112 +272,116 @@ public class SensorState implements Runnable{
                 case ENCODER:
                     return ((DcMotor) sen.sensor).getCurrentPosition();
                 case ULTRASONIC:
-                    return ((AnalogInput) sen.sensor).getValue();
+                    return ((5.0/1023.0)/0.00977) * ((AnalogInput) sen.sensor).getValue();
                 case LIGHT:
-                    return ((LightSensor) sen.sensor).getLightDetected();
+                    return ((AnalogInput) sen.sensor).getValue();
             }
             return 0.0;
         }
     }
 
-//    public synchronized double getAvgSensorData(String name, int points){
-//        // As usual, won't work on ColorSensors
-//        // Averages over (points) data points of recent sensor values.
-//
-//        SensorContainer senC = sensors.get(name);
-//        double[] data = senC.values;
-//        int len = data.length;
-//        int index = senC.index;
-//        double sum = 0;
-//        index = (index - (points - 1)) % len;
-//
-//        if (index < 0){
-//            index = len + index;
-//        }
-//
-//        for (int i = index; i != senC.index + 1; i++){
-//            if (i >= len){
-//                i = 0;
-//            }
-//            sum += data[i];
-//        }
-//        sum /= points;
-//        return sum;
-//    }
+    public synchronized double getAvgSensorData(String name, int points){
+        // As usual, won't work on ColorSensors
+        // Averages over (points) data points of recent sensor values.
 
-    public synchronized double getAvgSensorData(String name, int filter_length){
-        SensorContainer sen = sensors.get(name);
-        double[] values = sen.values;
-        int length = values.length;
-        int old_avg_index = sen.old_avg_index;
-        int index = sen.index;
-        assert filter_length < values.length;
-        int fl = sen.filter_length;
-        double avg = sen.avg;
+        SensorContainer senC = sensors.get(name);
+        double[] data = senC.values;
+        int len = data.length;
+        int index = senC.index;
+        double sum = 0;
+        index = (index - (points - 1)) % len;
 
-        int start_index = (index - filter_length + 1) % values.length;
-        if (start_index < 0) {start_index += length;}
-
-        sen.filter_length = filter_length;
-        sen.old_avg_index = start_index;
-
-        if (old_avg_index == -1){
-            for (int i = 0; i < filter_length; i++){
-                start_index++;
-                if (start_index == length){
-                    start_index = 0;
-                }
-                avg += values[start_index];
-            }
-            sen.avg = avg;
-            return avg / filter_length;
-            // In this case, filter_length must also be -1
-            // Do full averaging over filter_length
+        if (index < 0){
+            index = len + index;
         }
 
-        else if(filter_length != fl){
-            int difference = Math.abs(filter_length - fl);
-            avg *= filter_length;
-            if (filter_length < fl){
-                for (int i = old_avg_index + 1; i < start_index; i++){
-                    if (i >= length){i = 0;}
-                    avg -= values[i];
-                }
-//                delete everything from old_avg_index + 1 to start_index, including old_avg_index + 1 but not including start_index
-            }
-            if (filter_length > fl){
-                for (int i = start_index + 1; i < old_avg_index; i++){
-                    if (i >= length){i = 0;}
-                    avg += values[i];
-                }
-//                Add everything from start_index + 1 to old_avg_index, including start_index + 1 but not including old_avg_index;
-            }
-            avg += getSensorReading(name);
-            avg /= filter_length;
-            sen.avg = avg;
-            return avg;
-        }
+        do {
+            index++;
+            if (index >= len)
+                index = 0;
+            sum += data[index];
+        } while (index != senC.index);
 
-        else {
-            avg *= filter_length;
-            avg -= values[old_avg_index];
-            avg += getSensorReading(name);
-            avg /= filter_length;
-            return avg;
-        }
+//        index to senC.index inclusive.
+
+        sum /= (double)points;
+        return sum;
     }
+
+//    public synchronized double getAvgSensorData(String name, int filter_length){
+//        SensorContainer sen = sensors.get(name);
+//        double[] values = sen.values;
+//        int length = values.length;
+//        int old_avg_index = sen.old_avg_index;
+//        int index = sen.index;
+//        assert filter_length < values.length;
+//        int fl = sen.filter_length;
+//        double avg = sen.avg;
+//
+//        int start_index = (index - filter_length + 1) % values.length;
+//        if (start_index < 0) {start_index += length;}
+//
+//        sen.filter_length = filter_length;
+//        sen.old_avg_index = start_index;
+//
+//        if (old_avg_index == -1){
+//            for (int i = 0; i < filter_length; i++){
+//                start_index++;
+//                if (start_index == length){
+//                    start_index = 0;
+//                }
+//                avg += values[start_index];
+//            }
+//            sen.avg = avg;
+//            return avg / filter_length;
+//            // In this case, filter_length must also be -1
+//            // Do full averaging over filter_length
+//        }
+//
+//        else if(filter_length != fl){
+//            int difference = Math.abs(filter_length - fl);
+//            avg *= filter_length;
+//            if (filter_length < fl){
+//                for (int i = old_avg_index + 1; i < start_index; i++){
+//                    if (i >= length){i = 0;}
+//                    avg -= values[i];
+//                }
+////                delete everything from old_avg_index + 1 to start_index, including old_avg_index + 1 but not including start_index
+//            }
+//            if (filter_length > fl){
+//                for (int i = start_index + 1; i < old_avg_index; i++){
+//                    if (i >= length){i = 0;}
+//                    avg += values[i];
+//                }
+////                Add everything from start_index + 1 to old_avg_index, including start_index + 1 but not including old_avg_index;
+//            }
+//            avg += getSensorReading(name);
+//            avg /= filter_length;
+//            sen.avg = avg;
+//            return avg;
+//        }
+//
+//        else {
+//            avg *= filter_length;
+//            avg -= values[old_avg_index];
+//            avg += getSensorReading(name);
+//            avg /= filter_length;
+//            return avg;
+//        }
+//    }
 
 
 
     public ColorType getColorData(String name){
         // If we're returning a single value, we have to have two different functions for the two different return types.
 
-        try {
-            // Make sure that even if this function is called several times consecutively, it will not block run()
-            Thread.sleep(0, 10);
-        } catch (InterruptedException ex){}
+//        try {
+//            // Make sure that even if this function is called several times consecutively, it will not block run()
+//            Thread.sleep(0, 10);
+//        } catch (InterruptedException ex){}
 
         synchronized (this) {
+//            Robot.tel.addData("getColorData ran", "");
             return getDominantColor(name);
         }
     }
@@ -404,7 +412,7 @@ public class SensorState implements Runnable{
                                     updateArray(key, value);
                                     break;
                                 case ULTRASONIC:
-                                    value = ((AnalogInput) sen.sensor).getValue();
+                                    value = ((5.0/1023.0)/0.00977) * ((AnalogInput) sen.sensor).getValue();
                                     updateArray(key, value);
                                     break;
                                 case COLOR:
@@ -412,7 +420,7 @@ public class SensorState implements Runnable{
                                     updateColorSensor(key, color);
                                     break;
                                 case LIGHT:
-                                    value = ((LightSensor) sen.sensor).getLightDetected();
+                                    value = ((AnalogInput) sen.sensor).getValue();
                                     updateArray(key, value);
                                     break;
                                 default: break;

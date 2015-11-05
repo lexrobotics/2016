@@ -11,5 +11,7 @@ public interface DriveTrain {
     public void move(double power);
     public void setLeftMotors(double power);
     public void setRightMotors(double power);
+    public void resetEncoders();
+    public int getEncoders();
 //    public void moveWithCorrection(double power);
 }
