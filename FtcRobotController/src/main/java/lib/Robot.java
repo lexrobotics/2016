@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import java.util.HashMap;
 
@@ -17,31 +18,26 @@ import java.util.HashMap;
 
 
 public class Robot {
-//    public static SensorState state;
+    public static SensorState state;
 
     // Hardware map pulls device Objects from the robot.
     // Drivetrain handles functions specific to our drive type (four-wheeld, two-wheel, treads, etc).
     private HardwareMap hmap;
     private DriveTrain drivetrain;
-    private Telemetry tel;
-    private LinearOpMode opm;
-
+    public static Telemetry tel;
     // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
     private HashMap<String, Object> motors;
-
-    public HashMap<String, Object> getSensors() { return sensors; }
-
-    private HashMap<String, Object> sensors;
-    private HashMap<String, Object> servos;
+    private HashMap<String, Servo> servos;
+    private UltraServoHelper ultraservohelper;
+    public static LinearOpMode waiter;
 
     public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
 
         this.hmap = hmap;
-        this.sensors = new HashMap<String, Object>();
-        this.motors = new HashMap<String, Object>();
-        this.servos = new HashMap<String, Object>();
-        this.opm = opm;
         this.tel = tel;
+        this.servos = new HashMap<String, Servo>();
+        this.ultraservohelper = new UltraServoHelper();
+        waiter = opm;
 
         // 100 millisecond delay between updates.
 //        state = new SensorState(hmap, 100);
@@ -54,7 +50,9 @@ public class Robot {
         public HardwareNotRegisteredException() { super(); }
         public HardwareNotRegisteredException(String cause) { super(cause); }
     }
-
+    public void registerServo(String servoName) {
+        servos.put(servoName, hmap.servo.get(servoName));
+    }
 
     // REGISTRATION FUNCTIONS
     // It makes more sense to have the opmode construct a drivetrain and pass it to Robot than to repeat
@@ -63,135 +61,173 @@ public class Robot {
         this.drivetrain = d;
     }
 
-    // The register functions take a String that corresponds to a device in the hardware map, and
-    // add an Object corresponding to that device to the right hashmap.
-    public void registerColorSensor(String colorName) {
-        sensors.put("color_sensor", hmap.colorSensor.get(colorName));
+    public void registerUltrasonicServo(String sensorName, String servoName) {
+        if(servos.containsKey(servoName)) {
+            ultraservohelper.registerServo(sensorName, servos.get(servoName));
+        }
+        else{
+            this.registerServo(servoName);
+            ultraservohelper.registerServo(sensorName, servos.get(servoName));
+        }
     }
 
-    public void registerGyroSensor(String gyroName) {
-        sensors.put("gyro_sensor", hmap.gyroSensor.get(gyroName));
+    public void tillSenseTowards(String sensorName,int servoPosition, double power, int distance, int filterlength) {
+        ultraservohelper.setPosition(sensorName,servoPosition);
+        drivetrain.move(power);
+        while(state.getAvgSensorData(sensorName,filterlength) > distance){
+            try{
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
-
-    public void registerLightSensor(String lightName){
-        sensors.put("light_sensor", hmap.analogInput.get(lightName));
-    }
-
-    public void registerUltraSonicSensor(String usName) {
-        sensors.put(usName, new UltraSonic(hmap.analogInput.get(usName)));
-    }
-
-    public void registerUltraSonicSensor(String usName, String servoName) {
-        sensors.put(usName, new UltraSonic(hmap.analogInput.get(usName), hmap.servo.get(servoName)));
-    }
-
-    public void registerServo(String servoName) {
-        sensors.put(servoName, hmap.servo.get(servoName));
+    public void tillSenseAway(String sensorName,int servoPosition, double power, int distance, int filterlength){
+        ultraservohelper.setPosition(sensorName,servoPosition);
+        drivetrain.move(power);
+        while(state.getAvgSensorData(sensorName,filterlength) < distance){
+            try{
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     // This just gets the color reading from the color sensor. We can really only use it in one way,
     // so it doesn't really need its own class.
-    public String getDominantColor() {
-        ColorSensor sen = (ColorSensor) sensors.get("color_sensor");
-        int r = sen.red(), b = sen.blue(), g = sen.green();
-
-        if ((r > 0) && (b + g == 0))
-            return "red";
-        if ((b > 0) && (r + g == 0))
-            return "blue";
-        if ((r == 1) && (b == 1) && (g == 1))
-            return "white";
-        if (r + g + b == 0)
-            return "clear";
-        return "none";
-    }
+//    public String getDominantColor(String colorname) {
+//        ColorSensor sen = (ColorSensor) sensors.get("color_sensor");
+//        int r = sen.red(), b = sen.blue(), g = sen.green();
+//
+//        if ((r > 0) && (b + g == 0))
+//            return "red";
+//        if ((b > 0) && (r + g == 0))
+//            return "blue";
+//        if ((r == 1) && (b == 1) && (g == 1))
+//            return "white";
+//        if (r + g + b == 0)
+//            return "clear";
+//        return "none";
+//    }
 
     // tillSense for colors. If the first color we detect is the color argument (our teams color)
     // Then we will hit that button.
     // Otherwise, we go to the next light.
-    public void colorSweep(String color, double threshold) {
+    public void colorSweep(SensorState.ColorType color, double threshold, String lightname, String colorname) {
+        // TODO: maybe add argument so that it can average over a specific number of points
 
-        AnalogInput li = (AnalogInput) sensors.get("light_sensor");
-        String stored_color = "";               // First detected color
-        String dominant = getDominantColor();   // Current dominant color detected
-        double[] lights = new double[20];       // Record of light values
-        int index = 0;                          // Index of most recent light value
-        int streak = 0;                         // Streak of high light values
-        double average = 0;                     // Average of light values
+        SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
+        SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
+        double average = 0.0;                     // Average of light values
+        double reading = 0.0;
+//        int count = 0;
 
-        drivetrain.move(-0.10F);
+        drivetrain.move(0.4F);
+//        drivetrain.resetEncoders();
 
         // Get the first detected red or blue surface
-        while(!(dominant.equals("red") || dominant.equals("blue"))) {
-            dominant = getDominantColor();
+//        do {
+//            dominant = state.getColorData(colorname);
+//            tel.addData("Current color", dominant);
+//            count++;
+//            if (dominant == color){
+//                drivetrain.move(0.0);
+//                break;
+//            }
+//
+//            try {
+//                Thread.sleep(1);
+//            } catch (InterruptedException ex) {
+//            }
+//        } while (true);
+        do {
+//            if (drivetrain.getEncoders() > 10 * 1120)
+            if (!waiter.opModeIsActive()){
+                return;
+            }
+            dominant = state.getColorData(colorname);
+            tel.addData("Current color", dominant);
+//            count++;
             try {
-                Thread.sleep(1, 1);
+                Thread.sleep(0, 500000);
             } catch (InterruptedException ex){}
-        }
+        } while (!(dominant == SensorState.ColorType.RED || dominant == SensorState.ColorType.BLUE));
+//        drivetrain.move(0.0);
 
-        stored_color = dominant;
-        tel.addData("Top color detected",stored_color);
+//        while (count < 1000000);
+//        while (!(dominant == SensorState.ColorType.RED || dominant == SensorState.ColorType.BLUE));
 
-        // Build up a record of some normal light values
-        for(int i =0; i<20; i++){
-            lights[i]=li.getValue();
-            average += lights[i];
-            try {
-                opm.waitOneFullHardwareCycle();
-            }
-            catch(InterruptedException ex){
+        average = state.getAvgSensorData(lightname, 10);
 
-            }
-        }
+//        while (true){
+//            tel.addData("Found color", dominant);
+//            try {
+//                Thread.sleep(10);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
-        average /= 20.0;
-        double reading = 0;
-        tel.addData("Average", average);
+//        drivetrain.move(0.0);
+//
+//        while (waiter.opModeIsActive()){
+//            tel.addData("Standard Grey", average);
+//            tel.addData("Current average", state.getAvgSensorData(lightname, 10));
+//        }
 
-        // Look for a streak of values all above the average of the collected values array.
-        // Values that are above average are not added to the array, so that we don't get stuck when we drive over a white line.
+        average = state.getAvgSensorData(lightname, 10);
 
-        // Change to while loop later
-        for (int i = 0; i < 10000; i++){
-            tel.addData("Step", i);
-            tel.addData("Average", average);
 
-            reading = li.getValue();
+        while (waiter.opModeIsActive()) {
+            reading = state.getAvgSensorData(lightname, 10);
             tel.addData("Reading", reading);
 
-            if(reading - average > threshold){
-                streak++;
-                if(streak > 5){
-                    break;
-                }
-            }
-            else {
-                streak = 0;
-                average = ((average *20.0)-lights[index] + reading)/20.0;
-                lights[index] = reading;
-                index++;
-                index = index%20;
+            if (Math.abs(reading - average) > threshold){
+                break;
             }
             try{
                 Thread.sleep(1);
             } catch (InterruptedException ex){}
         }
-
-        drivetrain.move(0F);
-
-        // It seems like the conversion is necessary because drivetrain was declared as the abstract parent DriveTrain.
-        // First color detected is team color, so get that button.
-        if (stored_color.equals(color)){
+        drivetrain.move(0.0);
+//
+////        while (true){
+////            tel.addData("test", "tester");
+////            try {
+////                Thread.sleep(10);
+////            }
+////            catch (InterruptedException ex){}
+////        }
+//
+////        drivetrain.move(0f);
+////        while (true){
+////            tel.addData("test", "test");
+////            tel.addData("Average", average);
+////            tel.addData("Current average", state.getAvgSensorData(lightname, 10));
+////            try {
+////                Thread.sleep(10);
+////            } catch (InterruptedException ex){}
+//////            tel.addData("Worked", "yay");
+////
+////        }
+//
+//        drivetrain.move(0.0);
+////
+////        // It seems like the conversion is necessary because drivetrain was declared as the abstract parent DriveTrain.
+////        // First color detected is team color, so get that button.
+        if (dominant == color){
             tel.addData("Color", "CORRECT");
-//            drivetrain.moveD(-0.1,2);
-            ((TwoWheelDrive)drivetrain).moveDistance(0.1, 1);
+//            drivetrain.move(0.0);
+//            ((TwoWheelDrive)drivetrain).moveDistance(0.18, 8);
         }
 
         // First color detected is wrong color, so hit other button, which must be the right button.
         else {
             tel.addData("Color", "WRONG");
-            ((TwoWheelDrive)drivetrain).moveDistance(-0.1, 2);
-
+//            drivetrain.move(0.0);
+//            ((TwoWheelDrive)drivetrain).moveDistance(-0.18, 8);
         }
+
     }
 }

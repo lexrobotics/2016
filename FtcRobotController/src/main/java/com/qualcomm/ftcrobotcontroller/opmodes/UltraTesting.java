@@ -12,29 +12,37 @@ import lib.TwoWheelDrive;
 import lib.SensorState;
 
 
-public class ColorSweep extends LinearOpMode {
+public class UltraTesting extends LinearOpMode {
     // Demo class for the new Robot classes.
-
 
     @Override
     public void runOpMode() throws InterruptedException {
         waitForStart();
         Robot dave = new Robot(hardwareMap, telemetry, this);
         Robot.state = new SensorState(hardwareMap, 1, 0);
-        Robot.state.registerSensor("mr", SensorState.SensorType.COLOR, true, 1);
-        Robot.state.registerSensor("mrs", SensorState.SensorType.LIGHT, true, 1);
+        Robot.state.registerSensor("mr", SensorState.SensorType.COLOR, false, 12);
+        Robot.state.registerSensor("mrs", SensorState.SensorType.LIGHT, true, 12);
+        Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 12);
+        Robot.state.registerSensor("frontUltra", SensorState.SensorType.ULTRASONIC, true, 12);
+
+
         Thread state_thread = new Thread(Robot.state);
         state_thread.start();
 
 
         TwoWheelDrive dave_train = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
-                                                        hardwareMap.dcMotor.get("rightdrive"), false, 4);
+                hardwareMap.dcMotor.get("rightdrive"), false, 4);
 
         dave.registerDriveTrain(dave_train);
-        dave.colorSweep(SensorState.ColorType.BLUE, 2, "mrs", "mr");
+//        dave.registerUltrasonicServo("frontUltra", "frontSwivel");
+//        dave.registerUltrasonicServo("rearUltra","rearSwivel");
+
+//        dave.colorSweep(SensorState.ColorType.BLUE, 2, "mrs", "mr");
 
         while (opModeIsActive() && !(Thread.currentThread().isInterrupted())){
-            telemetry.addData("OpModeIsActive", "");
+            telemetry.addData("front", Robot.state.getAvgSensorData("frontUltra",10));
+            telemetry.addData("rear", Robot.state.getAvgSensorData("rearUltra",10));
+
             try {
                 Thread.sleep(50);
             } catch (InterruptedException ex){
@@ -45,17 +53,3 @@ public class ColorSweep extends LinearOpMode {
         state_thread.interrupt();
     }
 }
-
-/**
- * NOTE:
- * if a loop is running when the program is requested to stop, and the loop doesn't stop, the opmode
- * takes too long to end and the robot controller crashes.
- *
- * To counter this, we can either make a condition in every loop that ends it if the opmode ends
- * OR
- * we put everything in another thread and end it when the opmode ends, killing all running operations.
- * OR
- * maybe, if we can put everything in a master loop that breaks when the opmode ends, it might work.
- * as in while(opModeIsActive()) { do stuff } in the opmode
- * Not sure that would work, stuff inside would have to not block.
- **/

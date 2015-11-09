@@ -15,6 +15,7 @@ public class TwoWheelDrive implements DriveTrain {
 //    private GyroSensor gyro = (GyroSensor)robot.getSensors().get("gyro_sensors");
     private int robotHeading;
     private int rightEncoder, leftEncoder;
+    private Thread move_thread;
 
     // Using SensorState, we would not need to keep a reference to Robot
     public TwoWheelDrive (DcMotor leftMotor, boolean leftRev, DcMotor rightMotor, boolean rightRev, double wheel_diameter) {
@@ -29,9 +30,28 @@ public class TwoWheelDrive implements DriveTrain {
     }
 
     @Override
-    public void move(float power) {
+    public void setLeftMotors(double power){
+        this.leftMotor.setPower(power);
+    }
+
+    @Override
+    public void setRightMotors(double power){
+        this.rightMotor.setPower(power);
+    }
+
+    @Override
+    public void move(double power) {
         this.leftMotor.setPower(power);
         this.rightMotor.setPower(power);
+    }
+
+    public void move(double power, String gyro_name) {
+        move_thread = new Thread(new MovementThread(this, gyro_name));
+        move_thread.start();
+    }
+
+    public void stopMove(){
+        move_thread.interrupt();
     }
 
     public void resetEncoders() {
@@ -41,22 +61,37 @@ public class TwoWheelDrive implements DriveTrain {
 
     public int getEncoders() {
 
-      return (Math.abs((rightMotor.getCurrentPosition() - rightEncoder)) +
-              Math.abs((leftMotor.getCurrentPosition() - leftEncoder))) / 2;
+      return (Math.abs(rightMotor.getCurrentPosition() - rightEncoder) +
+              Math.abs(leftMotor.getCurrentPosition() - leftEncoder)) / 2;
     }
 
-    public void moveDistance(double power, double d){
+    public void moveDistance(double power, double d) {
         // 1120 ticks in the encoder
         resetEncoders();
         double distance = (d/wheel_circumference) * 1120;
 
-        while (Math.abs(getEncoders()) < distance){
+        while (Math.abs(getEncoders()) < distance) {
             leftMotor.setPower(power);
             rightMotor.setPower(power);
         }
 
         leftMotor.setPower(0);
         rightMotor.setPower(0);
+    }
+
+    @Override
+    public void turnWithEncoders(float power, int degrees) {
+        resetEncoders();
+
+        while (getEncoders() < degrees) {
+            this.leftMotor.setPower(-power);
+            this.rightMotor.setPower(power);
+        }
+    }
+
+    public void turnWithGyro(double power, double degrees) {
+//        double goal = gyro.getRotation + degrees;
+//        while (gyro.getRotation() - initial < )
     }
 
 //    public void turnWithGyro(float power, double heading)
