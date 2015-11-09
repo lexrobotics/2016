@@ -42,6 +42,12 @@ import java.util.HashMap;
  * The get...Data functions might want to have a Thread.sleep. Needs more testing.
  */
 
+// Potential problem that should be investigated: If two functions operate on a shared variable without synchronization,
+//    They might be reading or writing to variables only local to that thread.
+//    With synchronization, the problem disappears, but not all of the functions below are synchronized like that.
+//    Can also be declared volatile to fix.
+    // Or, make more synchronized functions.
+
 public class SensorState implements Runnable{
     public static class SensorData{
         // values is all the sensor data in chronological order, starting at index and wrapping around.
@@ -296,11 +302,11 @@ public class SensorState implements Runnable{
         }
 
         do {
-            index++;
             if (index >= len)
                 index = 0;
             sum += data[index];
-        } while (index != senC.index);
+            index++;
+        } while (index != senC.index + 1);
 
 //        index to senC.index inclusive.
 
