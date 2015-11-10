@@ -10,51 +10,53 @@ import java.lang.InterruptedException;
  * Created by lhscompsci on 9/28/15.
  */
 public class TeleOp extends OpMode {
-    DcMotor motorFrontLeft, motorFrontRight;
-    DcMotor motorBackLeft, motorBackRight;
-    DcMotor motorArmExtend;
-    DcMotor motorArmAngle;
+    DcMotor motors_left, motors_right;
+    DcMotor lift_1, lift_2;
+    DcMotor tilt;
+
+    double left_power, right_power;
 
     @Override
     public void init() {
-        motorFrontLeft = hardwareMap.dcMotor.get("left1");
-        motorFrontRight = hardwareMap.dcMotor.get("right1");
-        motorBackLeft = hardwareMap.dcMotor.get("left2");
-        motorBackRight = hardwareMap.dcMotor.get("right2");
-        motorArmExtend = hardwareMap.dcMotor.get("armExtend");
-        motorArmAngle = hardwareMap.dcMotor.get("armAngle");
+        motors_left = hardwareMap.dcMotor.get("left");
+        motors_right = hardwareMap.dcMotor.get("right");
 
-        motorBackLeft.setDirection(DcMotor.Direction.REVERSE);
-        motorFrontLeft.setDirection(DcMotor.Direction.REVERSE);
+        lift_1 = hardwareMap.dcMotor.get("lift1");
+        lift_2 = hardwareMap.dcMotor.get("lift2");
+
+        tilt = hardwareMap.dcMotor.get("tilt");
+
+        motors_left.setDirection(DcMotor.Direction.REVERSE);
+        lift_1.setDirection(DcMotor.Direction.REVERSE);
     }
 
     @Override
     public void loop() {
         gamepad1.setJoystickDeadzone(0.1f);
 
-        motorFrontLeft.setPower(-gamepad1.left_stick_y);
-        motorBackRight.setPower(-gamepad1.right_stick_y);
-        motorBackLeft.setPower(-gamepad1.left_stick_y);
-        motorFrontRight.setPower(-gamepad1.right_stick_y);
+        left_power = scaleInput(-gamepad1.left_stick_y);
+        right_power = scaleInput(-gamepad1.right_stick_y);
 
-        if (gamepad1.right_bumper) {
-            motorArmAngle.setPower(0.5);
-        }
-        else if(gamepad1.right_trigger > 0.5) {
-            motorArmAngle.setPower(-0.5);
-        }
-        else {
-            motorArmAngle.setPower(0);
+        motors_left.setPower(left_power);
+        motors_right.setPower(right_power);
+
+        if(gamepad2.dpad_up){
+            lift_1.setPower(0.5);
+            lift_2.setPower(0.5);
+        } else if (gamepad2.dpad_down){
+            lift_1.setPower(-0.5);
+            lift_2.setPower(-0.5);
+        } else {
+            lift_1.setPower(0);
+            lift_2.setPower(0);
         }
 
-        if (gamepad1.left_bumper) {
-            motorArmExtend.setPower(0.5);
-        }
-        else if(gamepad1.left_trigger > 0.5) {
-            motorArmExtend.setPower(-0.5);
-        }
-        else {
-            motorArmExtend.setPower(0);
+        if (gamepad2.x){
+            tilt.setPower(0.5);
+        } else if (gamepad2.b){
+            tilt.setPower(0.5);
+        } else {
+            tilt.setPower(0);
         }
 
         try {
@@ -63,5 +65,34 @@ public class TeleOp extends OpMode {
         catch(InterruptedException e){
             e.printStackTrace();
         }
+    }
+
+    double scaleInput(double dVal)  {
+        double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
+                0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
+
+        // get the corresponding index for the scaleInput array.
+        int index = (int) (dVal * 16.0);
+
+        // index should be positive.
+        if (index < 0) {
+            index = -index;
+        }
+
+        // index cannot exceed size of array minus 1.
+        if (index > 16) {
+            index = 16;
+        }
+
+        // get value from the array.
+        double dScale = 0.0;
+        if (dVal < 0) {
+            dScale = -scaleArray[index];
+        } else {
+            dScale = scaleArray[index];
+        }
+
+        // return scaled value.
+        return dScale;
     }
 }
