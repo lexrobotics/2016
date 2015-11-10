@@ -69,6 +69,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("TurnWithEncoder", TurnWithEncoder.class);
         manager.register("MoveStraight", MoveStraight.class);
         manager.register("UltraTesting", UltraTesting.class);
+        manager.register("GyroTest", GyroTest.class);
 
     }
 }

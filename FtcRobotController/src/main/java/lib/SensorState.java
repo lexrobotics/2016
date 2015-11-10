@@ -154,6 +154,10 @@ public class SensorState implements Runnable{
         Object sensor_obj = maps.get(type).get(name);
         SensorContainer sen;
 
+        if (type == SensorType.GYRO){
+            ((GyroSensor) sensor_obj).calibrate();
+        }
+
         // SensorContainers for ColorSensors have a different structure.
         if (type == SensorType.COLOR) {
             sen = new SensorContainer(new ColorType[data_length], sensor_obj, update, type, name);
@@ -167,6 +171,7 @@ public class SensorState implements Runnable{
             }
             sen = new SensorContainer(values, sensor_obj, update, type, name);
         }
+
         sensors.put(name, sen);
         addToRevTypes(sen);
     }
@@ -274,7 +279,10 @@ public class SensorState implements Runnable{
             SensorContainer sen = sensors.get(name);
             switch (sen.type) {
                 case GYRO:
-                    return ((GyroSensor) sen.sensor).getRotation();
+                    if (((GyroSensor) sen.sensor).isCalibrating())
+                        return ((GyroSensor) sen.sensor).getHeading();
+                    else
+                        return -1;
                 case ENCODER:
                     return ((DcMotor) sen.sensor).getCurrentPosition();
                 case ULTRASONIC:
@@ -410,7 +418,10 @@ public class SensorState implements Runnable{
                         if (sen.update) {
                             switch (sen.type) {
                                 case GYRO:
-                                    value = ((GyroSensor) sen.sensor).getRotation();
+                                    if (((GyroSensor) sen.sensor).isCalibrating())
+                                        value = ((GyroSensor) sen.sensor).getHeading();
+                                    else
+                                        value = -1;
                                     updateArray(key, value);
                                     break;
                                 case ENCODER:
@@ -442,3 +453,5 @@ public class SensorState implements Runnable{
         }
     }
 }
+
+//12345
