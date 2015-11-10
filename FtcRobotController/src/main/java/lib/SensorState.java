@@ -294,7 +294,8 @@ public class SensorState implements Runnable{
         }
     }
 
-    public synchronized double getAvgSensorData(String name, int points){
+    public synchronized double getAvgSensorData(String name, int points)
+    {
         // As usual, won't work on ColorSensors
         // Averages over (points) data points of recent sensor values.
 
@@ -309,18 +310,22 @@ public class SensorState implements Runnable{
             index = len + index;
         }
 
-        do {
-            if (index >= len)
-                index = 0;
+        for (int i = 0; i < points; i++){
             sum += data[index];
             index++;
-        } while (index != senC.index + 1);
-
-//        index to senC.index inclusive.
+            if (index >= len){
+                index = 0;
+            }
+        }
 
         sum /= (double)points;
         return sum;
     }
+
+//    public synchronized double getRollingAvgSensorData(String name, int filter_length)
+//    {
+//
+//    }
 
 //    public synchronized double getAvgSensorData(String name, int filter_length){
 //        SensorContainer sen = sensors.get(name);
@@ -418,6 +423,7 @@ public class SensorState implements Runnable{
                         if (sen.update) {
                             switch (sen.type) {
                                 case GYRO:
+                                    // If the gyrosensor is still calibrating, we should return -1 to indicate
                                     if (((GyroSensor) sen.sensor).isCalibrating())
                                         value = ((GyroSensor) sen.sensor).getHeading();
                                     else
@@ -429,6 +435,7 @@ public class SensorState implements Runnable{
                                     updateArray(key, value);
                                     break;
                                 case ULTRASONIC:
+                                    // Convert from raw voltage to
                                     value = ((5.0/1023.0)/0.00977) * ((AnalogInput) sen.sensor).getValue();
                                     updateArray(key, value);
                                     break;
@@ -453,5 +460,3 @@ public class SensorState implements Runnable{
         }
     }
 }
-
-//12345

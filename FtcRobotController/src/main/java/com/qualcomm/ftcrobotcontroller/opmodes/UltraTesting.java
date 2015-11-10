@@ -22,8 +22,8 @@ public class UltraTesting extends LinearOpMode {
         Robot.state = new SensorState(hardwareMap, 1, 0);
         Robot.state.registerSensor("mr", SensorState.SensorType.COLOR, false, 12);
         Robot.state.registerSensor("mrs", SensorState.SensorType.LIGHT, true, 12);
-        Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 12);
-        Robot.state.registerSensor("frontUltra", SensorState.SensorType.ULTRASONIC, true, 12);
+        Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 50);
+        Robot.state.registerSensor("frontUltra", SensorState.SensorType.ULTRASONIC, true, 50);
 
 
         Thread state_thread = new Thread(Robot.state);
@@ -40,11 +40,13 @@ public class UltraTesting extends LinearOpMode {
 //        dave.colorSweep(SensorState.ColorType.BLUE, 2, "mrs", "mr");
 
         while (opModeIsActive() && !(Thread.currentThread().isInterrupted())){
-            telemetry.addData("front", Robot.state.getAvgSensorData("frontUltra",10));
-            telemetry.addData("rear", Robot.state.getAvgSensorData("rearUltra",10));
+            telemetry.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra", 60));
+            telemetry.addData("rearAvg", Robot.state.getAvgSensorData("rearUltra", 60));
+            telemetry.addData("frontReading", Robot.state.getSensorReading("frontUltra"));
+            telemetry.addData("rearReading", Robot.state.getSensorReading("rearUltra"));
 
             try {
-                Thread.sleep(50);
+                Thread.sleep(1);
             } catch (InterruptedException ex){
                 Thread.currentThread().interrupt();
                 break;
