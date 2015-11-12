@@ -1,4 +1,6 @@
 package lib;
+import android.util.Log;
+
 import com.qualcomm.ftcrobotcontroller.opmodes.ColorSweep;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -23,12 +25,12 @@ public class Robot {
     // Hardware map pulls device Objects from the robot.
     // Drivetrain handles functions specific to our drive type (four-wheeld, two-wheel, treads, etc).
     private HardwareMap hmap;
-    private DriveTrain drivetrain;
+    public DriveTrain drivetrain;
     public static Telemetry tel;
     // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
     private HashMap<String, Object> motors;
     private HashMap<String, Servo> servos;
-    private UltraServoHelper ultraservohelper;
+    public UltraServoHelper ultraservohelper;
     public static LinearOpMode waiter;
 
     public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
@@ -54,6 +56,10 @@ public class Robot {
         servos.put(servoName, hmap.servo.get(servoName));
     }
 
+    public void setPosition(String name, int position) {
+        servos.get(name).setPosition(position/180);
+    }
+
     // REGISTRATION FUNCTIONS
     // It makes more sense to have the opmode construct a drivetrain and pass it to Robot than to repeat
     // constructors in Robot and the drivetrain classes.
@@ -73,19 +79,61 @@ public class Robot {
 
     public void tillSenseTowards(String sensorName,int servoPosition, double power, int distance, int filterlength) {
         ultraservohelper.setPosition(sensorName,servoPosition);
+        try {
+            Thread.sleep(400);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         drivetrain.move(power);
-        while(state.getAvgSensorData(sensorName,filterlength) > distance){
+        while(state.getAvgSensorData(sensorName,filterlength) >= distance && waiter.opModeIsActive()){
+            Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName, filterlength));
             try{
-                Thread.sleep(20);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        drivetrain.move(0);
+    }
+
+    public void parallel(String sensorNameA,String sensorNameB, double power, double thresh, int filterlength) {
+        double diff;
+        int count =0;
+        do{
+            diff = (state.getAvgSensorData(sensorNameA, filterlength) - state.getAvgSensorData(sensorNameB,filterlength));
+            if(Math.signum(diff) == 1 && count==0){
+                drivetrain.setLeftMotors(power);
+                drivetrain.setRightMotors(-power);
+            }
+            else if(Math.signum(diff) == -1 && count==0) {
+                drivetrain.setLeftMotors(-power);
+                drivetrain.setRightMotors(power);
+            }
+            else{
+                drivetrain.setLeftMotors(0);
+                drivetrain.setRightMotors(0);
+            }
+
+            if(Math.abs(diff) < thresh){
+                count ++;
+            }
+            else{
+                count = 0;
+            }
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }while (count<5 && waiter.opModeIsActive());
+
+        drivetrain.move(0);
+
     }
     public void tillSenseAway(String sensorName,int servoPosition, double power, int distance, int filterlength){
         ultraservohelper.setPosition(sensorName,servoPosition);
         drivetrain.move(power);
-        while(state.getAvgSensorData(sensorName,filterlength) < distance){
+        while(state.getAvgSensorData(sensorName,filterlength) < distance && waiter.opModeIsActive()){
             try{
                 Thread.sleep(20);
             } catch (InterruptedException e) {

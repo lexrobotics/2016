@@ -64,8 +64,8 @@ public class FourWheelDrive implements DriveTrain{
         }
     }
 
-    public void turnWithEncoders(float power, int degrees)
-    {
+    @Override
+    public void turnWithEncoders(double power, double angle) {
 
     }
 

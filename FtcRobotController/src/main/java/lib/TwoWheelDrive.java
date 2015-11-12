@@ -17,6 +17,8 @@ public class TwoWheelDrive implements DriveTrain {
     private int rightEncoder, leftEncoder;
     private Thread move_thread;
 
+    private final double TURN_SCALAR = 0.23;
+
     // Using SensorState, we would not need to keep a reference to Robot
     public TwoWheelDrive (DcMotor leftMotor, boolean leftRev, DcMotor rightMotor, boolean rightRev, double wheel_diameter) {
         this.wheel_circumference = wheel_diameter * Math.PI;
@@ -61,10 +63,10 @@ public class TwoWheelDrive implements DriveTrain {
 
     public int getEncoders() {
 
-      return (Math.abs(rightMotor.getCurrentPosition() - rightEncoder) +
-              Math.abs(leftMotor.getCurrentPosition() - leftEncoder)) / 2;
+      return (Math.abs(rightMotor.getCurrentPosition() - rightEncoder));
     }
 
+    @Override
     public void moveDistance(double power, double d) {
         // 1120 ticks in the encoder
         resetEncoders();
@@ -80,13 +82,17 @@ public class TwoWheelDrive implements DriveTrain {
     }
 
     @Override
-    public void turnWithEncoders(float power, int degrees) {
+    public void turnWithEncoders(double power, double angle) {
         resetEncoders();
+        double target = TURN_SCALAR * (angle/wheel_circumference) * 1120;
 
-        while (getEncoders() < degrees) {
-            this.leftMotor.setPower(-power);
-            this.rightMotor.setPower(power);
+        while(Math.abs(getEncoders()) < target) {
+            leftMotor.setPower(-power);
+            rightMotor.setPower(power);
         }
+
+        leftMotor.setPower(0);
+        rightMotor.setPower(0);
     }
 
     public void turnWithGyro(double power, double degrees) {
