@@ -6,62 +6,35 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.LightSensor;
-import com.qualcomm.robotcore.hardware.UltrasonicSensor;
-import com.qualcomm.robotcore.robocol.Telemetry;
 
 import java.util.HashMap;
 
 /**
- * Public fields:
- *
- * class SensorData
- *
- * enum SensorType
- * enum ColorType
- *
- * // Add a sensor to be tracked and updated in the thread.
- * void registerSensor(...)
- *
- * // Get the names of all sensors registered under a certain sensor type.
- * String getSensorsFromType(...)
- *
- * // Change whether a sensor gets updated on each loop or not.
- * void changeUpdateStatus(...)
- *
- * // Get an object containing all the recorded data of a sensor.
- * SensorData getSensorDataArray(...)
- *
- * // Get data directly from a sensor. (Without waiting)
- * double getSensorData(...)
- *
- * // Get data directly from a ColorSensor. (Without waiting)
- * SensorState.Color getColorData(...)
- *
- * // Return the average value over a specified number of recent points.
- * getAvgSensorData(...)
- *
- * The get...Data functions might want to have a Thread.sleep. Needs more testing.
- *
- * In any opmode using the gyro, you must wait for the gyro to finish calibrating before running the thread.
+ * Public fields
  */
 
 /**
  * TODO:
+ *  - Have private functions accept SensorContainers, not strings. More efficient
+ *  - Rolling averages
+ *  - Find out whether the getter functions need delays to not block run()
+ *  - Exponential averages
  *  - Take away some of the unnecessary SensorData and SensorContainer constructors, use setters instead.
  *  - Change the names of the types_inv functions
  *  - Maybe store SensorState instance in this class as static?
+ *  - Investigate problem of volatility:
+ *
+        // Potential problem that should be investigated: If two functions operate on a shared variable without synchronization,
+        //    They might be reading or writing to variables only local to that thread.
+        //    With synchronization, the problem disappears, but not all of the functions below are synchronized like that.
+        //    Can also be declared volatile to fix.
+        // Or, make more synchronized functions.
  *
  */
 
-
-// Potential problem that should be investigated: If two functions operate on a shared variable without synchronization,
-//    They might be reading or writing to variables only local to that thread.
-//    With synchronization, the problem disappears, but not all of the functions below are synchronized like that.
-//    Can also be declared volatile to fix.
-    // Or, make more synchronized functions.
-
 public class SensorState implements Runnable{
+
+
     public static class SensorData{
         // values is all the sensor data in chronological order, starting at index and wrapping around.
         public int index;
@@ -80,40 +53,22 @@ public class SensorState implements Runnable{
     }
 
     private static class SensorContainer {
-        // Should this handle its own updating?
+        // We set these three manually
         public int index;
         public double[] values;                 // For all other sensors.
         public SensorState.ColorType[] colors;        // For ColorSensors
+
         public Object sensor;
         public boolean update;
         public String name;
         public SensorState.SensorType type;
 
-        // Lets us synchronize the ultrasonics readings nicely.
-        public DigitalChannel usPin;
-
-        // These constructors are kinda dumb. Use setters instead
-        private SensorContainer(Object sensor, boolean update, SensorState.SensorType type, String name) {
+        public SensorContainer(Object sensor, boolean update, SensorState.SensorType type, String name) {
             this.index = 0;
             this.sensor = sensor;
             this.update = update;
             this.type = type;
             this.name = name;
-        }
-
-        public SensorContainer(double[] values, Object sensor, boolean update, SensorState.SensorType type, String name) {
-            this(sensor, update, type, name);
-            this.values = values;
-//            avg = 0;
-        }
-
-        public SensorContainer(SensorState.ColorType[] colors, Object sensor, boolean update, SensorState.SensorType type, String name) {
-            this(sensor, update, type, name);
-            this.colors = colors;
-        }
-
-        public void addUsPin(DigitalChannel usPin){
-            this.usPin = usPin;
         }
     }
 
@@ -127,6 +82,8 @@ public class SensorState implements Runnable{
     private HashMap<String, SensorContainer> sensors;                        // Stores SensorContainer objects (definition at bottom)
     private HashMap<SensorType, SensorContainer[]> types_inv;                // Allows recovery of all sensors of a certain type.
     private HardwareMap hmap;
+
+    private DigitalChannel usPin;
 
     // interval determines how long run() waits between updates.
     private int milli_interval;
@@ -155,8 +112,6 @@ public class SensorState implements Runnable{
         types_inv.put(SensorType.ENCODER, new SensorContainer[0]);
     }
 
-
-
     /*
     ************************
     INITIALIZATION FUNCTIONS
@@ -176,71 +131,79 @@ public class SensorState implements Runnable{
      * @param update        Whether or not to update the sensor on each pass
      * @param data_length   The number of sensor readings to store for the sensor
      */
+
     public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length){
         // Add a SensorContainer object to the sensors HashMap
         Object sensor_obj = maps.get(type).get(name);
-        SensorContainer sen;
+        SensorContainer sen = new SensorContainer(sensor_obj, update, type, name);
 
-        if (type == SensorType.GYRO){
+        if (type == SensorType.GYRO)
             ((GyroSensor) sensor_obj).calibrate();
-        }
 
         // SensorContainers for ColorSensors have a different structure.
         if (type == SensorType.COLOR) {
-            sen = new SensorContainer(new ColorType[data_length], sensor_obj, update, type, name);
+            sen.colors = new ColorType[data_length];
             ((ColorSensor) sen.sensor).enableLed(false);
         }
 
         else {
             // Initialize with zeroes so that averaging doesn't have any issues.
             double[] values = new double[data_length];
-            for (int i = 0; i < data_length; i++){
+            for (int i = 0; i < data_length; i++)
                 values[i] = 0.0;
-            }
-            sen = new SensorContainer(values, sensor_obj, update, type, name);
-        }
-
-        // We need the pin to synchronize the ultrasonic readings
-        if (type == SensorType.ULTRASONIC){
-            sen.addUsPin(hmap.digitalChannel.get("ultraToggle"));
+            sen.values = values;
         }
 
         sensors.put(name, sen);
-        addToRevTypes(sen);
+        updateTypes_Inv(sen);
+    }
+
+    public void setUltrasonicPin(String pin_name){
+        this.usPin = hmap.digitalChannel.get(pin_name);
     }
 
     /**
      * Updates the types_inv HashMap that maps from sensor types to lists of sensor names.
-     * May want to change this to map types to SensorContainers, but still return String[] from the
-     * getter.
      *
      * @param sen   SensorContainer to add to the HashMap
      */
-    private void addToRevTypes(SensorContainer sen){
-        // Pull out the old list of sensors of this type. Transfer them to a new list, and also add the new sensor.
-        SensorType type = sen.type;
-        SensorContainer[] old_sensors = types_inv.get(type);
+    private void updateTypes_Inv(SensorContainer sen){
+        SensorContainer[] old_sensors = types_inv.get(sen.type);        // Pull out the old array of sensors
         int old_length = old_sensors.length;
 
-        // Make a new list that is one longer than the old one.
         SensorContainer[] new_sensors = new SensorContainer[old_length + 1];
 
-        // Transfer all
-        for (int i = 0; i < old_length; i++){
-            new_sensors[i] = old_sensors[i];
-        }
+        System.arraycopy(old_sensors, 0, new_sensors, 0, old_length);               // Copy them into a new array
+        new_sensors[old_length] = sen;                                              // Add the new sensor
 
-        // Add new one
-        new_sensors[old_length] = sen;
-        types_inv.put(type, new_sensors);
+        types_inv.put(sen.type, new_sensors);
     }
-
-
 
     /*
     *********************************
     SENSORCONTAINER WRITING FUNCTIONS
     *********************************
+     */
+
+    // Add a new value onto the array
+    private void updateArray(SensorContainer sen, double value){
+        int index = sen.index;
+        index = (index + 1) % (sen.values.length);
+        sen.values[index] = value;
+        sen.index = index;
+    }
+
+    private void updateColorSensor(SensorContainer sen, ColorType color){
+        int index = sen.index;
+        index = (index + 1) % (sen.colors.length);
+        sen.colors[index] = color;
+        sen.index = index;
+    }
+
+    /*
+    **************
+    USER FUNCTIONS
+    **************
      */
 
     /**
@@ -254,32 +217,17 @@ public class SensorState implements Runnable{
         sensors.get(name).update = update;
     }
 
-    // Add a new value onto the array
-    private void updateArray(String name, double value){
-        SensorContainer sen = sensors.get(name);
-        int index = sen.index;
-        index = (index + 1) % (sen.values.length);
-        sen.values[index] = value;
-        sen.index = index;
-    }
-
-    private void updateColorSensor(String key, ColorType color){
-        // I don't know a good way to do this that avoids the unnecessary data pull without memory leaks or a lot of deallocation.
-        SensorContainer sen = sensors.get(key);
-        int index = sen.index;
-        index = (index + 1) % (sen.colors.length);
-        sen.colors[index] = color;
-        sen.index = index;
-    }
-
-    // Get the most important color visible to the sensor
-    private ColorType getDominantColor(String name) {
+    /**
+     * Get the most important color visible to the sensor
+     * Also used by run() to update the ColorSensor.
+     * There shouldn't be any sync issues.
+     *
+     * @param name      Name of ColorSensor to get color from
+     * @return          The most dominant color visible
+     */
+    public synchronized ColorType getDominantColor(String name) {
         ColorSensor sen_obj = (ColorSensor) sensors.get(name).sensor;
         int r = sen_obj.red(), b = sen_obj.blue(), g = sen_obj.green();
-//        Robot.tel.addData("Red: " ,r);
-//        Robot.tel.addData("Blue: " ,b);
-//        Robot.tel.addData("Green: " ,g);
-
 
         if ((r > 0) && (b + g == 0))
             return ColorType.RED;
@@ -292,245 +240,162 @@ public class SensorState implements Runnable{
         return ColorType.NONE;
     }
 
-    /*
-    **************
-    USER FUNCTIONS
-    **************
+    /**
+     * Get an array of all sensor names belonging to sensors of a certain type.
+     *
+     * @param type      The type of sensor that you're looking for
+     * @return          An array of strings containing the sensor names belonging to sensors of the specified type.
      */
-
-
     public synchronized String[] getSensorsFromType(SensorType type){
-        // I'm pretty sure this needs to be synchronized because an operation on one of the sensors might be underway.
-        // Returns an array of all the names of all the sensors of the given type.
         SensorContainer[] sens = types_inv.get(type);
         String[] ret = new String[sens.length];
 
-        for (int i = 0; i < sens.length; i++){
+        for (int i = 0; i < sens.length; i++)       // Transfer names to new array
             ret[i] = sens[i].name;
-        }
 
         return ret;
     }
 
-    // Allow an opmode to wait for the gyro to calibrate
-    public boolean calibrating(String gyro_name){
-        if (((GyroSensor)sensors.get(gyro_name).sensor).isCalibrating())
-            return true;
-        return false;
+    public boolean gyroIsCalibrating(String gyro_name){
+        return ((GyroSensor)sensors.get(gyro_name).sensor).isCalibrating();
     }
 
-    public SensorData getSensorDataObject(String name){
-        // Returns a SensorData object containing an array of values and an index for all sensors.
-        try {
-            // Make sure that even if this function is called several times consecutively, it will not block run()
-            Thread.sleep(0, 10);
-        } catch (InterruptedException ex){}
+    /**
+     * Extremely important user function. Used to get all currently stored chronological sensor data
+     * for a sensor, along with the most recent index.
+     *
+     * @param name  The name of the sensor whose data you want to collect
+     * @return      A SensorData instance containing a list of said data and an index pointing to the
+     *              most recent reading.
+     */
+    public synchronized SensorData getSensorDataObject(String name){
+        SensorContainer sen = sensors.get(name);
 
-        synchronized (this) {
-            SensorContainer sen = sensors.get(name);
-            // ColorSensors are annoying and different.
-            if (sen.type == SensorType.COLOR)
-                return new SensorData(sen.index, sen.colors);
-            else
-                return new SensorData(sen.index, sen.values);
-        }
+        if (sen.type == SensorType.COLOR)
+            return new SensorData(sen.index, sen.colors);
+        else
+            return new SensorData(sen.index, sen.values);
     }
 
+    /**
+     * Returns a single sensor reading immediately, for when you can't wait a millisecond to get the reading.
+     *
+     * @param name      The name of the sensor you want to get a reading from
+     * @return          The current reading of that sensor as a double
+     */
     public double getSensorReading(String name){
-        // Get a sensor value immediately, if you need a single value without waiting for the interval
-        double value = 0;
-
-        try {
-            // Make sure that even if this function is called several times consecutively, it will not block run()
-            Thread.sleep(0, 10);
-        } catch (InterruptedException ex){}
+        double value;
 
         synchronized (this) {
             SensorContainer sen = sensors.get(name);
             switch (sen.type) {
                 case GYRO:
-//                    if (((GyroSensor) sen.sensor).isCalibrating())
-                        return ((GyroSensor) sen.sensor).getHeading();
-//                    else
-//                        return -1;
+                    return ((GyroSensor) sen.sensor).getHeading();
 
                 case ENCODER:
                     return ((DcMotor) sen.sensor).getCurrentPosition();
 
                 case ULTRASONIC:
                     try {
-                        sen.usPin.setState(true);
+                        usPin.setState(true);
                         Thread.sleep(0, 20);
-                        sen.usPin.setState(true);
+                        usPin.setState(false);
                         value = ((5.0 / 1023.0) / 0.00977) * ((AnalogInput) sen.sensor).getValue();
                         Thread.sleep(0, 20);
-
                         return value;
+
                     } catch (InterruptedException ex){
                         ex.printStackTrace();
                     }
 
                 case LIGHT:
                     return ((AnalogInput) sen.sensor).getValue();
+
+                default:
+                    return 0.0;
             }
-            return 0.0;
         }
     }
 
-    public synchronized double getAvgSensorData(String name, int points)
-    {
-        // As usual, won't work on ColorSensors
-        // Averages over (points) data points of recent sensor values.
-
+    /**
+     * Using the most recent chronological sensor data, average the last several readings
+     *
+     * @param name              The name of the sensor you want to get an average reading from
+     * @param filter_length     The number of readings you want to average over
+     * @return                  The average of the last (filter_length) readings
+     */
+    public synchronized double getAvgSensorData(String name, int filter_length) {
         SensorContainer senC = sensors.get(name);
         double[] data = senC.values;
         int len = data.length;
         int index = senC.index;
         double sum = 0;
-        index = (index - (points - 1)) % len;
 
-        if (index < 0){
+        index = (index - (filter_length - 1)) % len;    // We subtract 1 because we want to include the most recent reading
+
+        if (index < 0)              // Loop back around
             index = len + index;
-        }
 
-        for (int i = 0; i < points; i++){
+        for (int i = 0; i < filter_length; i++){
             sum += data[index];
             index++;
-            if (index >= len){
+            if (index >= len)
                 index = 0;
-            }
         }
 
-        sum /= (double)points;
+        sum /= (double) filter_length;
         return sum;
     }
 
-//    public synchronized double getRollingAvgSensorData(String name, int filter_length)
-//    {
-//
-//    }
+    /*
+    *************
+    ACTUAL THREAD
+    *************
+     */
 
-//    public synchronized double getAvgSensorData(String name, int filter_length){
-//        SensorContainer sen = sensors.get(name);
-//        double[] values = sen.values;
-//        int length = values.length;
-//        int old_avg_index = sen.old_avg_index;
-//        int index = sen.index;
-//        assert filter_length < values.length;
-//        int fl = sen.filter_length;
-//        double avg = sen.avg;
-//
-//        int start_index = (index - filter_length + 1) % values.length;
-//        if (start_index < 0) {start_index += length;}
-//
-//        sen.filter_length = filter_length;
-//        sen.old_avg_index = start_index;
-//
-//        if (old_avg_index == -1){
-//            for (int i = 0; i < filter_length; i++){
-//                start_index++;
-//                if (start_index == length){
-//                    start_index = 0;
-//                }
-//                avg += values[start_index];
-//            }
-//            sen.avg = avg;
-//            return avg / filter_length;
-//            // In this case, filter_length must also be -1
-//            // Do full averaging over filter_length
-//        }
-//
-//        else if(filter_length != fl){
-//            int difference = Math.abs(filter_length - fl);
-//            avg *= filter_length;
-//            if (filter_length < fl){
-//                for (int i = old_avg_index + 1; i < start_index; i++){
-//                    if (i >= length){i = 0;}
-//                    avg -= values[i];
-//                }
-////                delete everything from old_avg_index + 1 to start_index, including old_avg_index + 1 but not including start_index
-//            }
-//            if (filter_length > fl){
-//                for (int i = start_index + 1; i < old_avg_index; i++){
-//                    if (i >= length){i = 0;}
-//                    avg += values[i];
-//                }
-////                Add everything from start_index + 1 to old_avg_index, including start_index + 1 but not including old_avg_index;
-//            }
-//            avg += getSensorReading(name);
-//            avg /= filter_length;
-//            sen.avg = avg;
-//            return avg;
-//        }
-//
-//        else {
-//            avg *= filter_length;
-//            avg -= values[old_avg_index];
-//            avg += getSensorReading(name);
-//            avg /= filter_length;
-//            return avg;
-//        }
-//    }
-
-    // If we're returning a single value, we have to have two different functions for the two different return types.
-    public synchronized ColorType getColorData(String name){
-        return getDominantColor(name);
-    }
-
-    // ACTUAL THREAD CODE
+    /**
+     * The body of the thread. This function continually updates all sensorContainers for which an
+     * update is requested.
+     * It loops through every sensor in the sensors HashMap, checks its type, and then updates it accordingly.
+     * After doing so, it waits for milli_intervals + micro_intervals before the next round of updates.
+     *
+     * The pin fiddling at the beginning is there to synchronize the readings of the ultrasonics
+     * so they don't interfere with each other. The pulse on the channel is the ultrasonic's signal to start a reading.
+     */
     public void run() {
-        double value = 0.0;
-        ColorType color;
 
         while (true){
             try {
+                if (usPin != null){                     // Prevent ultrasonic interference
+                    usPin.setState(true);
+                    Thread.sleep(0, 20);
+                    usPin.setState(false);
+                }
 
-                SensorContainer us = sensors.get(getSensorsFromType(SensorType.ULTRASONIC)[0]);
-                us.usPin.setState(true);
-                Thread.sleep(0, 20);
-                us.usPin.setState(false);
-
-                // Can't let any reading happen while updating values
-                synchronized (this) {
-                    // For every sensor name
+                synchronized (this) {                   // Can't let any reading happen while updating values
                     for (String key : sensors.keySet()) {
                         SensorContainer sen = sensors.get(key);
 
-                        // only update if an update is requested
-                        if (sen.update) {
+                        if (sen.update) {               // Only update if an update is requested
                             switch (sen.type) {
                                 case GYRO:
-                                    // If the gyrosensor is still calibrating, we should return -1 to indicate
-//                                    if (((GyroSensor) sen.sensor).isCalibrating())
-                                        value = ((GyroSensor) sen.sensor).getHeading();
-//                                    else
-//                                        value = -1;
-                                    updateArray(key, value);
+                                    updateArray(sen, ((GyroSensor) sen.sensor).getHeading());
                                     break;
 
                                 case ENCODER:
-                                    value = ((DcMotor) sen.sensor).getCurrentPosition();
-                                    updateArray(key, value);
+                                    updateArray(sen, ((DcMotor) sen.sensor).getCurrentPosition());
                                     break;
 
-                                case ULTRASONIC:
-                                    // Convert from raw voltage to
-//                                    sen.usPin.setState(true);
-//                                    Thread.sleep(0, 20);
-//                                    sen.usPin.setState(false);
-                                    value = ((5.0/1023.0)/0.00977) * ((AnalogInput) sen.sensor).getValue();
-                                    updateArray(key, value);
-//                                    Thread.sleep(0, 20);
+                                case ULTRASONIC:        // Converts from voltage to inches
+                                    updateArray(sen, ((5.0/1023.0)/0.00977) * ((AnalogInput) sen.sensor).getValue());
                                     break;
 
                                 case COLOR:
-                                    color = getDominantColor(key);
-                                    updateColorSensor(key, color);
+                                    updateColorSensor(sen, getDominantColor(key));
                                     break;
 
                                 case LIGHT:
-                                    value = ((AnalogInput) sen.sensor).getValue();
-                                    updateArray(key, value);
+                                    updateArray(sen, ((AnalogInput) sen.sensor).getValue());
                                     break;
 
                                 default: break;
@@ -538,10 +403,11 @@ public class SensorState implements Runnable{
                         }
                     }
                 }
-                // I need to give getSensorData and the registration functions time to grab the lock.
-                Thread.sleep(milli_interval, nano_interval);
+
+                Thread.sleep(milli_interval, nano_interval);        // The getter functions need time to grab the lock
             } catch (InterruptedException ex){
-                break;
+                Thread.currentThread().interrupt();
+                return;
             }
         }
     }
