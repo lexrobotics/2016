@@ -9,8 +9,14 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.HashMap;
 
-/**
- *
+/*
+PRECAUTIONS:
+Never try reading gyro values until it's calibrated.
+Some of the private functions don't need to be synchronized only because they are only ever called from run()
+NEVER make them public. Very sneaky things could follow.
+The ColorSensors get their own functions. Don't try to use the general-purpose ones for color.
+Early in the program, remember that not all of the array will be filled, so don't try to get long averages.
+Remember to delete SensorData objects you get to avoid leaks.  (Actually that's probably handled by garbage collection)
  */
 
 /**
