@@ -205,7 +205,7 @@ public class SensorState implements Runnable{
      * These two are the public wrappers around the private getDominantColor and getSensorReading functions.
      * Allows us to access by name only in the public functions.
      */
-    public synchronized ColorType getDominantColor(String name){
+    public synchronized ColorType getColorData(String name){
         return getDominantColor(sensors.get(name));
     }
 
