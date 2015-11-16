@@ -96,18 +96,23 @@ public class Robot {
         drivetrain.move(0);
     }
 
-    public void parallel(String sensorNameA,String sensorNameB, double power, double thresh, int filterlength) {
+    public void parallel(String sensorNameA, String sensorNameB, double power, double thresh, int filterlength) {
         double diff;
         int count =0;
         do{
+            tel.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra", 60));
+            tel.addData("rearAvg", Robot.state.getAvgSensorData("rearUltra", 60));
+            tel.addData("frontReading", Robot.state.getSensorReading("frontUltra"));
+            tel.addData("rearReading", Robot.state.getSensorReading("rearUltra"));
+
             diff = (state.getAvgSensorData(sensorNameA, filterlength) - state.getAvgSensorData(sensorNameB,filterlength));
             if(Math.signum(diff) == 1 && count==0){
-                drivetrain.setLeftMotors(power);
-                drivetrain.setRightMotors(-power);
-            }
-            else if(Math.signum(diff) == -1 && count==0) {
                 drivetrain.setLeftMotors(-power);
                 drivetrain.setRightMotors(power);
+            }
+            else if(Math.signum(diff) == -1 && count==0) {
+                drivetrain.setLeftMotors(power);
+                drivetrain.setRightMotors(-power);
             }
             else{
                 drivetrain.setLeftMotors(0);

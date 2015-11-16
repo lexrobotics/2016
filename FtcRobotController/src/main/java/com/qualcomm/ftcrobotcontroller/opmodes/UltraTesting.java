@@ -15,14 +15,14 @@ import lib.SensorState;
 public class UltraTesting extends LinearOpMode {
     // Demo class for the new Robot classes.
     private final int FRONT_CENTER = 30;
-    private final int REAR_CENTER = 80;
+    private final int REAR_CENTER = 140;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         Robot dave = new Robot(hardwareMap, telemetry, this); // makes Robot "dave"
 
-        Robot.state = new SensorState(hardwareMap, 1, 0); // this block sets up sensors
+        Robot.state = new SensorState(hardwareMap, 1, 0);
         Robot.state.registerSensor("mr", SensorState.SensorType.COLOR, false, 12);
         Robot.state.registerSensor("mrs", SensorState.SensorType.LIGHT, true, 12);
         Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 50);
@@ -31,32 +31,37 @@ public class UltraTesting extends LinearOpMode {
         Thread state_thread = new Thread(Robot.state); // starts sensor thread
         state_thread.start();
 
-        waitForStart(); // waits for start
+        waitForStart();
+
+        hardwareMap.dcMotor.get("noodler").setPower(-0.4); // turns on the harvester
 
         TwoWheelDrive dave_train = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
-                hardwareMap.dcMotor.get("rightdrive"), false, 4); // sets up two wheel drive
+                hardwareMap.dcMotor.get("rightdrive"), false, 4);
 
         dave.registerDriveTrain(dave_train);
         dave.registerUltrasonicServo("frontUltra", "frontSwivel");
         dave.registerUltrasonicServo("rearUltra", "rearSwivel");
         dave.registerServo("climber");
 
-        dave.ultraservohelper.setPosition("frontUltra", FRONT_CENTER);
-        dave.ultraservohelper.setPosition("rearUltra", REAR_CENTER);
-
         Thread.sleep(200);
-        dave.setPosition("climber", 180);
-        dave.drivetrain.moveDistance(-0.4, 48);
+        dave.setPosition("climber", 180); // sets position
+        dave.drivetrain.moveDistance(-0.4, 48); // moves forward
+        Thread.sleep(300);
+        dave.drivetrain.turnWithEncoders(0.4, 33); // 1st turn
         Thread.sleep(100);
-        dave.drivetrain.turnWithEncoders(0.4, 40);
-        dave.drivetrain.moveDistance(-0.2, 15);
-        dave.tillSenseTowards("frontUltra", 130, -0.2, 30, 10);
-        Thread.sleep(10000);
+        dave.drivetrain.moveDistance(-0.3, 35); // moves forward along diagonal
+        Thread.sleep(100);
+        dave.tillSenseTowards("frontUltra", 180, -0.2, 16, 10); // tillSense
+        Thread.sleep(100);
         dave.ultraservohelper.setPosition("frontUltra", FRONT_CENTER);
         dave.ultraservohelper.setPosition("rearUltra", REAR_CENTER);
-            dave.drivetrain.turnWithEncoders(0.4, 150);
+        dave.drivetrain.turnWithEncoders(0.4, 140); // turns w/ encoders
         Thread.sleep(300);
-        dave.parallel("frontUltra", "rearUltra", 0.30, 0.5, 30);
+
+        // dave.parallel("frontUltra", "rearUltra", 0.30, 0.5, 30); //
+
+        dave.colorSweep(SensorState.ColorType.BLUE, 1, "mrs", "mr");
+        dave.setPosition("climber", 0);
 
         while (opModeIsActive() && !(Thread.currentThread().isInterrupted())){
             telemetry.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra", 60));

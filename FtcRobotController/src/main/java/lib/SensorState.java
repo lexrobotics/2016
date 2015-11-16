@@ -487,7 +487,7 @@ public class SensorState implements Runnable{
 
                 SensorContainer us = sensors.get(getSensorsFromType(SensorType.ULTRASONIC)[0]);
                 us.usPin.setState(true);
-                Thread.sleep(0, 20);
+                Thread.sleep(0, 20000);
                 us.usPin.setState(false);
 
                 // Can't let any reading happen while updating values
