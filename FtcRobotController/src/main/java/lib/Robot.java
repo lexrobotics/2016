@@ -77,7 +77,7 @@ public class Robot {
         }
     }
 
-    public void tillSenseTowards(String sensorName,int servoPosition, double power, int distance, int filterlength) {
+    public void tillSenseTowards(String sensorName, int servoPosition, double power, int distance, int filterlength) {
         ultraservohelper.setPosition(sensorName,servoPosition);
         try {
             Thread.sleep(400);
@@ -130,7 +130,7 @@ public class Robot {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }while (count<5 && waiter.opModeIsActive());
+        }while (count<15 && waiter.opModeIsActive());
 
         drivetrain.move(0);
 
@@ -167,7 +167,7 @@ public class Robot {
     // tillSense for colors. If the first color we detect is the color argument (our teams color)
     // Then we will hit that button.
     // Otherwise, we go to the next light.
-    public void colorSweep(SensorState.ColorType color, double threshold, String lightname, String colorname) {
+    public void colorSweep(SensorState.ColorType color, double threshold, String lightname, String colorname, double power) {
         // TODO: maybe add argument so that it can average over a specific number of points
 
         SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
@@ -176,42 +176,21 @@ public class Robot {
         double reading = 0.0;
 //        int count = 0;
 
-        drivetrain.move(0.4F);
-//        drivetrain.resetEncoders();
+        drivetrain.move(power);
 
-        // Get the first detected red or blue surface
 //        do {
+//            if (!waiter.opModeIsActive()){
+//                return;
+//            }
 //            dominant = state.getColorData(colorname);
 //            tel.addData("Current color", dominant);
-//            count++;
-//            if (dominant == color){
-//                drivetrain.move(0.0);
-//                break;
-//            }
-//
+////            count++;
 //            try {
-//                Thread.sleep(1);
-//            } catch (InterruptedException ex) {
-//            }
-//        } while (true);
-        do {
-//            if (drivetrain.getEncoders() > 10 * 1120)
-            if (!waiter.opModeIsActive()){
-                return;
-            }
-            dominant = state.getColorData(colorname);
-            tel.addData("Current color", dominant);
-//            count++;
-            try {
-                Thread.sleep(0, 500000);
-            } catch (InterruptedException ex){}
-        } while (!(dominant == SensorState.ColorType.RED || dominant == SensorState.ColorType.BLUE));
+//                Thread.sleep(0, 500000);
+//            } catch (InterruptedException ex){}
+//        } while (!(dominant == SensorState.ColorType.RED || dominant == SensorState.ColorType.BLUE));
 //        drivetrain.move(0.0);
 
-//        while (count < 1000000);
-//        while (!(dominant == SensorState.ColorType.RED || dominant == SensorState.ColorType.BLUE));
-
-        average = state.getAvgSensorData(lightname, 10);
 
 //        while (true){
 //            tel.addData("Found color", dominant);
@@ -222,19 +201,13 @@ public class Robot {
 //            }
 //        }
 
-//        drivetrain.move(0.0);
-//
-//        while (waiter.opModeIsActive()){
-//            tel.addData("Standard Grey", average);
-//            tel.addData("Current average", state.getAvgSensorData(lightname, 10));
-//        }
-
         average = state.getAvgSensorData(lightname, 10);
 
 
         while (waiter.opModeIsActive()) {
             reading = state.getAvgSensorData(lightname, 10);
             tel.addData("Reading", reading);
+            tel.addData("Average", average);
 
             if (Math.abs(reading - average) > threshold){
                 break;
@@ -244,6 +217,14 @@ public class Robot {
             } catch (InterruptedException ex){}
         }
         drivetrain.move(0.0);
+
+        for (int i = 0; i < 4000; i++){
+            tel.addData("Reading", reading);
+            tel.addData("Average", average);
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex){}
+        }
 //
 ////        while (true){
 ////            tel.addData("test", "tester");

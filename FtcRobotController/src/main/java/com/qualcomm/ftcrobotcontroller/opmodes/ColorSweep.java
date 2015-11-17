@@ -31,7 +31,7 @@ public class ColorSweep extends LinearOpMode {
                                                         hardwareMap.dcMotor.get("rightdrive"), false, 4);
 
         dave.registerDriveTrain(dave_train);
-        dave.colorSweep(SensorState.ColorType.BLUE, 2, "mrs", "mr");
+//        dave.colorSweep(SensorState.ColorType.BLUE, 2, "mrs", "mr");
 
         while (opModeIsActive() && !(Thread.currentThread().isInterrupted())){
             telemetry.addData("OpModeIsActive", "");

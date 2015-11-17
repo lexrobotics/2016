@@ -47,21 +47,21 @@ public class UltraTesting extends LinearOpMode {
         dave.setPosition("climber", 180); // sets position
         dave.drivetrain.moveDistance(-0.4, 48); // moves forward
         Thread.sleep(300);
-        dave.drivetrain.turnWithEncoders(0.4, 33); // 1st turn
+        dave.drivetrain.turnWithEncoders(0.4, 37); // 1st turn
         Thread.sleep(100);
         dave.drivetrain.moveDistance(-0.3, 35); // moves forward along diagonal
         Thread.sleep(100);
-        dave.tillSenseTowards("frontUltra", 180, -0.2, 16, 10); // tillSense
+        dave.tillSenseTowards("frontUltra", 180, -0.2, 14, 10); // tillSense
         Thread.sleep(100);
         dave.ultraservohelper.setPosition("frontUltra", FRONT_CENTER);
         dave.ultraservohelper.setPosition("rearUltra", REAR_CENTER);
-        dave.drivetrain.turnWithEncoders(0.4, 140); // turns w/ encoders
+        dave.drivetrain.turnWithEncoders(0.5, 140); // turns w/ encoders
         Thread.sleep(300);
 
-        // dave.parallel("frontUltra", "rearUltra", 0.30, 0.5, 30); //
+//         dave.parallel("frontUltra", "rearUltra", 0.30, 0.5, 30); //
 
-        dave.colorSweep(SensorState.ColorType.BLUE, 1, "mrs", "mr");
-        dave.setPosition("climber", 0);
+        dave.colorSweep(SensorState.ColorType.BLUE, 5, "mrs", "mr", -0.4);
+        dave.setPosition("climber", 5);
 
         while (opModeIsActive() && !(Thread.currentThread().isInterrupted())){
             telemetry.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra", 60));
