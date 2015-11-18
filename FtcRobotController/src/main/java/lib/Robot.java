@@ -137,14 +137,21 @@ public class Robot {
     }
     public void tillSenseAway(String sensorName,int servoPosition, double power, int distance, int filterlength){
         ultraservohelper.setPosition(sensorName,servoPosition);
+        try {
+            Thread.sleep(400);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         drivetrain.move(power);
-        while(state.getAvgSensorData(sensorName,filterlength) < distance && waiter.opModeIsActive()){
+        while(state.getAvgSensorData(sensorName,filterlength) <= distance && waiter.opModeIsActive()){
+            Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName, filterlength));
             try{
-                Thread.sleep(20);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        drivetrain.move(0);
     }
 
     // This just gets the color reading from the color sensor. We can really only use it in one way,
@@ -218,13 +225,13 @@ public class Robot {
         }
         drivetrain.move(0.0);
 
-        for (int i = 0; i < 4000; i++){
-            tel.addData("Reading", reading);
-            tel.addData("Average", average);
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex){}
-        }
+//        for (int i = 0; i < 4000; i++){
+//            tel.addData("Reading", reading);
+//            tel.addData("Average", average);
+//            try {
+//                Thread.sleep(1);
+//            } catch (InterruptedException ex){}
+//        }
 //
 ////        while (true){
 ////            tel.addData("test", "tester");

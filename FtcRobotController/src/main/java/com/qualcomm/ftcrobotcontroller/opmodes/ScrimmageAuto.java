@@ -15,10 +15,10 @@ public class ScrimmageAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException{
         waitForStart();
-//        TwoWheelDrive drivetrain = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
-//                hardwareMap.dcMotor.get("rightdrive"), false, 4);
-//        drivetrain.moveDistance(-0.25F, 78);
-        LightSensor ls = hardwareMap.lightSensor.get("mr");
+        TwoWheelDrive drivetrain = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
+                hardwareMap.dcMotor.get("rightdrive"), false, 4);
+        drivetrain.moveDistance(-0.25F, 78);
+//        LightSensor ls = hardwareMap.lightSensor.get("mr");
         while (true){
             telemetry.addData("light", ls.getLightDetected());
         }

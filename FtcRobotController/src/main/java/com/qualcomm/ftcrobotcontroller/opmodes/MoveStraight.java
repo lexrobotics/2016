@@ -8,19 +8,12 @@ import lib.TwoWheelDrive;
  * Created by luke on 11/3/15.
  */
 public class MoveStraight extends LinearOpMode {
-    public void runOpMode() throws InterruptedException{
-        waitForStart();
 
-        TwoWheelDrive dave_train = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
-                hardwareMap.dcMotor.get("rightdrive"), false, 4);
-        dave_train.move(-0.25);
-
-        while (opModeIsActive()){
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex){
-                Thread.currentThread().interrupt();
-            }
+        @Override
+        public void runOpMode() throws InterruptedException{
+            waitForStart();
+            TwoWheelDrive drivetrain = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
+                    hardwareMap.dcMotor.get("rightdrive"), false, 4);
+            drivetrain.moveDistance(-0.25F, 78);
         }
-    }
 }
