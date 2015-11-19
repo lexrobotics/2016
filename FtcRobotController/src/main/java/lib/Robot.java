@@ -174,8 +174,10 @@ public class Robot {
     // tillSense for colors. If the first color we detect is the color argument (our teams color)
     // Then we will hit that button.
     // Otherwise, we go to the next light.
-    public void colorSweep(SensorState.ColorType color, double threshold, String lightname, String colorname, double power) {
+    public void colorSweep(SensorState.ColorType color, double low_threshold, double high_threshold, String lightname, String colorname, double power) {
         // TODO: maybe add argument so that it can average over a specific number of points
+        // average + low_threshold < Light detected < average + high_threshold
+
 
         SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
         SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
@@ -216,7 +218,7 @@ public class Robot {
             tel.addData("Reading", reading);
             tel.addData("Average", average);
 
-            if (Math.abs(reading - average) > threshold){
+            if (average + low_threshold <= reading && reading <= average + high_threshold){
                 break;
             }
             try{
@@ -225,13 +227,15 @@ public class Robot {
         }
         drivetrain.move(0.0);
 
-//        for (int i = 0; i < 4000; i++){
-//            tel.addData("Reading", reading);
-//            tel.addData("Average", average);
-//            try {
-//                Thread.sleep(1);
-//            } catch (InterruptedException ex){}
-//        }
+        for (int i = 0; i < 4000; i++){
+            tel.addData("Reading", reading);
+            tel.addData("Average", average);
+            if (!waiter.opModeIsActive())
+                break;
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex){}
+        }
 //
 ////        while (true){
 ////            tel.addData("test", "tester");

@@ -30,7 +30,7 @@ public class Meet1ReverseAuto extends LinearOpMode {
 
         waitForStart();
 
-        hardwareMap.dcMotor.get("noodler").setPower(-0.4); // turns on the harvester
+//        hardwareMap.dcMotor.get("noodler").setPower(-0.4); // turns on the harvester
 
         TwoWheelDrive dave_train = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
                 hardwareMap.dcMotor.get("rightdrive"), false, 4);
@@ -42,12 +42,26 @@ public class Meet1ReverseAuto extends LinearOpMode {
 
         Thread.sleep(200);
         dave.setPosition("climber", 180); // sets position
-        dave.tillSenseAway("rearUltra", REAR_CENTER - 90, -0.4, 63, 10);
-        Thread.sleep(100);
-        dave.drivetrain.turnWithEncoders(0.4, 90);
-        dave.tillSenseTowards("frontUltra", REAR_CENTER + 90, -0.4, 15, 10);
-        dave.drivetrain.turnWithEncoders(0.4, -90);
-        dave.colorSweep(SensorState.ColorType.RED, 5, "mrs", "mr", -0.4);
+        dave.ultraservohelper.setPosition("rearUltra",REAR_CENTER - 90);
+
+        Thread.sleep(500);
+        dave.drivetrain.moveDistance(-0.4, 10);
+        dave.tillSenseAway("rearUltra", REAR_CENTER - 90, -0.4, 45, 10);
+//        Thread.sleep(500);
+        dave.drivetrain.moveDistance(-0.4, 3);
+        Thread.sleep(500);
+        dave.drivetrain.turnWithEncoders(-0.4, 90);
+        Thread.sleep(500);
+        dave.tillSenseTowards("frontUltra", FRONT_CENTER + 90, -0.3, 10, 10);
+        Thread.sleep(500);
+        dave.drivetrain.turnWithEncoders(0.4, 85);
+        Thread.sleep(500);
+
+        dave.drivetrain.moveDistance(-0.4, 12);
+
+//        dave.colorSweep(SensorState.ColorType.RED, 4, 8, "mrs", "mr", -0.4);
+//        Thread.sleep(500);
+
 
         dave.setPosition("climber", 5);
 

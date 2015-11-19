@@ -63,7 +63,7 @@ public class ClimberDrop extends LinearOpMode {
 
 //         dave.parallel("frontUltra", "rearUltra", 0.30, 0.5, 30); //
 
-        dave.colorSweep(SensorState.ColorType.BLUE, 7, "mrs", "mr", -0.4);
+        dave.colorSweep(SensorState.ColorType.BLUE, 4, 8, "mrs", "mr", -0.4);
         Thread.sleep(500);
 //        dave.drivetrain.moveDistance(0.3, 5);
 //        Thread.sleep(100);
