@@ -94,10 +94,37 @@ public class TwoWheelDrive implements DriveTrain {
         leftMotor.setPower(0);
         rightMotor.setPower(0);
     }
+    public int distToZero(int angle1){
+        if(angle1>180){
+            return 360 - angle1;
+        }
+        else{
+            return angle1;
+        }
+    }
+    public void turnWithGyro(double power, int degrees, String name) {
+        int goal = ((int)Robot.state.getSensorReading(name) + degrees) % 360;
+        int max = 361;
+        int distance;
 
-    public void turnWithGyro(double power, double degrees) {
-//        double goal = gyro.getRotation + degrees;
-//        while (gyro.getRotation() - initial < )
+        double reading = Robot.state.getSensorReading(name);
+        while(Robot.waiter.opModeIsActive() && distToZero((int)reading-goal)>3 ) {
+            reading = Robot.state.getSensorReading(name);
+            Robot.tel.addData("Gyro reading", Robot.state.getSensorReading("hero"));
+//            leftMotor.setPower(-power);
+//            rightMotor.setPower(power);
+
+
+        } ;
+//        while (Robot.waiter.opModeIsActive()){
+//            distance = (int) Math.abs(Robot.state.getSensorReading(name) - goal);
+//            if (distance > max){
+//                break;
+//            }
+//            max = (int) distance;
+//        }
+        leftMotor.setPower(0);
+        rightMotor.setPower(0);
     }
 
 //    public void turnWithGyro(float power, double heading)

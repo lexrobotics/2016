@@ -30,20 +30,27 @@ public class GyroTest extends LinearOpMode {
 
         waitForStart();
 
+        while (opModeIsActive()){
+            telemetry.addData("Gyro heading", Robot.state.getSensorReading("hero"));
+            Thread.sleep(10);
+        }
+
+        state_thread.interrupt();
+
 //        hardwareMap.dcMotor.get("noodler").setPower(-0.4); // turns on the harvester
 
-        TwoWheelDrive dave_train = new TwoWheelDrive(hardwareMap.dcMotor.get("leftdrive"), true,
-                hardwareMap.dcMotor.get("rightdrive"), false, 4);
-
-        MovementThread gyroTester = new MovementThread(dave_train, "hero", 0);
-        gyroTester.setPower(-0.2);
-        Thread mthread = new Thread(gyroTester);
-        mthread.start();
-
-        while (opModeIsActive()){
-            Thread.sleep(20);
-        }
-        state_thread.interrupt();
-        mthread.interrupt();
+//        TwoWheelDrive dave_train = new TwoWheelDrive(hardwareMap.dcMotor.get("leftdrive"), true,
+//                hardwareMap.dcMotor.get("rightdrive"), false, 4);
+//
+//        MovementThread gyroTester = new MovementThread(dave_train, "hero", 0, this);
+//        gyroTester.setPower(-0.2);
+//        Thread mthread = new Thread(gyroTester);
+//        mthread.start();
+//
+//        while (opModeIsActive()){
+//            Thread.sleep(20);
+//        }
+//        state_thread.interrupt();
+//        mthread.interrupt();
     }
 }

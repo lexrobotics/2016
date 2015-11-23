@@ -1,5 +1,6 @@
 package lib;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 
 /**
@@ -13,19 +14,30 @@ public class MovementThread implements Runnable{
     private double power;
     private double minthresh;
     private double turnthresh;
+    private LinearOpMode waiter;
 
     // Must always be less than 1
     private double scalingfactor;
 
 
-    public MovementThread (DriveTrain drivetrain, String gyro_name, int expectedHeading) {
+    public MovementThread (DriveTrain drivetrain, String gyro_name, int expectedHeading, LinearOpMode waiter) {
         this.drivetrain = drivetrain;
         this.gyro_name = gyro_name;
         this.power = 0;
+        this.waiter = waiter;
     }
 
     public synchronized void setPower(double power){
         this.power = power;
+    }
+
+    public int distToZero(int angle1){
+        if(angle1>180){
+            return 360 - angle1;
+        }
+        else{
+            return angle1;
+        }
     }
 
     @Override
@@ -34,14 +46,14 @@ public class MovementThread implements Runnable{
 //        drivetrain.setRightMotors(power);
         double motorPower;
 
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!Thread.currentThread().isInterrupted() && waiter.opModeIsActive()) {
             synchronized(this){
                 motorPower = this.power;
             }
 
             try{
-                // MAKE SURE MORE THAN 10 VALUES ARE STORED
-                actualHeading = Robot.state.getAvgSensorData(gyro_name, 10);
+                actualHeading = Robot.state.getSensorReading(gyro_name);
+                Robot.tel.addData("Gyro heading", actualHeading);
 
                 if (Math.abs(actualHeading - expectedHeading)>minthresh && Math.abs(actualHeading - expectedHeading)<turnthresh){
                     double scalar = (actualHeading - expectedHeading)/360;
@@ -77,8 +89,11 @@ public class MovementThread implements Runnable{
                 Thread.sleep(10);
             } catch (InterruptedException ex){
                 Thread.currentThread().interrupt();
-                return;
+                break;
             }
         }
+
+        drivetrain.setLeftMotors(0);
+        drivetrain.setRightMotors(0);
     }
 }

@@ -485,10 +485,12 @@ public class SensorState implements Runnable{
         while (true){
             try {
 
-                SensorContainer us = sensors.get(getSensorsFromType(SensorType.ULTRASONIC)[0]);
-                us.usPin.setState(true);
-                Thread.sleep(0, 20000);
-                us.usPin.setState(false);
+                if (types_inv.get(SensorType.ULTRASONIC).length > 0) {
+                    SensorContainer us = types_inv.get(SensorType.ULTRASONIC)[0];
+                    us.usPin.setState(true);
+                    Thread.sleep(0, 20000);
+                    us.usPin.setState(false);
+                }
 
                 // Can't let any reading happen while updating values
                 synchronized (this) {
