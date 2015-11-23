@@ -4,7 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 //import com.qualcomm.robotcore.hardware.GyroSensor;
 
+import lib.MovementThread;
+import lib.Robot;
 import lib.SensorState;
+import lib.TwoWheelDrive;
 
 /**
  * Created by luke on 11/9/15.
@@ -13,36 +16,34 @@ public class GyroTest extends LinearOpMode {
 //    SensorState state;
 
     @Override
-    public void runOpMode() throws InterruptedException{
+    public void runOpMode() throws InterruptedException {
+        Robot dave = new Robot(hardwareMap, telemetry, this); // makes Robot "dave"
+
+        Robot.state = new SensorState(hardwareMap, 1, 0);
+        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
+
+        while(Robot.state.calibrating("hero") == true)
+            Thread.sleep(20);
+
+        Thread state_thread = new Thread(Robot.state); // starts sensor thread
+        state_thread.start();
+
         waitForStart();
-//        state = new SensorState(hardwareMap, 1, 0);
-//        state.registerSensor("gyro", SensorState.SensorType.GYRO, true, 40);
-//        Thread state_thread = new Thread(state);
-//        state_thread.start();
-        GyroSensor gyro = hardwareMap.gyroSensor.get("gyro");
-        gyro.calibrate();
-        while (gyro.isCalibrating()){
-            try{
-                Thread.sleep(10);
-            } catch (InterruptedException ex){}
-            telemetry.addData("Calibrating", true);
-        }
+
+//        hardwareMap.dcMotor.get("noodler").setPower(-0.4); // turns on the harvester
+
+        TwoWheelDrive dave_train = new TwoWheelDrive(hardwareMap.dcMotor.get("leftdrive"), true,
+                hardwareMap.dcMotor.get("rightdrive"), false, 4);
+
+        MovementThread gyroTester = new MovementThread(dave_train, "hero", 0);
+        gyroTester.setPower(-0.2);
+        Thread mthread = new Thread(gyroTester);
+        mthread.start();
 
         while (opModeIsActive()){
-            telemetry.addData("1. x", String.format("%03d", gyro.rawX()));
-            telemetry.addData("2. y", String.format("%03d", gyro.rawY()));
-            telemetry.addData("3. z", String.format("%03d", gyro.rawZ()));
-            telemetry.addData("4. h", String.format("%03d", gyro.getHeading()));
-//            telemetry.addData("Gyro", gyro.getHeading());
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex){
-                Thread.currentThread().interrupt();
-                break;
-            }
+            Thread.sleep(20);
         }
-//        state_thread.interrupt();
-//        GyroSensor x;
-//        x.
+        state_thread.interrupt();
+        mthread.interrupt();
     }
 }

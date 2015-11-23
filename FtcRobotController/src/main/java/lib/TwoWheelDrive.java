@@ -47,10 +47,10 @@ public class TwoWheelDrive implements DriveTrain {
         this.rightMotor.setPower(power);
     }
 
-    public void move(double power, String gyro_name) {
-        move_thread = new Thread(new MovementThread(this, gyro_name));
-        move_thread.start();
-    }
+//    public void move(double power, String gyro_name) {
+//        move_thread = new Thread(new MovementThread(this, gyro_name));
+//        move_thread.start();
+//    }
 
     public void stopMove(){
         move_thread.interrupt();

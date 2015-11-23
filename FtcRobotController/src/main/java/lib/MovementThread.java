@@ -18,22 +18,27 @@ public class MovementThread implements Runnable{
     private double scalingfactor;
 
 
-    public MovementThread (DriveTrain drivetrain, String gyro_name) {
+    public MovementThread (DriveTrain drivetrain, String gyro_name, int expectedHeading) {
         this.drivetrain = drivetrain;
         this.gyro_name = gyro_name;
         this.power = 0;
     }
 
-    public void setPower(double power){
+    public synchronized void setPower(double power){
         this.power = power;
     }
 
     @Override
     public void run() {
-        drivetrain.setLeftMotors(power);
-        drivetrain.setRightMotors(power);
+//        drivetrain.setLeftMotors(power);
+//        drivetrain.setRightMotors(power);
+        double motorPower;
 
         while (!Thread.currentThread().isInterrupted()) {
+            synchronized(this){
+                motorPower = this.power;
+            }
+
             try{
                 // MAKE SURE MORE THAN 10 VALUES ARE STORED
                 actualHeading = Robot.state.getAvgSensorData(gyro_name, 10);
@@ -45,8 +50,8 @@ public class MovementThread implements Runnable{
                     scalar = 1 - (1 - scalar) * scalingfactor;
 
                     // Scale down the power's distance from 1
-                    double left_power = Math.signum(power) * (1 - (1 - Math.abs(power))) * scalar;
-                    double right_power = power * scalar;
+                    double left_power = Math.signum(motorPower) * (1 - (1 - Math.abs(motorPower))) * scalar;
+                    double right_power = motorPower * scalar;
 
                     // switch if necessary. I don't actually know what the correct case is, so this might be wrong.
                      if (actualHeading > expectedHeading){
@@ -60,24 +65,20 @@ public class MovementThread implements Runnable{
                 }
                 else if((actualHeading - expectedHeading)>turnthresh){
                     while(Math.abs(actualHeading - expectedHeading)>minthresh) {
-                        drivetrain.setRightMotors(power * Math.signum(actualHeading - expectedHeading));
-                        drivetrain.setLeftMotors(power * Math.signum(actualHeading - expectedHeading) * -1);
+                        drivetrain.setRightMotors(motorPower * Math.signum(actualHeading - expectedHeading));
+                        drivetrain.setLeftMotors(motorPower * Math.signum(actualHeading - expectedHeading) * -1);
                     }
                 }
                 else{
-                    drivetrain.setLeftMotors(power);
-                    drivetrain.setRightMotors(power);
+                    drivetrain.setLeftMotors(motorPower);
+                    drivetrain.setRightMotors(motorPower);
                 }
 
                 Thread.sleep(10);
             } catch (InterruptedException ex){
                 Thread.currentThread().interrupt();
-                break;
+                return;
             }
         }
-    }
-
-    public synchronized void setExpectedHeading(int angle) {
-        expectedHeading = angle;
     }
 }
