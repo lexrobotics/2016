@@ -1,7 +1,10 @@
 package lib;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+
+import static java.lang.Thread.*;
 
 /**
  * Created by luke on 10/7/15.
@@ -47,10 +50,10 @@ public class TwoWheelDrive implements DriveTrain {
         this.rightMotor.setPower(power);
     }
 
-//    public void move(double power, String gyro_name) {
-//        move_thread = new Thread(new MovementThread(this, gyro_name));
-//        move_thread.start();
-//    }
+    public void move(double power, String gyro_name, LinearOpMode waiter) {
+        move_thread = new Thread(new MovementThread(this, gyro_name, 0, waiter,0.2));
+        move_thread.start();
+    }
 
     public void stopMove(){
         move_thread.interrupt();
@@ -95,6 +98,7 @@ public class TwoWheelDrive implements DriveTrain {
         rightMotor.setPower(0);
     }
     public int distToZero(int angle1){
+        angle1=Math.abs(angle1)%360;
         if(angle1>180){
             return 360 - angle1;
         }
@@ -102,37 +106,81 @@ public class TwoWheelDrive implements DriveTrain {
             return angle1;
         }
     }
+
+    public int angleDist(int deg1, int deg2)
+    {
+        int absDist = (360 + deg2 - deg1) % 360;
+        if (absDist > 180)
+            absDist -= 360;
+        return absDist;
+    }
+
     public void turnWithGyro(double power, int degrees, String name) {
-        int goal = ((int)Robot.state.getSensorReading(name) + degrees) % 360;
-        int max = 361;
-        int distance;
-
-        double reading = Robot.state.getSensorReading(name);
-        while(Robot.waiter.opModeIsActive() && distToZero((int)reading-goal)>3 ) {
-            reading = Robot.state.getSensorReading(name);
-            Robot.tel.addData("Gyro reading", Robot.state.getSensorReading("hero"));
-//            leftMotor.setPower(-power);
-//            rightMotor.setPower(power);
-
-
-        } ;
-//        while (Robot.waiter.opModeIsActive()){
-//            distance = (int) Math.abs(Robot.state.getSensorReading(name) - goal);
-//            if (distance > max){
-//                break;
-//            }
-//            max = (int) distance;
-//        }
+        int prevReading = (int)Robot.state.getSensorReading(name);
+        int currReading = prevReading;
+        int sum = 0;
+        leftMotor.setPower(-power);
+        rightMotor.setPower(power);
+        while (Robot.waiter.opModeIsActive()) {
+            prevReading = currReading;
+            currReading = (int)Robot.state.getSensorReading(name);
+            sum += angleDist(prevReading, currReading);
+            int offset = Math.abs(degrees) - Math.abs(sum);
+            //if (offset < 10) {
+            //    leftMotor.setPower(power * offset / -10);
+            //    rightMotor.setPower(power * offset / 10);
+            //}
+            if (offset <= 0)
+                break;
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         leftMotor.setPower(0);
         rightMotor.setPower(0);
     }
 
-//    public void turnWithGyro(float power, double heading)
-//    {
-//        while (gyro.getRotation() < heading)
-//        {
-//            leftMotor.setPower(power);
-//            rightMotor.setPower(-power);
-//        }
-//    }
+    /*
+    public void oldTurnWithGyro(double power, int degrees, String name) {
+        int goal = (360 + (int)Robot.state.getSensorReading(name) + degrees) % 360;
+        int prevReading = (int)Robot.state.getSensorReading(name);
+        int currReading = prevReading;
+        leftMotor.setPower(-power);
+        rightMotor.setPower(power);
+        if (power > 0) {
+            while (Robot.waiter.opModeIsActive()) {
+            // when our reading range "passes over" goal
+                prevReading = currReading;
+                currReading = (int)Robot.state.getSensorReading(name);
+                if (angleDist(prevReading, goal) <= 180 && angleDist(currReading, goal) >= 180)
+                    break;
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        else {
+            while (Robot.waiter.opModeIsActive()) {
+                prevReading = currReading;
+                currReading = (int)Robot.state.getSensorReading(name);
+                if (angleDist(prevReading, goal) >= 180 && angleDist(currReading, goal) <= 180)
+                    break;
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        leftMotor.setPower(0);
+        rightMotor.setPower(0);
+        while (Robot.waiter.opModeIsActive()){
+            Robot.tel.addData("Reading", Robot.state.getSensorReading(name));
+        }
+    }
+    */
 }
