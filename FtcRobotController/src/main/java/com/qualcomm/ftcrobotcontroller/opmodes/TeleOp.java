@@ -9,39 +9,29 @@ import com.qualcomm.robotcore.util.Range;
  * Created by lhscompsci on 9/28/15.
  */
 public class TeleOp extends OpMode {
-    final static double NOODLER_POWER = 1.0;
-    final static double NOODLER_REVERSE_POWER = -1.0;
-    final static double DUMP_SPEED_FORWARDS_SLOW = 0.55;
-    final static double DUMP_SPEED_REVERSE_SLOW = 0.45;
-    final static double DUMP_SPEED_FORWARDS = 0.6;
-    final static double DUMP_SPEED_REVERSE = 0.4;
-    final static double LIFT_MAX_RANGE = 1.0;
-    final static double LIFT_MIN_RANGE = 0.0;
-
-    final static double LIFT_DELTA_DOWN = 0.03;
-    final static double LIFT_DELTA_UP = 0.01;
 
     DcMotor leftDrivePair, rightDrivePair;
-    DcMotor noodler;
-    Servo dumpServo1, dumpServo2, liftServo, climber;
+    DcMotor noodler, armTilter, liftStageOne, liftStageTwo;
+    Servo allClearSignal, leftBallRelease, rightBallRelease;
 
     boolean driveInverted = false;
     boolean bWasDown = false;
-    double dumpServoPosition = 0.5;
-    double liftServoPosition = 0.3;
+    int closed = 0, rightClosed = 0;
 
     @Override
     public void init() {
         leftDrivePair = hardwareMap.dcMotor.get("leftdrive");
         rightDrivePair = hardwareMap.dcMotor.get("rightdrive");
         noodler = hardwareMap.dcMotor.get("noodler");
+        armTilter = hardwareMap.dcMotor.get("armTilter");
+        liftStageOne = hardwareMap.dcMotor.get("liftOne");
+        liftStageTwo = hardwareMap.dcMotor.get("liftTwo");
 
         rightDrivePair.setDirection(DcMotor.Direction.REVERSE);
 
-        liftServo = hardwareMap.servo.get("lift");
-        dumpServo1 = hardwareMap.servo.get("dump1");
-        dumpServo2 = hardwareMap.servo.get("dump2");
-        climber = hardwareMap.servo.get("climber");
+        allClearSignal = hardwareMap.servo.get("allClear");
+        leftBallRelease = hardwareMap.servo.get("leftDump");
+        rightBallRelease = hardwareMap.servo.get("rightDump");
     }
 
     @Override
@@ -51,7 +41,9 @@ public class TeleOp extends OpMode {
 
         double leftPower = scaleInput(-gamepad1.left_stick_y);
         double rightPower = scaleInput(-gamepad1.right_stick_y);
-        if(driveInverted) {
+        ballRelease.setPosition(90);
+
+        if (driveInverted) {
             double temp = -leftPower;
             leftPower = -rightPower;
             rightPower = temp;
@@ -60,66 +52,80 @@ public class TeleOp extends OpMode {
         leftDrivePair.setPower(leftPower);
         rightDrivePair.setPower(rightPower);
 
-        if(gamepad1.right_trigger > 0.1)
-            noodler.setPower(-1*scaleInput(gamepad1.right_trigger));
-        else if(gamepad1.left_bumper)
-            noodler.setPower(NOODLER_POWER/2);
-        else if(gamepad1.right_bumper)
-            noodler.setPower(NOODLER_POWER);
-        else
-            noodler.setPower(0);
+//        if(gamepad1.right_trigger > 0.1)
+//            noodler.setPower(-1*scaleInput(gamepad1.right_trigger));
+//        else if(gamepad1.left_bumper)
+//            noodler.setPower(NOODLER_POWER/2);                            noodler stuff
+//        else if(gamepad1.right_bumper)
+//            noodler.setPower(NOODLER_POWER);
+//        else
+//            noodler.setPower(0);
 
-        if(gamepad1.b && !bWasDown) {
+
+        if (gamepad1.b && !bWasDown) {
             driveInverted = !driveInverted;
             bWasDown = true;
-        }
-        else if(!gamepad1.b) {
+        } else if (!gamepad1.b) {
             bWasDown = false;
         }
 
-        if(gamepad2.b)
-            climber.setPosition(0);
+        if (gamepad1.right_trigger >= .1)
+            noodler.setPower(gamepad1.right_trigger);
+        else if (gamepad1.left_trigger >= .1)
+            noodler.setPower(-gamepad1.left_trigger);
         else
-            climber.setPosition(1);
+            noodler.setPower(0);
 
-        if(gamepad2.dpad_up)
-            liftServoPosition += LIFT_DELTA_UP;
-        else if(gamepad2.dpad_down)
-            liftServoPosition -= LIFT_DELTA_DOWN;
 
-        if (gamepad2.a) {
-            if(gamepad2.left_bumper || gamepad2.right_bumper)
-                dumpServoPosition = DUMP_SPEED_FORWARDS_SLOW;
-            else
-                dumpServoPosition = DUMP_SPEED_FORWARDS;
-        }
-        else if (gamepad2.y) {
-            if(gamepad2.left_bumper || gamepad2.right_bumper)
-                dumpServoPosition = DUMP_SPEED_REVERSE_SLOW;
-            else
-                dumpServoPosition = DUMP_SPEED_REVERSE;
-        }
-        else if(liftServoPosition > 0.4)
-            dumpServoPosition = 0.48;
+        if (gamepad2.dpad_up)
+            armTilter.setPower(-.4);
+        else if (gamepad2.dpad_down)
+            armTilter.setPower(.4);
         else
-            dumpServoPosition = 0.5;
+            armTilter.setPower(0);
 
-        liftServoPosition = Range.clip(liftServoPosition, LIFT_MIN_RANGE, LIFT_MAX_RANGE);
 
-        liftServo.setPosition(liftServoPosition);
-        setDumpServos(dumpServoPosition);
+        if (gamepad2.left_trigger <= .1)
+            liftStageOne.setPower(gamepad2.left_trigger);
+        else if(gamepad2.left_bumper)
+            liftStageOne.setPower(-1);
+        else
+            liftStageOne.setPower(0);
 
-        telemetry.addData("liftServoPosition", liftServoPosition);
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (gamepad2.right_trigger <= .1)
+            liftStageTwo.setPower(gamepad2.right_trigger);
+        else if(gamepad2.right_bumper)
+            liftStageTwo.setPower(-1);
+        else
+            liftStageTwo.setPower(0);
+
+        if (gamepad1.dpad_left)
+            allClearSignal.setPosition(1);
+        else if (gamepad1.dpad_right)
+            allClearSignal.setPosition(0);
+        else
+            allClearSignal.setPosition(.5);
+
+        if(gamepad2.x) {
+            if (closed == 0) {
+                leftBallRelease.setPosition(90);
+                closed--;
+            }
+            else
+                leftBallRelease.setPosition(0);
+                closed++;
         }
-    }
 
-    public void setDumpServos(double pos) {
-        dumpServo1.setPosition(pos);
-        dumpServo2.setPosition(1.0 - pos);
+        if(gamepad2.b) {
+            if (rightClosed == 0) {
+                rightBallRelease.setPosition(90);
+                rightClosed--;
+            }
+            else
+                rightBallRelease.setPosition(0);
+            rightClosed++;
+        }
+
     }
 
     /*

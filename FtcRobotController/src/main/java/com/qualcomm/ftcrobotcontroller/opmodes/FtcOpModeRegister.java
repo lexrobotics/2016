@@ -59,18 +59,10 @@ public class FtcOpModeRegister implements OpModeRegister {
      */
         manager.register("NullOp", NullOp.class);
 
-        manager.register("ColorSweep", ColorSweep.class);
 //        manager.register("UltraSonic", UltraSonicOpMode.class);
 //        manager.register("Gyro", GyroSensorOpMode.class);
 //        manager.register("NullOp", NullOp.class);
         manager.register("TeleOp", TeleOp.class);
-        manager.register("ScrimmageAuto", ScrimmageAuto.class);
-        manager.register("SensorStateOpMode", SensorStateOpMode.class);
-        manager.register("TurnWithEncoder", TurnWithEncoder.class);
-        manager.register("MoveStraight", MoveStraight.class);
-        manager.register("ClimberDrop", ClimberDrop.class);
-        manager.register("Meet1ReverseAuto", Meet1ReverseAuto.class);
-        manager.register("GyroTester", GyroTest.class);
 
     }
 }
