@@ -30,7 +30,7 @@ public class Meet1ReverseAuto extends LinearOpMode {
 
         waitForStart();
 
-//        hardwareMap.dcMotor.get("noodler").setPower(-0.4); // turns on the harvester
+        hardwareMap.dcMotor.get("noodler").setPower(-0.4); // turns on the harvester
 
         TwoWheelDrive dave_train = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
                 hardwareMap.dcMotor.get("rightdrive"), false, 4);
@@ -63,7 +63,7 @@ public class Meet1ReverseAuto extends LinearOpMode {
 //        Thread.sleep(500);
 
 
-        dave.setPosition("climber", 5);
+        dave.setPosition("climber", 0);
 
         while (opModeIsActive() && !(Thread.currentThread().isInterrupted())){
             telemetry.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra", 60));
