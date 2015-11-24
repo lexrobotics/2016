@@ -23,7 +23,7 @@ public class TeleOp extends OpMode {
 
     DcMotor leftDrivePair, rightDrivePair;
     DcMotor noodler;
-    Servo dumpServo1, dumpServo2, liftServo;
+    Servo dumpServo1, dumpServo2, liftServo, climber;
 
     boolean driveInverted = false;
     boolean bWasDown = false;
@@ -41,6 +41,7 @@ public class TeleOp extends OpMode {
         liftServo = hardwareMap.servo.get("lift");
         dumpServo1 = hardwareMap.servo.get("dump1");
         dumpServo2 = hardwareMap.servo.get("dump2");
+        climber = hardwareMap.servo.get("climber");
     }
 
     @Override
@@ -50,7 +51,6 @@ public class TeleOp extends OpMode {
 
         double leftPower = scaleInput(-gamepad1.left_stick_y);
         double rightPower = scaleInput(-gamepad1.right_stick_y);
-
         if(driveInverted) {
             double temp = -leftPower;
             leftPower = -rightPower;
@@ -61,9 +61,11 @@ public class TeleOp extends OpMode {
         rightDrivePair.setPower(rightPower);
 
         if(gamepad1.right_trigger > 0.1)
-            noodler.setPower(scaleInput(gamepad1.right_trigger));
+            noodler.setPower(-1*scaleInput(gamepad1.right_trigger));
+        else if(gamepad1.left_bumper)
+            noodler.setPower(NOODLER_POWER/2);
         else if(gamepad1.right_bumper)
-            noodler.setPower(NOODLER_REVERSE_POWER);
+            noodler.setPower(NOODLER_POWER);
         else
             noodler.setPower(0);
 
@@ -74,6 +76,11 @@ public class TeleOp extends OpMode {
         else if(!gamepad1.b) {
             bWasDown = false;
         }
+
+        if(gamepad2.b)
+            climber.setPosition(0);
+        else
+            climber.setPosition(1);
 
         if(gamepad2.dpad_up)
             liftServoPosition += LIFT_DELTA_UP;
