@@ -124,7 +124,7 @@ public class TwoWheelDrive implements DriveTrain {
         while (Robot.waiter.opModeIsActive()) {
             prevReading = currReading;
             currReading = (int)Robot.state.getSensorReading(name);
-            sum += angleDist(prevReading, currReading);
+            sum += 1 * angleDist(prevReading, currReading);
             int offset = Math.abs(degrees) - Math.abs(sum);
             //if (offset < 10) {
             //    leftMotor.setPower(power * offset / -10);
@@ -137,6 +137,8 @@ public class TwoWheelDrive implements DriveTrain {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+            Robot.tel.addData("Gyro", Robot.state.getSensorReading("hero"));
         }
         leftMotor.setPower(0);
         rightMotor.setPower(0);
