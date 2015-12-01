@@ -12,7 +12,7 @@ public class TeleOp extends OpMode {
 
     DcMotor leftDrivePair, rightDrivePair;
     DcMotor noodler, armTilter, liftStageOne, liftStageTwo;
-    Servo allClearSignal, leftBallRelease, rightBallRelease;
+    Servo allClearSignal, ballRelease;
 
     boolean driveInverted = false;
     boolean bWasDown = false;
@@ -27,11 +27,10 @@ public class TeleOp extends OpMode {
         liftStageOne = hardwareMap.dcMotor.get("liftOne");
         liftStageTwo = hardwareMap.dcMotor.get("liftTwo");
 
-        rightDrivePair.setDirection(DcMotor.Direction.REVERSE);
+//        rightDrivePair.setDirection(DcMotor.Direction.REVERSE);
 
         allClearSignal = hardwareMap.servo.get("allClear");
-        leftBallRelease = hardwareMap.servo.get("leftDump");
-        rightBallRelease = hardwareMap.servo.get("rightDump");
+        ballRelease = hardwareMap.servo.get("ballRelease");
     }
 
     @Override
@@ -41,7 +40,7 @@ public class TeleOp extends OpMode {
 
         double leftPower = scaleInput(-gamepad1.left_stick_y);
         double rightPower = scaleInput(-gamepad1.right_stick_y);
-        ballRelease.setPosition(90);
+//        ballRelease.setPosition(90);
 
         if (driveInverted) {
             double temp = -leftPower;
@@ -85,14 +84,14 @@ public class TeleOp extends OpMode {
             armTilter.setPower(0);
 
 
-        if (gamepad2.left_trigger <= .1)
-            liftStageOne.setPower(gamepad2.left_trigger);
+        if (gamepad2.left_trigger >= .1)
+            liftStageOne.setPower(-gamepad2.left_trigger);
         else if(gamepad2.left_bumper)
-            liftStageOne.setPower(-1);
+            liftStageOne.setPower(1);
         else
             liftStageOne.setPower(0);
 
-        if (gamepad2.right_trigger <= .1)
+        if (gamepad2.right_trigger >= .1)
             liftStageTwo.setPower(gamepad2.right_trigger);
         else if(gamepad2.right_bumper)
             liftStageTwo.setPower(-1);
@@ -107,24 +106,21 @@ public class TeleOp extends OpMode {
             allClearSignal.setPosition(.5);
 
         if(gamepad2.x) {
-            if (closed == 0) {
-                leftBallRelease.setPosition(90);
-                closed--;
-            }
-            else
-                leftBallRelease.setPosition(0);
-                closed++;
+            ballRelease.setPosition(0.5);
         }
-
-        if(gamepad2.b) {
-            if (rightClosed == 0) {
-                rightBallRelease.setPosition(90);
-                rightClosed--;
-            }
-            else
-                rightBallRelease.setPosition(0);
-            rightClosed++;
+        else {
+            ballRelease.setPosition(0);
         }
+//
+//        if(gamepad2.b) {
+//            if (rightClosed == 0) {
+//                rightBallRelease.setPosition(90);
+//                rightClosed--;
+//            }
+//            else
+//                rightBallRelease.setPosition(0);
+//            rightClosed++;
+//        }
 
     }
 
