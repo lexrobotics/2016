@@ -1,5 +1,7 @@
 package lib;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
@@ -115,33 +117,61 @@ public class TwoWheelDrive implements DriveTrain {
         return absDist;
     }
 
-    public void turnWithGyro(double power, int degrees, String name) {
-        int prevReading = (int)Robot.state.getSensorReading(name);
-        int currReading = prevReading;
-        int sum = 0;
-        leftMotor.setPower(-power);
-        rightMotor.setPower(power);
-        while (Robot.waiter.opModeIsActive()) {
-            prevReading = currReading;
-            currReading = (int)Robot.state.getSensorReading(name);
-            sum += 1 * angleDist(prevReading, currReading);
-            int offset = Math.abs(degrees) - Math.abs(sum);
-            //if (offset < 10) {
-            //    leftMotor.setPower(power * offset / -10);
-            //    rightMotor.setPower(power * offset / 10);
-            //}
-            if (offset <= 0)
-                break;
+    public void turnWithGyro(int degrees, String name) {
+//        PID turnPID = new PID(.010,.02,0,true, 0.1);
+//        PID turnPID = new PID(.02,0.02,0,true, 0.1,20); // 0.003
+        PID turnPID = new PID(.031,0,0.05,true, 0.1); // 0.003
+
+        //need target thresh
+        turnPID.setTarget(degrees);
+        turnPID.setMaxOutput(1);
+        turnPID.setMinOutput(-1);
+        double update;
+        while (Robot.waiter.opModeIsActive()&& !turnPID.isAtTarget()) {
+            update = turnPID.update(Robot.state.getSensorReading(name));
+            Robot.tel.addData("update: ", update);
+            Robot.tel.addData("integral: ", turnPID.getITerm());
+            Robot.tel.addData("gyro: ", Robot.state.getSensorReading(name));
+            Log.i("PID", String.format("update: %f, integral: %f, gyro: %f", update, turnPID.getITerm(), Robot.state.getSensorReading(name)));
+            leftMotor.setPower(scaleInput(update));
+            rightMotor.setPower(scaleInput(-update));
             try {
-                Thread.sleep(1);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-            Robot.tel.addData("Gyro", Robot.state.getSensorReading("hero"));
         }
         leftMotor.setPower(0);
         rightMotor.setPower(0);
+    }
+
+    double scaleInput(double dVal)  {
+        double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
+                0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
+
+        // get the corresponding index for the scaleInput array.
+        int index = (int) (dVal * 16.0);
+
+        // index should be positive.
+        if (index < 0) {
+            index = -index;
+        }
+
+        // index cannot exceed size of array minus 1.
+        if (index > 16) {
+            index = 16;
+        }
+
+        // get value from the array.
+        double dScale = 0.0;
+        if (dVal < 0) {
+            dScale = -scaleArray[index];
+        } else {
+            dScale = scaleArray[index];
+        }
+
+        // return scaled value.
+        return dScale;
     }
 
     /*

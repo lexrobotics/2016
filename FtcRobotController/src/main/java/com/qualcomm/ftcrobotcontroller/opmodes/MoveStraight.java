@@ -28,7 +28,7 @@ public class MoveStraight extends LinearOpMode {
 
             TwoWheelDrive drivetrain = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,
                     hardwareMap.dcMotor.get("rightdrive"), false, 4);
-            drivetrain.move(-0.25F, "hero", this);
+            drivetrain.turnWithGyro(90, "hero");
             while (opModeIsActive()){
                 telemetry.addData("Gyro reading", Robot.state.getSensorReading("hero"));
             }

@@ -20,6 +20,7 @@ public class PID {
 
     private double iTerm;
     private double prevError;
+    private double prevOutput;
 
     private ElapsedTime timer;
 
@@ -39,7 +40,7 @@ public class PID {
         this.targetThresh = targetThresh;
         this.iCap = iCap;
         this.target = 0;
-        timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+        timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         reset();
     }
 
@@ -48,15 +49,20 @@ public class PID {
         double error = target - current;
         if(prevError == -1)
             prevError = error;
-        iTerm += error * dt;
+
+        if(prevOutput < maxOutput/2 && prevOutput > minOutput/2);
+            iTerm += error * dt;
+
         if(iCap != -1)
             iTerm = Range.clip(iTerm, -1*iCap, iCap);
 
         double dTerm = (error - prevError)/dt;
 
-        double output = Kp * error + Ki * iTerm - Kd * dTerm;
+        double output = Kp * error + Kd * (dt/(error - prevError));
+//        double output = Kp * error + Ki * iTerm + Kd * dTerm;
         output = Range.clip(output, minOutput, maxOutput);
 
+        prevOutput = output;
         if(reversed)
             output *= -1;
 
@@ -84,6 +90,10 @@ public class PID {
 
         this.maxOutput = maxOutput;
         return true;
+    }
+
+    public double getITerm() {
+        return iTerm;
     }
 
     public void setTarget(double target) {
