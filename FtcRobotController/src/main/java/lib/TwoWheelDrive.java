@@ -5,6 +5,8 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import static java.lang.Thread.*;
 
@@ -117,26 +119,53 @@ public class TwoWheelDrive implements DriveTrain {
         return absDist;
     }
 
-    public void turnWithGyro(int degrees, String name) {
+    public void turnWithGyro(int degrees, String name, GyroSensor jiro) {
 //        PID turnPID = new PID(.010,.02,0,true, 0.1);
 //        PID turnPID = new PID(.02,0.02,0,true, 0.1,20); // 0.003
-        PID turnPID = new PID(.031,0,0.05,true, 0.1); // 0.003
+        PID turnPID = new PID(100,0.1,0.0,true, 0.1); // 0.003
+        PID speedPID = new PID(0.05, 0, 0, false, 0);
 
         //need target thresh
         turnPID.setTarget(degrees);
-        turnPID.setMaxOutput(1);
-        turnPID.setMinOutput(-1);
-        double update;
-        while (Robot.waiter.opModeIsActive()&& !turnPID.isAtTarget()) {
-            update = turnPID.update(Robot.state.getSensorReading(name));
-            Robot.tel.addData("update: ", update);
-            Robot.tel.addData("integral: ", turnPID.getITerm());
-            Robot.tel.addData("gyro: ", Robot.state.getSensorReading(name));
-            Log.i("PID", String.format("update: %f, integral: %f, gyro: %f", update, turnPID.getITerm(), Robot.state.getSensorReading(name)));
-            leftMotor.setPower(scaleInput(update));
-            rightMotor.setPower(scaleInput(-update));
+        turnPID.setMaxOutput(5000);
+        turnPID.setMinOutput(-5000);
+        speedPID.setMaxOutput(0.4);
+        speedPID.setMinOutput(-0.4);
+
+        double initDistance = degrees - Robot.state.getSensorReading(name);
+        double error;
+        double maxSpeed = 1;
+        double minSpeed = 0.2;
+        double base = 1.5;
+        double centerC = 0.5;
+
+        double prevReading;
+        double power;
+        double angle = Robot.state.getSensorReading(name);
+        prevReading = angle;
+        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+
+
+//        while (Robot.waiter.opModeIsActive()&& !turnPID.isAtTarget()) {
+          while(Robot.waiter.opModeIsActive()) {
+              double dt = timer.time(); // get time since last update
+              angle = Robot.state.getSensorReading(name);
+
+//            speed = turnPID.update(Robot.state.getSensorReading(name));
+              speedPID.setTarget(10);
+               power = speedPID.update((angle-prevReading)/dt);
+              prevReading =angle;
+              Robot.tel.addData("power ", power);
+              Robot.tel.addData("rot ", (angle-prevReading)/dt);
+              Robot.tel.addData("dt ", dt);
+
+
+//            Log.i("PID", String.format("update: %f, integral: %f, gyro: %f", update, turnPID.getITerm(), Robot.state.getSensorReading(name)));
+            leftMotor.setPower(Range.clip(0.5 + power, -1, 1));
+            rightMotor.setPower(Range.clip(-(0.5 + power), -1, 1));
+              timer.reset();
             try {
-                Thread.sleep(50);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

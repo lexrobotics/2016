@@ -71,6 +71,8 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("ClimberDrop", ClimberDrop.class);
         manager.register("Meet1ReverseAuto", Meet1ReverseAuto.class);
         manager.register("GyroTester", GyroTest.class);
+        manager.register("UltraPIDTEST", UltraPIDTEST.class);
+
 
     }
 }

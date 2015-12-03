@@ -78,14 +78,20 @@ public class Robot {
     }
 
     public void tillSenseTowards(String sensorName, int servoPosition, double power, int distance, int filterlength) {
-        ultraservohelper.setPosition(sensorName,servoPosition);
+        PID ultraPID = new PID(0.05, 0.005, 0, false,0.1);
+        ultraPID.setTarget(distance);
+        ultraPID.setMinOutput(-1);
+        ultraPID.setMaxOutput(1);
+        ultraservohelper.setPosition(sensorName, servoPosition);
         try {
             Thread.sleep(400);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        drivetrain.move(power);
-        while(state.getAvgSensorData(sensorName,filterlength) >= distance && waiter.opModeIsActive()){
+        while(!ultraPID.isAtTarget() && waiter.opModeIsActive()){
+            power = ultraPID.update(state.getAvgSensorData(sensorName, filterlength));
+            drivetrain.move(power);
+
             Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName, filterlength));
             try{
                 Thread.sleep(10);

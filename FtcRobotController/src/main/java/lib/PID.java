@@ -50,7 +50,7 @@ public class PID {
         if(prevError == -1)
             prevError = error;
 
-        if(prevOutput < maxOutput/2 && prevOutput > minOutput/2);
+        if(prevOutput < maxOutput/2 && prevOutput > minOutput/2)
             iTerm += error * dt;
 
         if(iCap != -1)
@@ -58,8 +58,7 @@ public class PID {
 
         double dTerm = (error - prevError)/dt;
 
-        double output = Kp * error + Kd * (dt/(error - prevError));
-//        double output = Kp * error + Ki * iTerm + Kd * dTerm;
+        double output = Kp * error + Ki * iTerm + Kd * dTerm;
         output = Range.clip(output, minOutput, maxOutput);
 
         prevOutput = output;
