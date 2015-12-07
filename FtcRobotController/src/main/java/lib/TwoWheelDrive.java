@@ -113,9 +113,10 @@ public class TwoWheelDrive implements DriveTrain {
 
     public double angleDist(double deg1, double deg2)
     {
-        double absDist = (360.0 + deg2 - deg1) % 360.0;
-        if (absDist > 180.0)
-            absDist -= 360.0;
+
+        double absDist = (360 + deg2 - deg1) % 360;
+        if (absDist > 180)
+            absDist -= 360;
         return absDist;
     }
 
@@ -136,18 +137,19 @@ public class TwoWheelDrive implements DriveTrain {
         speedPID.setMaxOutput(0.1);
         speedPID.setMinOutput(-0.1);
 
-        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         double prevReading;
-        double currentSpeed;
+        double reading = Robot.state.getSensorReading(name);
+
+        double power = 0.5;
+        double rot = 0.0;
+        double speed = 0;
         double time;
         double angle;
-        double power=0.5;
-
+        double currentSpeed;
         Filter filter = new Filter(20);
 
-        angle = Robot.state.getSensorReading(name);
-        timer.reset();
-        prevReading = angle;
+        prevReading = reading;
+        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
         while(Robot.waiter.opModeIsActive() && !turnPID.isAtTarget()) {
             time = timer.time();
@@ -171,6 +173,7 @@ public class TwoWheelDrive implements DriveTrain {
 
             try {
                 Thread.sleep(25);
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
