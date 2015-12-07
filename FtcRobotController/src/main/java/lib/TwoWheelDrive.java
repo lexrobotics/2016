@@ -111,9 +111,9 @@ public class TwoWheelDrive implements DriveTrain {
         }
     }
 
-    public int angleDist(int deg1, int deg2)
+    public double angleDist(double deg1, double deg2)
     {
-        int absDist = (360 + deg2 - deg1) % 360;
+        double absDist = (360 + deg2 - deg1) % 360;
         if (absDist > 180)
             absDist -= 360;
         return absDist;
@@ -122,50 +122,61 @@ public class TwoWheelDrive implements DriveTrain {
     public void turnWithGyro(int degrees, String name, GyroSensor jiro) {
 //        PID turnPID = new PID(.010,.02,0,true, 0.1);
 //        PID turnPID = new PID(.02,0.02,0,true, 0.1,20); // 0.003
-        PID turnPID = new PID(100,0.1,0.0,true, 0.1); // 0.003
-        PID speedPID = new PID(0.05, 0, 0, false, 0);
+        PID turnPID = new PID(2, 0.01, 0); // 0.003
+        PID speedPID = new PID(0.0075, 0.000, 0);
 
         //need target thresh
         turnPID.setTarget(degrees);
-        turnPID.setMaxOutput(5000);
-        turnPID.setMinOutput(-5000);
-        speedPID.setMaxOutput(0.4);
-        speedPID.setMinOutput(-0.4);
+        turnPID.setMaxOutput(100);
+        turnPID.setMinOutput(-100);
+        speedPID.setMaxOutput(0.5);
+        speedPID.setMinOutput(-0.5);
 
-        double initDistance = degrees - Robot.state.getSensorReading(name);
-        double error;
-        double maxSpeed = 1;
-        double minSpeed = 0.2;
-        double base = 1.5;
-        double centerC = 0.5;
+        int maxReadings = 20;
+        double[] readings = new double[maxReadings];
+        int index = 0;
 
         double prevReading;
+        double reading = Robot.state.getSensorReading(name);
+
         double power;
-        double angle = Robot.state.getSensorReading(name);
-        prevReading = angle;
+        double rot = 0.0;
+        double speed = 0;
+
+        prevReading = reading;
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
 
-//        while (Robot.waiter.opModeIsActive()&& !turnPID.isAtTarget()) {
-          while(Robot.waiter.opModeIsActive()) {
+        while (Robot.waiter.opModeIsActive()&& !turnPID.isAtTarget()) {
               double dt = timer.time(); // get time since last update
-              angle = Robot.state.getSensorReading(name);
+              reading = Robot.state.getSensorReading(name);
+              speed = angleDist(prevReading, reading)/dt;
+              readings[index] = speed;
+              index = (index + 1) % maxReadings;
 
-//            speed = turnPID.update(Robot.state.getSensorReading(name));
-              speedPID.setTarget(10);
-               power = speedPID.update((angle-prevReading)/dt);
-              prevReading =angle;
+              double targetspeed = turnPID.update(reading);
+              speedPID.setTarget(targetspeed);
+              rot *= (double) maxReadings;
+              rot += speed;
+              rot -= readings[(index ) % maxReadings];
+              rot /= (double) maxReadings;
+              power = speedPID.update(rot);
+
               Robot.tel.addData("power ", power);
-              Robot.tel.addData("rot ", (angle-prevReading)/dt);
+              Robot.tel.addData("speed", speed);
+              Robot.tel.addData("rot ", rot);
+              Robot.tel.addData("angle ", reading);
+              Robot.tel.addData("prevReading ", prevReading);
               Robot.tel.addData("dt ", dt);
+            Robot.tel.addData("targetspeed ", targetspeed);
 
+            prevReading = reading;
 
-//            Log.i("PID", String.format("update: %f, integral: %f, gyro: %f", update, turnPID.getITerm(), Robot.state.getSensorReading(name)));
-            leftMotor.setPower(Range.clip(0.5 + power, -1, 1));
-            rightMotor.setPower(Range.clip(-(0.5 + power), -1, 1));
+            leftMotor.setPower(Range.clip(-0.5 - power, -1, 1));
+            rightMotor.setPower(Range.clip((0.5 + power), -1, 1));
               timer.reset();
             try {
-                Thread.sleep(1);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
