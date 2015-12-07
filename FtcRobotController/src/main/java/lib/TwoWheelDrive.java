@@ -111,65 +111,71 @@ public class TwoWheelDrive implements DriveTrain {
         }
     }
 
-    public int angleDist(int deg1, int deg2)
+    public double angleDist(double deg1, double deg2)
     {
-        int absDist = (360 + deg2 - deg1) % 360;
-        if (absDist > 180)
-            absDist -= 360;
+        double absDist = (360.0 + deg2 - deg1) % 360.0;
+        if (absDist > 180.0)
+            absDist -= 360.0;
         return absDist;
     }
 
+    public double speedScale(double currentSpeed, double error, double scalar){
+        return currentSpeed + error*scalar;
+    }
+
     public void turnWithGyro(int degrees, String name, GyroSensor jiro) {
-//        PID turnPID = new PID(.010,.02,0,true, 0.1);
-//        PID turnPID = new PID(.02,0.02,0,true, 0.1,20); // 0.003
-        PID turnPID = new PID(100,0.1,0.0,true, 0.1); // 0.003
-        PID speedPID = new PID(0.05, 0, 0, false, 0);
+
+//        PID turnPID = new PID(0.05, 0, 0, true, 0); // 0.003
+        PID turnPID = new PID(2, 0, 0.35, true, 1); // 0.003
+        PID speedPID = new PID(0.0005, 0, 0.0001, false, 0);
 
         //need target thresh
         turnPID.setTarget(degrees);
-        turnPID.setMaxOutput(5000);
-        turnPID.setMinOutput(-5000);
-        speedPID.setMaxOutput(0.4);
-        speedPID.setMinOutput(-0.4);
+        turnPID.setMaxOutput(80);
+        turnPID.setMinOutput(-80);
+        speedPID.setMaxOutput(0.1);
+        speedPID.setMinOutput(-0.1);
 
-        double initDistance = degrees - Robot.state.getSensorReading(name);
-        double error;
-        double maxSpeed = 1;
-        double minSpeed = 0.2;
-        double base = 1.5;
-        double centerC = 0.5;
-
-        double prevReading;
-        double power;
-        double angle = Robot.state.getSensorReading(name);
-        prevReading = angle;
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+        double prevReading;
+        double currentSpeed;
+        double time;
+        double angle;
+        double power=0.5;
 
+        Filter filter = new Filter(20);
 
-//        while (Robot.waiter.opModeIsActive()&& !turnPID.isAtTarget()) {
-          while(Robot.waiter.opModeIsActive()) {
-              double dt = timer.time(); // get time since last update
-              angle = Robot.state.getSensorReading(name);
+        angle = Robot.state.getSensorReading(name);
+        timer.reset();
+        prevReading = angle;
 
-//            speed = turnPID.update(Robot.state.getSensorReading(name));
-              speedPID.setTarget(10);
-               power = speedPID.update((angle-prevReading)/dt);
-              prevReading =angle;
-              Robot.tel.addData("power ", power);
-              Robot.tel.addData("rot ", (angle-prevReading)/dt);
-              Robot.tel.addData("dt ", dt);
+        while(Robot.waiter.opModeIsActive() && !turnPID.isAtTarget()) {
+            time = timer.time();
 
+            angle = Robot.state.getSensorReading(name);
+            currentSpeed = angleDist(angle , prevReading)/time;
+            filter.update(currentSpeed);
+            power += speedPID.update(filter.getAvg());
+            power = Range.clip(power, -1, 1);
+            speedPID.setTarget(turnPID.update(angle));
+            leftMotor.setPower(power);
+            rightMotor.setPower(-power);
 
-//            Log.i("PID", String.format("update: %f, integral: %f, gyro: %f", update, turnPID.getITerm(), Robot.state.getSensorReading(name)));
-            leftMotor.setPower(Range.clip(0.5 + power, -1, 1));
-            rightMotor.setPower(Range.clip(-(0.5 + power), -1, 1));
-              timer.reset();
+            Robot.tel.addData("angle", Robot.state.getSensorReading(name));
+            Robot.tel.addData("speed",filter.getAvg());
+            Robot.tel.addData("pid", speedPID.update(filter.getAvg()));
+            Robot.tel.addData("power", power);
+
+            prevReading = angle;
+            timer.reset();
+
             try {
-                Thread.sleep(1);
+                Thread.sleep(25);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
         leftMotor.setPower(0);
         rightMotor.setPower(0);
     }
