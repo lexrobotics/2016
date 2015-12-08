@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 /**
  * Created by luke on 10/28/15.
  */
-public class MovementThread implements Runnable{
+public class MovementThread implements Runnable {
 
     private double expectedHeading, actualHeading;
     private DriveTrain drivetrain;
@@ -20,11 +20,13 @@ public class MovementThread implements Runnable{
     private double scalingfactor;
 
 
-    public MovementThread (DriveTrain drivetrain, String gyro_name, int expectedHeading, LinearOpMode waiter) {
+    public MovementThread (DriveTrain drivetrain, String gyro_name, int expectedHeading, LinearOpMode waiter, double power) {
         this.drivetrain = drivetrain;
         this.gyro_name = gyro_name;
-        this.power = 0;
+        this.power = power;
         this.waiter = waiter;
+        minthresh = 1;
+        turnthresh = 10;
     }
 
     public synchronized void setPower(double power){
@@ -40,54 +42,63 @@ public class MovementThread implements Runnable{
         }
     }
 
+    public int angleDist(int deg1, int deg2)
+    {
+        int absDist = (360 + deg2 - deg1) % 360;
+        if (absDist > 180)
+            absDist -= 360;
+        return absDist;
+    }
+
     @Override
     public void run() {
-//        drivetrain.setLeftMotors(power);
-//        drivetrain.setRightMotors(power);
         double motorPower;
+        synchronized(this) {
+            motorPower = this.power;
+        }
+        drivetrain.setLeftMotors(motorPower);
+        drivetrain.setRightMotors(motorPower);
 
         while (!Thread.currentThread().isInterrupted() && waiter.opModeIsActive()) {
-            synchronized(this){
+            synchronized(this) {
                 motorPower = this.power;
             }
 
-            try{
+            try {
                 actualHeading = Robot.state.getSensorReading(gyro_name);
-                Robot.tel.addData("Gyro heading", actualHeading);
+                int offset = angleDist((int)actualHeading, (int)expectedHeading);
 
-                if (Math.abs(actualHeading - expectedHeading)>minthresh && Math.abs(actualHeading - expectedHeading)<turnthresh){
-                    double scalar = (actualHeading - expectedHeading)/360;
-
-                    // Scale down the scalar's distance from 1
-                    scalar = 1 - (1 - scalar) * scalingfactor;
-
-                    // Scale down the power's distance from 1
-                    double left_power = Math.signum(motorPower) * (1 - (1 - Math.abs(motorPower))) * scalar;
-                    double right_power = motorPower * scalar;
-
-                    // switch if necessary. I don't actually know what the correct case is, so this might be wrong.
-                     if (actualHeading > expectedHeading){
-                         double temp = left_power;
-                         left_power = right_power;
-                         right_power = temp;
-                     }
-
-                    drivetrain.setLeftMotors(left_power);
-                    drivetrain.setRightMotors(right_power);
-                }
-                else if((actualHeading - expectedHeading)>turnthresh){
-                    while(Math.abs(actualHeading - expectedHeading)>minthresh) {
-                        drivetrain.setRightMotors(motorPower * Math.signum(actualHeading - expectedHeading));
-                        drivetrain.setLeftMotors(motorPower * Math.signum(actualHeading - expectedHeading) * -1);
+                if (Math.abs(offset) > minthresh && Math.abs(offset) < turnthresh) {
+                    if (offset > 0) {
+                        drivetrain.setLeftMotors(motorPower * 0.1);
+                        drivetrain.setRightMotors(1 - (1 - motorPower) * 0.1);
+                    }
+                    else {
+                        drivetrain.setLeftMotors(1 - (1 - motorPower) * 0.1);
+                        drivetrain.setRightMotors(motorPower * 0.1);
                     }
                 }
-                else{
+                else if (Math.abs(offset) > turnthresh) {
+
+                    Thread.sleep(200);
+
+                    while (Math.abs(offset) > minthresh && waiter.opModeIsActive()) {
+                        Robot.tel.addData("IN TURNING", "");
+                        actualHeading = Robot.state.getSensorReading(gyro_name);
+                        offset = angleDist((int)actualHeading, (int)expectedHeading);
+                        drivetrain.setLeftMotors((1 - (1 - motorPower) * 0.1) * Math.signum(offset) * -1);
+                        drivetrain.setRightMotors((1 - (1 - motorPower) * 0.1) * Math.signum(offset));
+
+                        Thread.sleep(1);
+                    }
+                    Thread.sleep(200);
+                }
+                else {
                     drivetrain.setLeftMotors(motorPower);
                     drivetrain.setRightMotors(motorPower);
                 }
-
-                Thread.sleep(10);
-            } catch (InterruptedException ex){
+                Thread.sleep(1);
+            } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
                 break;
             }

@@ -12,7 +12,7 @@ public class TeleOp extends OpMode {
 
     DcMotor leftDrivePair, rightDrivePair;
     DcMotor noodler, armTilter, liftStageOne, liftStageTwo;
-    Servo allClearSignal, ballRelease;
+    Servo allClearSignal, ballRelease, doodler;
 
     boolean driveInverted = false;
     boolean bWasDown = false;
@@ -29,8 +29,9 @@ public class TeleOp extends OpMode {
 
 //        rightDrivePair.setDirection(DcMotor.Direction.REVERSE);
 
-        allClearSignal = hardwareMap.servo.get("allClear");
+//        allClearSignal = hardwareMap.servo.get("allClear");
         ballRelease = hardwareMap.servo.get("ballRelease");
+        doodler = hardwareMap.servo.get("doodler");
     }
 
     @Override
@@ -70,8 +71,8 @@ public class TeleOp extends OpMode {
 
         if (gamepad1.right_trigger >= .1)
             noodler.setPower(gamepad1.right_trigger);
-        else if (gamepad1.left_trigger >= .1)
-            noodler.setPower(-gamepad1.left_trigger);
+        else if (gamepad1.right_bumper)
+            noodler.setPower(-1);
         else
             noodler.setPower(0);
 
@@ -99,17 +100,17 @@ public class TeleOp extends OpMode {
             liftStageTwo.setPower(0);
 
         if (gamepad1.dpad_left)
-            allClearSignal.setPosition(1);
+            doodler.setPosition(1);
         else if (gamepad1.dpad_right)
-            allClearSignal.setPosition(0);
+            doodler.setPosition(0);
         else
-            allClearSignal.setPosition(.5);
+            doodler.setPosition(.5);
 
         if(gamepad2.x) {
-            ballRelease.setPosition(0.5);
+            ballRelease.setPosition(0);
         }
         else {
-            ballRelease.setPosition(0);
+            ballRelease.setPosition(1);
         }
 //
 //        if(gamepad2.b) {
