@@ -17,10 +17,13 @@ public class PID {
     private double target;
     private double minOutput;
     private double maxOutput;
+    private double iThresh;
 
     private double iTerm;
     private double prevError;
     private double prevOutput;
+
+    private int atTarget;
 
     private ElapsedTime timer;
 
@@ -33,6 +36,10 @@ public class PID {
     }
 
     public PID(double Kp, double Ki, double Kd, boolean reversed, double targetThresh, double iCap) {
+        this(Kp, Ki, Kd, reversed, targetThresh, -1, -1);
+    }
+
+    public PID(double Kp, double Ki, double Kd, boolean reversed, double targetThresh, double iCap, double iThresh) {
         this.Kp = Kp;
         this.Ki = Ki;
         this.Kd = Kd;
@@ -40,6 +47,8 @@ public class PID {
         this.targetThresh = targetThresh;
         this.iCap = iCap;
         this.target = 0;
+        this.atTarget = 0;
+        this.iThresh = iThresh;
         timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         reset();
     }
@@ -49,10 +58,14 @@ public class PID {
         double error = target - current;
         if(prevError == -1)
             prevError = error;
-
-        if(prevOutput < maxOutput/2 && prevOutput > minOutput/2)
+        if(iThresh != -1 && Math.abs(error) <= iThresh ) {
+            if (prevOutput < maxOutput && prevOutput > minOutput) {
+                iTerm += error * dt;
+            }
+        }
+        else if (iThresh == -1) {
             iTerm += error * dt;
-
+        }
         if(iCap != -1)
             iTerm = Range.clip(iTerm, -1*iCap, iCap);
 
@@ -101,8 +114,18 @@ public class PID {
     }
 
     public boolean isAtTarget() {
+        return isAtTarget(1);
+    }
+
+    public boolean isAtTarget(int count) {
         if(prevError == -1)
             return false;
-        return (targetThresh >= Math.abs(prevError));
+
+        if(targetThresh >= Math.abs(prevError))
+            atTarget++;
+        else
+            atTarget = 0;
+
+        return (atTarget >= count);
     }
 }

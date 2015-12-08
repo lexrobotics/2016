@@ -14,5 +14,7 @@ public interface DriveTrain {
     public void setRightMotors(double power);
     public void resetEncoders();
     public int getEncoders();
+    public double getActualHeading(String name);
+    public double getExpectedHeading();
 //    public void moveWithCorrection(double power);
 }

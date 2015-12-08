@@ -11,6 +11,7 @@ public class FourWheelDrive implements DriveTrain{
     private DcMotor frontLeftMotor, frontRightMotor,
                     backLeftMotor, backRightMotor;
     private double wheel_circumference;
+    private double expectedHeading = 420;
 
     public FourWheelDrive (DcMotor frontLeftMotor, boolean frontLeftRev,
                            DcMotor frontRightMotor, boolean frontRightRev,
@@ -69,6 +70,13 @@ public class FourWheelDrive implements DriveTrain{
 
     }
 
+    public double getExpectedHeading() {
+        return expectedHeading;
+    }
+
+    public double getActualHeading(String name) {
+        return Robot.state.getSensorReading(name);
+    }
     public void resetEncoders(){}
     public int getEncoders(){return 0;}
 

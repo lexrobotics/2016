@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
  */
 public class MovementThread implements Runnable {
 
-    private double expectedHeading, actualHeading;
     private DriveTrain drivetrain;
     private String gyro_name;
     private double power;
@@ -65,8 +64,8 @@ public class MovementThread implements Runnable {
             }
 
             try {
-                actualHeading = Robot.state.getSensorReading(gyro_name);
-                int offset = angleDist((int)actualHeading, (int)expectedHeading);
+                int offset = angleDist((int)drivetrain.getActualHeading(gyro_name),
+                        (int)drivetrain.getExpectedHeading());
 
                 if (Math.abs(offset) > minthresh && Math.abs(offset) < turnthresh) {
                     if (offset > 0) {
@@ -84,8 +83,8 @@ public class MovementThread implements Runnable {
 
                     while (Math.abs(offset) > minthresh && waiter.opModeIsActive()) {
                         Robot.tel.addData("IN TURNING", "");
-                        actualHeading = Robot.state.getSensorReading(gyro_name);
-                        offset = angleDist((int)actualHeading, (int)expectedHeading);
+                        offset = angleDist((int)drivetrain.getActualHeading(gyro_name),
+                                (int)drivetrain.getExpectedHeading());
                         drivetrain.setLeftMotors((1 - (1 - motorPower) * 0.1) * Math.signum(offset) * -1);
                         drivetrain.setRightMotors((1 - (1 - motorPower) * 0.1) * Math.signum(offset));
 
