@@ -53,7 +53,7 @@ public class ClimberDrop extends LinearOpMode {
         Thread.sleep(500);
         dave.drivetrain.moveDistance(-0.3, 35); // moves forward along diagonal
         Thread.sleep(500);
-        dave.tillSenseTowards("frontUltra", 160, -0.2, 13, 10); // tillSense
+        dave.tillSense("frontUltra", 160, -0.2, 13, 10); // tillSense
         Thread.sleep(500);
         dave.ultraservohelper.setPosition("frontUltra", FRONT_CENTER);
         dave.ultraservohelper.setPosition("rearUltra", REAR_CENTER);

@@ -35,10 +35,15 @@ public class GyroTest extends LinearOpMode {
 
         TwoWheelDrive dave_train = new TwoWheelDrive(hardwareMap.dcMotor.get("leftdrive"), true,
                 hardwareMap.dcMotor.get("rightdrive"), false, 4);
-        while(opModeIsActive()) {
-            dave_train.turnWithGyro(90, "hero", hardwareMap.gyroSensor.get("hero"));
-            dave_train.moveDistance(0.5,10);
-
+//        while (opModeIsActive()){
+//            telemetry.addData("reading", Robot.state.getSensorReading("hero"));
+//            Thread.sleep(10);
+//        }
+        for (int i=0; i<10;i++) {
+            if(!opModeIsActive())
+                break;
+            dave_train.turnWithGyro(180, "hero", hardwareMap.gyroSensor.get("hero"));
+//            dave_train.moveDistance(-0.5,10);
         }
 //        Thread.sleep(2000);
 //

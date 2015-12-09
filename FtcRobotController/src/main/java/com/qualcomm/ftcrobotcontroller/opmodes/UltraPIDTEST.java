@@ -44,7 +44,7 @@ public class UltraPIDTEST extends LinearOpMode {
         dave.registerUltrasonicServo("frontUltra", "frontSwivel");
         dave.registerUltrasonicServo("rearUltra", "rearSwivel");
 
-        dave.tillSenseTowards("frontUltra", FRONT_CENTER + 90, -0.3, 30, 10);
+        dave.tillSense("frontUltra", FRONT_CENTER + 90, -0.3, 30, 10);
         Thread.sleep(500);
 
 

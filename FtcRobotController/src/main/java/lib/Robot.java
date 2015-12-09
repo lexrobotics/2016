@@ -77,7 +77,7 @@ public class Robot {
         }
     }
 
-    public void tillSenseTowards(String sensorName, int servoPosition, double power, int distance, int filterlength) {
+    public void tillSense(String sensorName, int servoPosition, double power, int distance, int filterlength) {
         PID ultraPID = new PID(0.05, 0.005, 0, false,0.1);
         ultraPID.setTarget(distance);
         ultraPID.setMinOutput(-1);
@@ -141,24 +141,7 @@ public class Robot {
         drivetrain.move(0);
 
     }
-    public void tillSenseAway(String sensorName,int servoPosition, double power, int distance, int filterlength){
-        ultraservohelper.setPosition(sensorName,servoPosition);
-        try {
-            Thread.sleep(400);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        drivetrain.move(power);
-        while(state.getAvgSensorData(sensorName,filterlength) <= distance && waiter.opModeIsActive()){
-            Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName, filterlength));
-            try{
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        drivetrain.move(0);
-    }
+
 
     // This just gets the color reading from the color sensor. We can really only use it in one way,
     // so it doesn't really need its own class.

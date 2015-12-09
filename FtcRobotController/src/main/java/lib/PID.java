@@ -84,6 +84,36 @@ public class PID {
         return output;
     }
 
+    public double updateWithError(double error) {
+        double dt = timer.time(); // get time since last update
+        if(prevError == -1)
+            prevError = error;
+        if(iThresh != -1 && Math.abs(error) <= iThresh ) {
+            if (prevOutput < maxOutput && prevOutput > minOutput) {
+                iTerm += error * dt;
+            }
+        }
+        else if (iThresh == -1) {
+            iTerm += error * dt;
+        }
+        if(iCap != -1)
+            iTerm = Range.clip(iTerm, -1*iCap, iCap);
+
+        double dTerm = (error - prevError)/dt;
+
+//        Robot.tel.addData("" + Kp * error + "")
+        double output = Kp * error + Ki * iTerm + Kd * dTerm;
+        output = Range.clip(output, minOutput, maxOutput);
+
+        prevOutput = output;
+        if(reversed)
+            output *= -1;
+
+        prevError = error;
+        timer.reset(); // reset timer and start counting time till next update
+        return output;
+    }
+
     public void reset() {
         iTerm = 0;
         prevError = -1;

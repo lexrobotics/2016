@@ -98,6 +98,7 @@ public class TwoWheelDrive implements DriveTrain {
         while (Math.abs(getEncoders()) < distance && Robot.waiter.opModeIsActive()) {
 
         }
+        stopMove();
 
         leftMotor.setPower(0);
         rightMotor.setPower(0);
@@ -142,12 +143,12 @@ public class TwoWheelDrive implements DriveTrain {
         // near perfect
         PID turnPID = new PID(1.6, 0, 0, true, 1.1);
 //        PID turnPID = new PID(2, 0.15, 0.35, true, 1, 0.75, 5);
-        PID speedPID = new PID(0.0007, 0, 0.0002, false, 0);
-        degrees= ((360 - degrees) + 360) % 360;
+        PID speedPID = new PID(0.00071, 0, 0.0002, false, 0);
+        degrees= ((360 - (int)expectedHeading) + 360) % 360;
 
         turnPID.setTarget(degrees);
-        turnPID.setMaxOutput(100);
-        turnPID.setMinOutput(-100);
+        turnPID.setMaxOutput(75);
+        turnPID.setMinOutput(-75);
         speedPID.setMaxOutput(0.1);
         speedPID.setMinOutput(-0.1);
         double prevReading;
@@ -170,7 +171,7 @@ public class TwoWheelDrive implements DriveTrain {
             currentSpeed = angleDist(angle , prevReading)/time;
             filter.update(currentSpeed);
 
-            angVel = turnPID.update(angle);
+            angVel = turnPID.updateWithError(angleDist(angle,degrees));
             if(Math.abs(angVel) < 3) {
                 speedPID.setTarget(Math.signum(angVel)*3);
             }

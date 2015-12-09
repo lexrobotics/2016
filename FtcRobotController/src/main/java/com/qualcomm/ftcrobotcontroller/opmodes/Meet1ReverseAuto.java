@@ -46,13 +46,13 @@ public class Meet1ReverseAuto extends LinearOpMode {
 
         Thread.sleep(500);
         dave.drivetrain.moveDistance(-0.4, 10);
-        dave.tillSenseAway("rearUltra", REAR_CENTER - 90, -0.4, 45, 10);
+        dave.tillSense("rearUltra", REAR_CENTER - 90, -0.4, 45, 10);
 //        Thread.sleep(500);
         dave.drivetrain.moveDistance(-0.4, 3);
         Thread.sleep(500);
         dave.drivetrain.turnWithEncoders(-0.4, 90);
         Thread.sleep(500);
-        dave.tillSenseTowards("frontUltra", FRONT_CENTER + 90, -0.3, 10, 10);
+        dave.tillSense("frontUltra", FRONT_CENTER + 90, -0.3, 10, 10);
         Thread.sleep(500);
         dave.drivetrain.turnWithEncoders(0.4, 85);
         Thread.sleep(500);
