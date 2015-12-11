@@ -362,7 +362,8 @@ public class SensorState implements Runnable{
                         sen.usPin.setState(true);
                         Thread.sleep(0, 20);
                         sen.usPin.setState(true);
-                        value = ((5.0 / 1023.0) / 0.00977) * ((AnalogInput) sen.sensor).getValue();
+                        //(5.0 / 1023.0) / 0.00977) ▼
+                        value = (0.50026463999) * ((AnalogInput) sen.sensor).getValue();
                         Thread.sleep(0, 20);
 
                         return value;
@@ -450,10 +451,11 @@ public class SensorState implements Runnable{
 
                                 case ULTRASONIC:
                                     // Convert from raw voltage to
-//                                    sen.usPin.setState(true);
-//                                    Thread.sleep(0, 20);
-//                                    sen.usPin.setState(false);
-                                    value = ((5.0/1023.0)/0.00977) * ((AnalogInput) sen.sensor).getValue();
+                                    sen.usPin.setState(true);
+                                    Thread.sleep(0, 20);
+                                    sen.usPin.setState(false);
+                                    //(5.0 / 1023.0) / 0.00977) ▼
+                                    value = (0.50026463999) * ((AnalogInput) sen.sensor).getValue();
                                     updateArray(key, value);
 //                                    Thread.sleep(0, 20);
                                     break;
