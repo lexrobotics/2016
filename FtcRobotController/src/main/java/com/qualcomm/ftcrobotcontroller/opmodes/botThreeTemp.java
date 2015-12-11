@@ -36,21 +36,157 @@ public class botThreeTemp extends OpMode{
         //arm extend
 
         leftDrivePair.setPower(-gamepad1.left_stick_y);
-        rightDrivePair.setPower(-gamepad1.right_stick_y);
+        rightDrivePair.setPower(-gamepad1.right_
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                stick_y);
 
         if(gamepad1.right_trigger > 0.1)
-            armExtend.setPower(-1 * (gamepad1.right_trigger));
+            armExtend.setPower(-1);
         else if(gamepad1.right_bumper)
-            armExtend.setPower(gamepad1.right_trigger);
+            armExtend.setPower(1);
         else
             armExtend.setPower(0);
 
         //arm angle
 
         if(gamepad1.left_trigger > 0.1)
-            armAngle.setPower(-1 * (gamepad1.left_trigger));
+            armAngle.setPower(-1);
         else if(gamepad1.left_bumper)
-            armAngle.setPower(gamepad1.left_trigger);
+            armAngle.setPower(1);
         else
             armAngle.setPower(0);
     }
