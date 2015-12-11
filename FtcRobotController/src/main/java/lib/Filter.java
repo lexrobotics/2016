@@ -11,9 +11,7 @@ public class Filter {
     private int index;
     private int stdevs;
 
-
     private boolean filled;
-
 
     public Filter(int size){
         data = new double[size];
@@ -40,6 +38,7 @@ public class Filter {
         }
         return Math.sqrt((squareSum) / (nums.length - 1));
     }
+
     private void addToAverage(double val){
         data[index] = val;
         if (index == size - 1) {
@@ -54,6 +53,7 @@ public class Filter {
         avg += val;
         avg /= size;
     }
+
     public void update(double val){
         if (stdevs >-1) {
 
@@ -70,9 +70,21 @@ public class Filter {
         return filled;
     }
 
-    public double getAvg(){
-        return avg;
-    }
-    public double getLastValue(){ return data[size-1]; }
+    public double getAvg(){ return avg; }
 
+    public double getLastValue(){
+        return data[(index - 1 + size) % size];
+    }
+
+    public Filter clone(){
+        Filter new_filter = new Filter(size);
+        new_filter.avg = avg;
+        new_filter.size = size;
+        new_filter.index = index;
+        new_filter.stdevs = stdevs;
+        new_filter.filled = filled;
+
+        new_filter.data = data.clone();
+        return new_filter;
+    }
 }
