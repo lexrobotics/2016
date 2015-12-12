@@ -8,26 +8,31 @@ public class Filter {
     private double avg;
 
     private int size;
-    private int index;
+    private int index;  // always points to the location of the most recent value
     private int stdevs;
+    private int filter_length;
 
+    // Describes whether filter_length values have been collected yet, so the average will be meaningful.
     private boolean filled;
 
     public Filter(int size){
-        data = new double[size];
-        filled = false;
-        index = 0;
-        this.stdevs = -1;
-
-        this.size = size;
+        this(size, -1, size);
     }
 
     public Filter(int size, int stdevs){
+        this(size, stdevs, size);
+    }
+
+    public Filter(int size, int stdevs, int filter_length){
+        assert(filter_length <= size);
+
         data = new double[size];
         filled = false;
         index = 0;
-        this.stdevs = stdevs;
+        avg = 0;
 
+        this.stdevs = stdevs;
+        this.filter_length = filter_length;
         this.size = size;
     }
 
@@ -40,18 +45,20 @@ public class Filter {
     }
 
     private void addToAverage(double val){
-        data[index] = val;
-        if (index == size - 1) {
-            filled = true;
-        }
+        int oldest_index = (index + 1 + size - filter_length) % size;
+
+        avg *= filter_length;
+        avg -= data[oldest_index];
+        avg += val;
+        avg /= filter_length;
 
         index++;
         index %= size;
+        data[index] = val;
 
-        avg *= size;
-        avg -= data[index];
-        avg += val;
-        avg /= size;
+        if (index == filter_length - 1) {
+            filled = true;
+        }
     }
 
     public void update(double val){
@@ -66,11 +73,46 @@ public class Filter {
         }
     }
 
+    public void changeFilter_length(int fl){
+        if (fl == filter_length)
+            return;
+
+        assert(fl <= size);
+
+        avg *= filter_length;
+        int sign, from, to;
+        int dist = Math.abs(filter_length - fl);
+
+        // If the new length is more than the previous, we need to add new values. Otherwise, we need to subtract.
+        // Will change from "from" to "to" inclusive
+        if (fl > filter_length){
+            sign = 1;
+            from = (index - filter_length + 1 - dist + size) % size;
+            to = (index - filter_length) % size;
+        }
+        else {
+            sign = -1;
+            from = (index - filter_length + 1) % size;
+            to = (index - fl) % size;
+        }
+
+        for (int i = from; i != to; i++){
+            if (i >= size)
+                i %= size;
+            avg += data[i] * sign;
+        }
+
+        filter_length = fl;
+        avg /= filter_length;
+    }
+
     public boolean isFilled(){
         return filled;
     }
 
     public double getAvg(){ return avg; }
+
+    public double[] getData(){ return data; }
 
     public double getLastValue(){
         return data[(index - 1 + size) % size];
