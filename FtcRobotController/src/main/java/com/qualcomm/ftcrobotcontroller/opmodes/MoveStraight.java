@@ -23,7 +23,7 @@ public class MoveStraight extends LinearOpMode {
 
             waitForStart();
 
-            while (Robot.state.calibrating("hero")){
+            while (Robot.state.gyroIsCalibrating("hero")){
             }
 
             TwoWheelDrive drivetrain = new TwoWheelDrive(   hardwareMap.dcMotor.get("leftdrive"), true,

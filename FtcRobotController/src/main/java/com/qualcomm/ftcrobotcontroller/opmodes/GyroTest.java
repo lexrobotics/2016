@@ -28,7 +28,7 @@ public class GyroTest extends LinearOpMode {
         state_thread.start();
 
         waitForStart();
-        while (Robot.state.calibrating("hero")){
+        while (Robot.state.gyroIsCalibrating("hero")){
             x = "calibrated";
             Robot.tel.addData("Reading", "");
         }

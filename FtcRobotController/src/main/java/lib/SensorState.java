@@ -15,8 +15,9 @@ Never try reading gyro values until it's calibrated.
 Some of the private functions don't need to be synchronized only because they are only ever called from run()
 NEVER make them public. Very sneaky things could follow.
 The ColorSensors get their own functions. Don't try to use the general-purpose ones for color.
-Early in the program, remember that not all of the array will be filled, so don't try to get long averages.
+Early in the program, remember that not all of the filter array will be filled, so the averages will start near zero.
 Remember to delete SensorData objects you get to avoid leaks.  (Actually that's probably handled by garbage collection)
+Also, NEVER EVER return an actual filter object being used in the SensorState. only return clones, to avoid synchronization issues.
  */
 
 //New system: all of our data is in a filter. Colors become ints before they go in, and we get the colors back with a Sensorstate function
@@ -24,7 +25,6 @@ Remember to delete SensorData objects you get to avoid leaks.  (Actually that's 
 
 /**
  * TODO:
- *  - Rolling averages
  *  - Find out whether the getter functions need delays to not block run()
  *  - Exponential averages
  *  - Investigate problem of volatility:
@@ -205,8 +205,19 @@ public class SensorState implements Runnable{
     /**
      * Returns true if the given gyro is currently calibrating, and therefore can't give good values.
      */
-    public boolean gyroIsCalibrating(String gyro_name){
+    public synchronized boolean gyroIsCalibrating(String gyro_name){
         return ((GyroSensor)sensorContainers.get(gyro_name).sensor).isCalibrating();
+    }
+
+    /**
+     * Returns true if all the values of the filter array have been filled, allowing averaging.
+     */
+    public synchronized boolean filterIsFilled(String name){
+        return sensorContainers.get(name).filter.isFilled();
+    }
+
+    public synchronized void changeFilterLength(String name, int fl){
+        sensorContainers.get(name).filter.changeFilter_length(fl);
     }
 
     /**

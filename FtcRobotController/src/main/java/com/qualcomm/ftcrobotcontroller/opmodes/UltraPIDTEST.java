@@ -49,8 +49,8 @@ public class UltraPIDTEST extends LinearOpMode {
 
 
         while (opModeIsActive() && !(Thread.currentThread().isInterrupted())){
-            telemetry.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra", 60));
-            telemetry.addData("rearAvg", Robot.state.getAvgSensorData("rearUltra", 60));
+            telemetry.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra"));
+            telemetry.addData("rearAvg", Robot.state.getAvgSensorData("rearUltra"));
             telemetry.addData("frontReading", Robot.state.getSensorReading("frontUltra"));
             telemetry.addData("rearReading", Robot.state.getSensorReading("rearUltra"));
 

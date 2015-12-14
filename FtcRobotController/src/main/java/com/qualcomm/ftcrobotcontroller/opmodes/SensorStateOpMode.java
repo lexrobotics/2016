@@ -1,4 +1,5 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import lib.Filter;
 import lib.Robot;
@@ -8,38 +9,38 @@ import lib.SensorState;
  * Created by luke on 10/27/15.
  */
 
-public class SensorStateOpMode extends OpMode {
+public class SensorStateOpMode extends LinearOpMode {
     private Filter filter;
     private Thread state_thread;
 
-    @Override
-    public void loop(){
+    public void runOpMode() throws InterruptedException{
+        Robot.state = new SensorState(hardwareMap, 1, 0);
+        Robot.state.registerSensor("color", SensorState.SensorType.COLOR, true, 60);
+        Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 60);
+        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 60);
+        Robot.state.setUltrasonicPin("ultraToggle");
+
+        state_thread = new Thread(Robot.state);
+        state_thread.start();
+
+        //Start loop
+        while (Robot.state.gyroIsCalibrating("hero")){
+            Thread.sleep(10);
+            telemetry.addData("calibrating", "");
+        }
+        Thread.sleep(60);
+
         filter  = Robot.state.getFilter("rearUltra");
-        telemetry.addData("Filter val", filter.getAvg());
-        telemetry.addData("Color name", Robot.state.getSensorsFromType(SensorState.SensorType.COLOR)[0]);
-        telemetry.addData("Calibrating", Robot.state.gyroIsCalibrating("hero"));
+        telemetry.addData("Filter_val", filter.getAvg());
+        telemetry.addData("Color_name", Robot.state.getSensorsFromType(SensorState.SensorType.COLOR)[0]);
         telemetry.addData("Color", Robot.state.getColorData("mr"));
         telemetry.addData("Distance", Robot.state.getSensorReading("rearUltra"));
         telemetry.addData("Distance_Avg", Robot.state.getAvgSensorData("rearUltra"));
-        filter  = Robot.state.getFilter("rearUltra");
-
         try {
             Thread.sleep(10);
         } catch (InterruptedException ex){
 
         }
-    }
-
-    @Override
-    public void init(){
-        Robot.state = new SensorState(hardwareMap, 1, 0);
-        Robot.state.registerSensor("color", SensorState.SensorType.COLOR, true, 60);
-        Robot.state.registerSensor("ultra", SensorState.SensorType.ULTRASONIC, true, 60);
-        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 60);
-        Robot.state.setUltrasonicPin("usPin");
-
-        state_thread = new Thread(Robot.state);
-        state_thread.start();
     }
 }
 

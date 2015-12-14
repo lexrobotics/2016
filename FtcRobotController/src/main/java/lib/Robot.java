@@ -89,10 +89,10 @@ public class Robot {
             e.printStackTrace();
         }
         while(!ultraPID.isAtTarget() && waiter.opModeIsActive()){
-            power = ultraPID.update(state.getAvgSensorData(sensorName, filterlength));
+            power = ultraPID.update(state.getAvgSensorData(sensorName));
             drivetrain.move(power);
 
-            Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName, filterlength));
+            Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName));
             try{
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -106,12 +106,12 @@ public class Robot {
         double diff;
         int count =0;
         do{
-            tel.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra", 60));
-            tel.addData("rearAvg", Robot.state.getAvgSensorData("rearUltra", 60));
+            tel.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra"));
+            tel.addData("rearAvg", Robot.state.getAvgSensorData("rearUltra"));
             tel.addData("frontReading", Robot.state.getSensorReading("frontUltra"));
             tel.addData("rearReading", Robot.state.getSensorReading("rearUltra"));
 
-            diff = (state.getAvgSensorData(sensorNameA, filterlength) - state.getAvgSensorData(sensorNameB,filterlength));
+            diff = (state.getAvgSensorData(sensorNameA) - state.getAvgSensorData(sensorNameB));
             if(Math.signum(diff) == 1 && count==0){
                 drivetrain.setLeftMotors(-power);
                 drivetrain.setRightMotors(power);
@@ -199,11 +199,11 @@ public class Robot {
 //            }
 //        }
 
-        average = state.getAvgSensorData(lightname, 10);
+        average = state.getAvgSensorData(lightname);
 
 
         while (waiter.opModeIsActive()) {
-            reading = state.getAvgSensorData(lightname, 10);
+            reading = state.getAvgSensorData(lightname);
             tel.addData("Reading", reading);
             tel.addData("Average", average);
 
