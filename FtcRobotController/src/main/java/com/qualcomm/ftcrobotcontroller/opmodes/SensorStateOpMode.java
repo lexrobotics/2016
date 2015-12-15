@@ -23,6 +23,8 @@ public class SensorStateOpMode extends LinearOpMode {
         state_thread = new Thread(Robot.state);
         state_thread.start();
 
+        waitForStart();
+
         //Start loop
         while (Robot.state.gyroIsCalibrating("hero")){
             Thread.sleep(10);

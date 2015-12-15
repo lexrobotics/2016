@@ -9,6 +9,31 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.HashMap;
 
+/**
+ * public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER }
+ * public enum ColorType{ RED, BLUE, WHITE, CLEAR, NONE;
+     * public static int toInt(ColorType c)
+     * public static int[] toInt(ColorType[] c)
+     * public static ColorType toColor(int i){
+     * public static ColorType[] toColor(int[] i)
+ * }
+ *
+ * public SensorState(HardwareMap hmap, int milli_interval, int nano_interval)
+ * public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length)
+ * public void setUltrasonicPin(String pin_name)
+ * public boolean gyroIsCalibrating(String gyro_name)
+ * public synchronized ColorType getColorData(String name)
+ * public synchronized double getSensorReading(String name)
+ * public synchronized void changeUpdateStatus(String name, boolean update)
+ * public synchronized Filter getFilter(String name)
+ * public synchronized double getAvgSensorData(String name)
+ * public synchronized String[] getSensorsFromType(SensorType type)
+ * public synchronized boolean filterIsFilled(String name)
+ * public synchronized void changeFilterLength(String name, int fl)
+ * public void run()
+ * */
+
+
 /*
 PRECAUTIONS:
 Never try reading gyro values until it's calibrated.
