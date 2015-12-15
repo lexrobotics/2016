@@ -81,26 +81,31 @@ public class Filter {
 
         avg *= filter_length;
         int sign, from, to;
-        int dist = Math.abs(filter_length - fl);
 
         // If the new length is more than the previous, we need to add new values. Otherwise, we need to subtract.
         // Will change from "from" to "to" inclusive
         if (fl > filter_length){
             sign = 1;
-            from = (index - filter_length + 1 - dist + size) % size;
-            to = (index - filter_length) % size;
+            from = (index - fl + 1 + size) % size;
+            to = (index - filter_length + size) % size;
         }
         else {
             sign = -1;
-            from = (index - filter_length + 1) % size;
-            to = (index - fl) % size;
+            from = (index - filter_length + 1 + size) % size;
+            to = (index - fl + size) % size;
         }
+//
+//        while (Robot.waiter.opModeIsActive()){
+//            Robot.tel.addData("from: " + from + "to", to );
+//            Robot.tel.addData("size: " + size + " old_fl: " + filter_length + " index: " + index, "");
+//        }
 
         for (int i = from; i != to; i++){
             if (i >= size)
                 i %= size;
             avg += data[i] * sign;
         }
+        avg += data[to] * sign;
 
         filter_length = fl;
         avg /= filter_length;

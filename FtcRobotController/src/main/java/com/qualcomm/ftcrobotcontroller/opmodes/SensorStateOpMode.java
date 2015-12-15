@@ -14,9 +14,11 @@ public class SensorStateOpMode extends LinearOpMode {
     private Thread state_thread;
 
     public void runOpMode() throws InterruptedException{
+        Robot dave = new Robot(hardwareMap, telemetry, this);
+
         Robot.state = new SensorState(hardwareMap, 1, 0);
-        Robot.state.registerSensor("color", SensorState.SensorType.COLOR, true, 60);
-        Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 60);
+        Robot.state.registerSensor("mr", SensorState.SensorType.COLOR, true, 60);
+        Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 2000);
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 60);
         Robot.state.setUltrasonicPin("ultraToggle");
 
@@ -31,18 +33,22 @@ public class SensorStateOpMode extends LinearOpMode {
             telemetry.addData("calibrating", "");
         }
         Thread.sleep(60);
+        Robot.state.changeFilterLength("rearUltra", 10);
 
-        filter  = Robot.state.getFilter("rearUltra");
-        telemetry.addData("Filter_val", filter.getAvg());
-        telemetry.addData("Color_name", Robot.state.getSensorsFromType(SensorState.SensorType.COLOR)[0]);
-        telemetry.addData("Color", Robot.state.getColorData("mr"));
-        telemetry.addData("Distance", Robot.state.getSensorReading("rearUltra"));
-        telemetry.addData("Distance_Avg", Robot.state.getAvgSensorData("rearUltra"));
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException ex){
-
+        while (opModeIsActive()) {
+            filter = Robot.state.getFilter("rearUltra");
+            telemetry.addData("Filter_val", filter.getAvg());
+            telemetry.addData("Distance_Avg", Robot.state.getAvgSensorData("rearUltra"));
+//            telemetry.addData("Color_name", Robot.state.getSensorsFromType(SensorState.SensorType.COLOR)[0]);
+//            telemetry.addData("Color", Robot.state.getColorData("mr"));
+            telemetry.addData("Distance", Robot.state.getSensorReading("rearUltra"));
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                break;
+            }
         }
+        state_thread.interrupt();
     }
 }
 

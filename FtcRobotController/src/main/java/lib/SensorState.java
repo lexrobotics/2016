@@ -315,6 +315,8 @@ public class SensorState implements Runnable{
      *
      * @return          The most dominant color visible, as a SensorState.ColorType
      */
+
+    //should be private, no synch
     private ColorType getDominantColor(SensorContainer sen) {
         ColorSensor sen_obj = (ColorSensor) sen.sensor;
         int r = sen_obj.red(), b = sen_obj.blue(), g = sen_obj.green();

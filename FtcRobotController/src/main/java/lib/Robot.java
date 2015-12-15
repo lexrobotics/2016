@@ -34,7 +34,6 @@ public class Robot {
     public static LinearOpMode waiter;
 
     public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
-
         this.hmap = hmap;
         this.tel = tel;
         this.servos = new HashMap<String, Servo>();
