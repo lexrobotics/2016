@@ -26,15 +26,11 @@ public class MeetTwoPath extends LinearOpMode {
                 hardwareMap.dcMotor.get("rightdrive"), false, 4);
 
         dave.registerDriveTrain(dave_train);
-        dave.registerUltrasonicServo("frontUltra", "frontSwivel");
         DcMotor noodler = hardwareMap.dcMotor.get("noodler");
 
         Robot.state = new SensorState(hardwareMap, 1, 0);
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
-        Robot.state.registerSensor("mr", SensorState.SensorType.COLOR, false, 12);
-        Robot.state.registerSensor("mrs", SensorState.SensorType.LIGHT, true, 12);
-        Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 50);
-        Robot.state.registerSensor("frontUltra", SensorState.SensorType.ULTRASONIC, true, 50);
+
 
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         timer.reset();
