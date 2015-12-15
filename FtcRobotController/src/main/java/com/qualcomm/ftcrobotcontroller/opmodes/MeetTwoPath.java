@@ -54,11 +54,12 @@ public class MeetTwoPath extends LinearOpMode {
 
         noodler.setPower(1.0);
         dave_train.moveDistanceWithCorrections(.5, 135);
+        noodler.setPower(-1.0);
 
-        while (timer.time() < 20){
+        while (timer.time() < 25){
             Thread.sleep(10);
         }
-        noodler.setPower(-1);
+        noodler.setPower(0);
 
         state_thread.interrupt();
     }
