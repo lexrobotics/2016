@@ -1,10 +1,9 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.LightSensor;
-import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.util.Timer;
 
 import lib.Robot;
 import lib.SensorState;
@@ -16,8 +15,19 @@ import lib.TwoWheelDrive;
 public class MeetTwoPath extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
+
+        /************
+         * INITIALIZE
+         ***********/
+
         Robot dave = new Robot(hardwareMap, telemetry, this); // makes Robot "dave"
-        String x = "NOT CALIBRATED";
+
+        TwoWheelDrive dave_train = new TwoWheelDrive(hardwareMap.dcMotor.get("leftdrive"), true,
+                hardwareMap.dcMotor.get("rightdrive"), false, 4);
+
+        dave.registerDriveTrain(dave_train);
+        dave.registerUltrasonicServo("frontUltra", "frontSwivel");
+        DcMotor noodler = hardwareMap.dcMotor.get("noodler");
 
         Robot.state = new SensorState(hardwareMap, 1, 0);
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
@@ -25,24 +35,30 @@ public class MeetTwoPath extends LinearOpMode {
         Robot.state.registerSensor("mrs", SensorState.SensorType.LIGHT, true, 12);
         Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 50);
         Robot.state.registerSensor("frontUltra", SensorState.SensorType.ULTRASONIC, true, 50);
+
+        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+        timer.reset();
+
         Thread state_thread = new Thread(Robot.state);
         state_thread.start();
 
         waitForStart();
+
+        /******
+         * LOOP
+         *****/
+
         while (Robot.state.calibrating("hero")) {
-            x = "calibrated";
-            Robot.tel.addData("Reading", "");
+            Robot.tel.addData("Reading", "CALIBRATING");
         }
 
-        TwoWheelDrive dave_train = new TwoWheelDrive(hardwareMap.dcMotor.get("leftdrive"), true,
-                hardwareMap.dcMotor.get("rightdrive"), false, 4);
+        noodler.setPower(1.0);
+        dave_train.moveDistanceWithCorrections(.5, 135);
 
-        dave.registerDriveTrain(dave_train);
-        dave.registerUltrasonicServo("frontUltra", "frontSwivel");
-
-        //movement//
-
-        dave_train.moveDistanceWithCorrections(.5, 60);
+        while (timer.time() < 20){
+            Thread.sleep(10);
+        }
+        noodler.setPower(-1);
 
         state_thread.interrupt();
     }
