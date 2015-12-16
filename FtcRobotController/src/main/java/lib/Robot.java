@@ -1,15 +1,8 @@
 package lib;
 import android.util.Log;
 
-import com.qualcomm.ftcrobotcontroller.opmodes.ColorSweep;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.LightSensor;
-import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import java.util.HashMap;
