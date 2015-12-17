@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.util.Range;
 
+import lib.FourWheelDrive;
 import lib.Robot;
 import lib.SensorState;
 import lib.TwoWheelDrive;
@@ -18,8 +19,11 @@ public class MeetTwoPath extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Robot dave = new Robot(hardwareMap, telemetry, this); // makes Robot "dave"
 
-        TwoWheelDrive dave_train = new TwoWheelDrive(hardwareMap.dcMotor.get("leftdrive"), true,
-                hardwareMap.dcMotor.get("rightdrive"), false, 4);
+        FourWheelDrive dave_train = new FourWheelDrive(hardwareMap.dcMotor.get("leftFront"), true,
+                hardwareMap.dcMotor.get("rightFront"), false,
+                hardwareMap.dcMotor.get("leftRear"), true,
+                hardwareMap.dcMotor.get("rightRear"), false,
+                4);
 
         dave.registerDriveTrain(dave_train);
 
@@ -27,6 +31,6 @@ public class MeetTwoPath extends LinearOpMode {
 
         //movement//
 
-        dave_train.moveDistance(0.5, 60);
+        dave_train.moveDistance(0.5, 65);
     }
 }

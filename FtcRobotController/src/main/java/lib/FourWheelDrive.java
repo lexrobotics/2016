@@ -28,6 +28,8 @@ public class FourWheelDrive implements DriveTrain{
         if (frontRightRev) frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
         if (backLeftRev) backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         if (backRightRev) backRightMotor.setDirection(DcMotor.Direction.REVERSE);
+
+        resetEncoders();
     }
 
     @Override
@@ -54,15 +56,20 @@ public class FourWheelDrive implements DriveTrain{
         // 1120 ticks in the encoder
         distance = (distance/wheel_circumference) * 1120;
 
-        while ((backLeftMotor.getCurrentPosition() +
+        while (Math.abs(backLeftMotor.getCurrentPosition() +
                 backRightMotor.getCurrentPosition() +
                 frontLeftMotor.getCurrentPosition() +
-                frontRightMotor.getCurrentPosition()) / 4 > distance){
+                frontRightMotor.getCurrentPosition()) / 4 < distance){
             backLeftMotor.setPower(power);
             backRightMotor.setPower(power);
             frontLeftMotor.setPower(power);
             frontRightMotor.setPower(power);
         }
+        backLeftMotor.setPower(0);
+        backRightMotor.setPower(0);
+        frontLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+
     }
 
     @Override

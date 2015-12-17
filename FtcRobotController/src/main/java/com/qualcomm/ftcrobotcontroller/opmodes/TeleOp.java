@@ -17,7 +17,6 @@ public class TeleOp extends OpMode {
 
     boolean driveInverted = false;
     boolean bWasDown = false;
-    int closed = 0, rightClosed = 0;
 
     @Override
     public void init() {
@@ -37,6 +36,11 @@ public class TeleOp extends OpMode {
         divider = hardwareMap.servo.get("divider");
         rightZipline = hardwareMap.servo.get("rightClimber");
         leftZipline = hardwareMap.servo.get("leftClimber");
+
+        noodler.setPower(0);
+        armTilter.setPower(0);
+        liftStageOne.setPower(0);
+        liftStageTwo.setPower(0);
     }
 
     @Override
@@ -104,12 +108,6 @@ public class TeleOp extends OpMode {
             divider.setPosition(0);
         else
             divider.setPosition(.5);
-
-        if(gamepad2.x) {
-            door.setPosition(1);
-        } else {
-            door.setPosition(0);
-        }
 
         if(gamepad2.left_stick_x > 0.1)
             leftZipline.setPosition(1);

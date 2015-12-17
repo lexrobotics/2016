@@ -59,7 +59,8 @@ public class FtcOpModeRegister implements OpModeRegister {
      */
         manager.register("NullOp", NullOp.class);
 
-        manager.register("TeleOp", TeleOp.class);
+        manager.register("Blue TeleOp", TeleOpBlue.class);
+        manager.register("Red TeleOp", TeleOpRed.class);
         manager.register("SensorStateOpMode", SensorStateOpMode.class);
         manager.register("Meet2Path", MeetTwoPath.class);
 
