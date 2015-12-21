@@ -81,10 +81,10 @@ public class Robot {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        drivetrain.move(power,"hero",waiter);
         while(!ultraPID.isAtTarget() && waiter.opModeIsActive()){
             power = ultraPID.update(state.getAvgSensorData(sensorName, filterlength));
             drivetrain.move(power);
-
             Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName, filterlength));
             try{
                 Thread.sleep(10);
@@ -167,7 +167,7 @@ public class Robot {
         double reading = 0.0;
 //        int count = 0;
 
-        drivetrain.move(power);
+        drivetrain.move(power,"hero",waiter);
 
 //        do {
 //            if (!waiter.opModeIsActive()){
@@ -207,42 +207,9 @@ public class Robot {
                 Thread.sleep(1);
             } catch (InterruptedException ex){}
         }
-        drivetrain.move(0.0);
+        drivetrain.stopMove();
 
-        for (int i = 0; i < 4000; i++){
-            tel.addData("Reading", reading);
-            tel.addData("Average", average);
-            if (!waiter.opModeIsActive())
-                break;
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex){}
-        }
-//
-////        while (true){
-////            tel.addData("test", "tester");
-////            try {
-////                Thread.sleep(10);
-////            }
-////            catch (InterruptedException ex){}
-////        }
-//
-////        drivetrain.move(0f);
-////        while (true){
-////            tel.addData("test", "test");
-////            tel.addData("Average", average);
-////            tel.addData("Current average", state.getAvgSensorData(lightname, 10));
-////            try {
-////                Thread.sleep(10);
-////            } catch (InterruptedException ex){}
-//////            tel.addData("Worked", "yay");
-////
-////        }
-//
-//        drivetrain.move(0.0);
-////
-////        // It seems like the conversion is necessary because drivetrain was declared as the abstract parent DriveTrain.
-////        // First color detected is team color, so get that button.
+
         if (dominant == color){
             tel.addData("Color", "CORRECT");
 //            drivetrain.move(0.0);

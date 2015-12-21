@@ -16,7 +16,7 @@ public class FourWheelDrive implements DriveTrain{
                     backLeftMotor, backRightMotor;
     private double wheel_circumference;
     private double expectedHeading = 0;
-    private Thread move_thread;
+    public MovementThread move_thread;
     private final double TURN_SCALAR = 0.23;
     private int rightEncoder, leftEncoder;
 
@@ -84,8 +84,13 @@ public class FourWheelDrive implements DriveTrain{
     }
 
     public void move(double power, String gyro_name, LinearOpMode waiter) {
-        move_thread = new Thread(new MovementThread(this, gyro_name, 0, waiter,0.2));
-        move_thread.start();
+        if(move_thread.isInterrupted() == false) {
+            move_thread = new MovementThread(this, gyro_name, 0, waiter, 0.2);
+            move_thread.start();
+        }
+        else {
+            move_thread.setPower(power);
+        }
     }
 
     public void stopMove(){

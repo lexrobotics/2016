@@ -1,5 +1,7 @@
 package lib;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
 /**
  * Created by luke on 10/7/15.
  */
@@ -10,11 +12,14 @@ public interface DriveTrain {
     public void moveDistance(double power, double d);
     public void turnWithEncoders(double power, double angle);
     public void move(double power);
+    public void move(double power, String gyro_name, LinearOpMode waiter);
+    public void stopMove();
     public void setLeftMotors(double power);
     public void setRightMotors(double power);
     public void resetEncoders();
     public int getEncoders();
     public double getActualHeading(String name);
     public double getExpectedHeading();
+
 //    public void moveWithCorrection(double power);
 }
