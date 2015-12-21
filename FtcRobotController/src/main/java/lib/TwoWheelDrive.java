@@ -42,18 +42,18 @@ public class TwoWheelDrive implements DriveTrain {
 
     @Override
     public void setLeftMotors(double power){
-        this.leftMotor.setPower(power);
+        this.setLeftMotors(power);
     }
 
     @Override
     public void setRightMotors(double power){
-        this.rightMotor.setPower(power);
+        this.setRightMotors(power);
     }
 
     @Override
     public void move(double power) {
-        this.leftMotor.setPower(power);
-        this.rightMotor.setPower(power);
+        this.setRightMotors(power);
+        this.setLeftMotors(power);
     }
 
     public void move(double power, String gyro_name, LinearOpMode waiter) {
@@ -82,12 +82,12 @@ public class TwoWheelDrive implements DriveTrain {
         double distance = (d/wheel_circumference) * 1120;
 
         while (Math.abs(getEncoders()) < distance) {
-            leftMotor.setPower(power);
-            rightMotor.setPower(power);
+            this.setLeftMotors(power);
+            this.setRightMotors(power);
         }
 
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
+        setLeftMotors(0);
+        setRightMotors(0);
     }
 
     public void moveDistanceWithCorrections(double power, double d) {
@@ -100,8 +100,8 @@ public class TwoWheelDrive implements DriveTrain {
         }
         stopMove();
 
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
+        setLeftMotors(0);
+        setRightMotors(0);
     }
 
     @Override
@@ -110,12 +110,12 @@ public class TwoWheelDrive implements DriveTrain {
         double target = TURN_SCALAR * (angle/wheel_circumference) * 1120;
 
         while(Math.abs(getEncoders()) < target) {
-            leftMotor.setPower(-power);
-            rightMotor.setPower(power);
+            setLeftMotors(-power);
+            setRightMotors(power);
         }
 
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
+        setLeftMotors(0);
+        setRightMotors(0);
     }
 
     public int distToZero(int angle1){
@@ -181,8 +181,8 @@ public class TwoWheelDrive implements DriveTrain {
             power += speedPID.update(filter.getAvg());
             power = Range.clip(power, -1, 1);
 
-            leftMotor.setPower(power);
-            rightMotor.setPower(-power);
+            setLeftMotors(power);
+            setRightMotors(-power);
 
             Robot.tel.addData("angle", Robot.state.getSensorReading(name));
             Robot.tel.addData("speed",filter.getAvg());
@@ -200,8 +200,8 @@ public class TwoWheelDrive implements DriveTrain {
             }
         }
 
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
+        setLeftMotors(0);
+        setRightMotors(0);
 
     }
 

@@ -19,6 +19,13 @@ public class MeetTwoPath extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Robot dave = new Robot(hardwareMap, telemetry, this); // makes Robot "dave"
 
+        Robot.state = new SensorState(hardwareMap, 1, 0);
+        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
+        Thread state_thread = new Thread(Robot.state);
+        state_thread.start();
+
+        waitForStart();
+        while (Robot.state.calibrating("hero"));
         FourWheelDrive dave_train = new FourWheelDrive(hardwareMap.dcMotor.get("leftFront"), true,
                 hardwareMap.dcMotor.get("rightFront"), false,
                 hardwareMap.dcMotor.get("leftRear"), true,
@@ -32,5 +39,6 @@ public class MeetTwoPath extends LinearOpMode {
         //movement//
 
         dave_train.moveDistance(0.5, 65);
+        dave_train.turnWithGyro(90,"hero");
     }
 }
