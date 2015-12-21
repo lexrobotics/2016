@@ -110,16 +110,16 @@ public class TeleOp extends OpMode {
             divider.setPosition(.5);
 
         if(gamepad2.left_stick_x > 0.1)
-            leftZipline.setPosition(1);
-        else if(gamepad2.left_stick_x < -0.1)
             leftZipline.setPosition(0);
+        else if(gamepad2.left_stick_x < -0.1)
+            leftZipline.setPosition(1);
         else
             leftZipline.setPosition(0.5);
 
         if(gamepad2.right_stick_x > 0.1)
-            rightZipline.setPosition(1);
-        else if(gamepad2.right_stick_x < -0.1)
             rightZipline.setPosition(0);
+        else if(gamepad2.right_stick_x < -0.1)
+            rightZipline.setPosition(1);
         else
             rightZipline.setPosition(0.5);
 
