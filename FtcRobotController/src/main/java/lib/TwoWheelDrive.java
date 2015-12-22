@@ -17,12 +17,10 @@ public class TwoWheelDrive implements DriveTrain {
     // Diameter and moveDistance should be measured in inches.
 
     private DcMotor leftMotor, rightMotor;
-//    private Robot robot;
     double wheel_circumference;
-//    private GyroSensor gyro = (GyroSensor)robot.getSensors().get("gyro_sensors");
-    private int robotHeading;
     private int rightEncoder, leftEncoder;
     private Thread move_thread;
+    private MovementThread mover;
     private double expectedHeading;
 
     private final double TURN_SCALAR = 0.23;
@@ -57,8 +55,14 @@ public class TwoWheelDrive implements DriveTrain {
     }
 
     public void move(double power, String gyro_name, LinearOpMode waiter) {
-        move_thread = new Thread(new MovementThread(this, gyro_name, 0, waiter,0.2));
-        move_thread.start();
+        if(move_thread.isInterrupted() == false) {
+            mover = new MovementThread(this, gyro_name, 0, waiter, 0.2);
+            move_thread = new Thread(mover);
+            move_thread.start();
+        }
+        else {
+            mover.setPower(power);
+        }
     }
 
     public void stopMove(){

@@ -25,7 +25,7 @@ public class DropPath extends LinearOpMode {
         state_thread.start();
 
         waitForStart();
-        while (Robot.state.calibrating("hero"));
+        while (Robot.state.gyroIsCalibrating("hero"));
         FourWheelDrive dave_train = new FourWheelDrive(hardwareMap.dcMotor.get("leftFront"), true,
                 hardwareMap.dcMotor.get("rightFront"), false,
                 hardwareMap.dcMotor.get("leftRear"), true,

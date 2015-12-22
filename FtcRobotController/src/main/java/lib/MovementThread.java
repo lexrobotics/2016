@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 /**
  * Created by luke on 10/28/15.
  */
-public class MovementThread extends Thread implements Runnable {
+public class MovementThread implements Runnable {
 
     private DriveTrain drivetrain;
     private String gyro_name;
