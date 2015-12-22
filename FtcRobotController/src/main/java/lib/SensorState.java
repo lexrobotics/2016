@@ -395,8 +395,10 @@ public class SensorState implements Runnable{
     public void run() {
         while (true){
             try {
-                for (SensorContainer sen : sensorContainers.values()){
-                    sen.filter.update(getSensorReading(sen));
+                for (SensorContainer sen : sensorContainers.values()) {
+                    synchronized (this) {
+                        sen.filter.update(getSensorReading(sen));
+                    }
                 }
 
                 Thread.sleep(milli_interval, nano_interval);        // The getter functions need time to grab the lock
