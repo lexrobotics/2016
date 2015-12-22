@@ -33,7 +33,6 @@ import java.util.HashMap;
  * public void run()
  * */
 
-
 /*
 PRECAUTIONS:
 Never try reading gyro values until it's calibrated.

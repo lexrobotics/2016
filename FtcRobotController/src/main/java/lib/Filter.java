@@ -94,11 +94,6 @@ public class Filter {
             from = (index - filter_length + 1 + size) % size;
             to = (index - fl + size) % size;
         }
-//
-//        while (Robot.waiter.opModeIsActive()){
-//            Robot.tel.addData("from: " + from + "to", to );
-//            Robot.tel.addData("size: " + size + " old_fl: " + filter_length + " index: " + index, "");
-//        }
 
         for (int i = from; i != to; i++){
             if (i >= size)

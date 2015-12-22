@@ -135,24 +135,6 @@ public class Robot {
 
     }
 
-
-    // This just gets the color reading from the color sensor. We can really only use it in one way,
-    // so it doesn't really need its own class.
-//    public String getDominantColor(String colorname) {
-//        ColorSensor sen = (ColorSensor) sensors.get("color_sensor");
-//        int r = sen.red(), b = sen.blue(), g = sen.green();
-//
-//        if ((r > 0) && (b + g == 0))
-//            return "red";
-//        if ((b > 0) && (r + g == 0))
-//            return "blue";
-//        if ((r == 1) && (b == 1) && (g == 1))
-//            return "white";
-//        if (r + g + b == 0)
-//            return "clear";
-//        return "none";
-//    }
-
     // tillSense for colors. If the first color we detect is the color argument (our teams color)
     // Then we will hit that button.
     // Otherwise, we go to the next light.

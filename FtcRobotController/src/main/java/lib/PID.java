@@ -71,7 +71,6 @@ public class PID {
 
         double dTerm = (error - prevError)/dt;
 
-//        Robot.tel.addData("" + Kp * error + "")
         double output = Kp * error + Ki * iTerm + Kd * dTerm;
         output = Range.clip(output, minOutput, maxOutput);
 
@@ -101,7 +100,6 @@ public class PID {
 
         double dTerm = (error - prevError)/dt;
 
-//        Robot.tel.addData("" + Kp * error + "")
         double output = Kp * error + Ki * iTerm + Kd * dTerm;
         output = Range.clip(output, minOutput, maxOutput);
 
