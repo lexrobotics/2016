@@ -1,15 +1,8 @@
 package lib;
 import android.util.Log;
 
-import com.qualcomm.ftcrobotcontroller.opmodes.ColorSweep;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.LightSensor;
-import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import java.util.HashMap;
@@ -87,6 +80,7 @@ public class Robot {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        drivetrain.move(power,"hero",waiter);
         while(!ultraPID.isAtTarget() && waiter.opModeIsActive()){
             power = ultraPID.update(state.getAvgSensorData(sensorName));
             drivetrain.move(power);
@@ -163,40 +157,12 @@ public class Robot {
     // Then we will hit that button.
     // Otherwise, we go to the next light.
     public void colorSweep(SensorState.ColorType color, double low_threshold, double high_threshold, String lightname, String colorname, double power) {
-        // TODO: maybe add argument so that it can average over a specific number of points
-        // average + low_threshold < Light detected < average + high_threshold
-
-
         SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
         SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
         double average = 0.0;                     // Average of light values
         double reading = 0.0;
-//        int count = 0;
 
-        drivetrain.move(power);
-
-//        do {
-//            if (!waiter.opModeIsActive()){
-//                return;
-//            }
-//            dominant = state.getColorData(colorname);
-//            tel.addData("Current color", dominant);
-////            count++;
-//            try {
-//                Thread.sleep(0, 500000);
-//            } catch (InterruptedException ex){}
-//        } while (!(dominant == SensorState.ColorType.RED || dominant == SensorState.ColorType.BLUE));
-//        drivetrain.move(0.0);
-
-
-//        while (true){
-//            tel.addData("Found color", dominant);
-//            try {
-//                Thread.sleep(10);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
+        drivetrain.move(power,"hero",waiter);
 
         average = state.getAvgSensorData(lightname);
 
@@ -213,42 +179,9 @@ public class Robot {
                 Thread.sleep(1);
             } catch (InterruptedException ex){}
         }
-        drivetrain.move(0.0);
+        drivetrain.stopMove();
 
-        for (int i = 0; i < 4000; i++){
-            tel.addData("Reading", reading);
-            tel.addData("Average", average);
-            if (!waiter.opModeIsActive())
-                break;
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex){}
-        }
-//
-////        while (true){
-////            tel.addData("test", "tester");
-////            try {
-////                Thread.sleep(10);
-////            }
-////            catch (InterruptedException ex){}
-////        }
-//
-////        drivetrain.move(0f);
-////        while (true){
-////            tel.addData("test", "test");
-////            tel.addData("Average", average);
-////            tel.addData("Current average", state.getAvgSensorData(lightname, 10));
-////            try {
-////                Thread.sleep(10);
-////            } catch (InterruptedException ex){}
-//////            tel.addData("Worked", "yay");
-////
-////        }
-//
-//        drivetrain.move(0.0);
-////
-////        // It seems like the conversion is necessary because drivetrain was declared as the abstract parent DriveTrain.
-////        // First color detected is team color, so get that button.
+
         if (dominant == color){
             tel.addData("Color", "CORRECT");
 //            drivetrain.move(0.0);
@@ -261,6 +194,5 @@ public class Robot {
 //            drivetrain.move(0.0);
 //            ((TwoWheelDrive)drivetrain).moveDistance(-0.18, 8);
         }
-
     }
 }

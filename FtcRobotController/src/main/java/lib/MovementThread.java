@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 /**
  * Created by luke on 10/28/15.
  */
-public class MovementThread implements Runnable {
+public class MovementThread extends Thread implements Runnable {
 
     private DriveTrain drivetrain;
     private String gyro_name;
@@ -28,7 +28,7 @@ public class MovementThread implements Runnable {
         turnthresh = 10;
     }
 
-    public synchronized void setPower(double power){
+    public void setPower(double power){
         this.power = power;
     }
 
