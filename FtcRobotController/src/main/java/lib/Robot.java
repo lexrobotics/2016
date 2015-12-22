@@ -27,7 +27,6 @@ public class Robot {
     public static LinearOpMode waiter;
 
     public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
-
         this.hmap = hmap;
         this.tel = tel;
         this.servos = new HashMap<String, Servo>();
@@ -83,9 +82,10 @@ public class Robot {
         }
         drivetrain.move(power,"hero",waiter);
         while(!ultraPID.isAtTarget() && waiter.opModeIsActive()){
-            power = ultraPID.update(state.getAvgSensorData(sensorName, filterlength));
+            power = ultraPID.update(state.getAvgSensorData(sensorName));
             drivetrain.move(power);
-            Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName, filterlength));
+
+            Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName));
             try{
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -99,12 +99,12 @@ public class Robot {
         double diff;
         int count =0;
         do{
-            tel.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra", 60));
-            tel.addData("rearAvg", Robot.state.getAvgSensorData("rearUltra", 60));
+            tel.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra"));
+            tel.addData("rearAvg", Robot.state.getAvgSensorData("rearUltra"));
             tel.addData("frontReading", Robot.state.getSensorReading("frontUltra"));
             tel.addData("rearReading", Robot.state.getSensorReading("rearUltra"));
 
-            diff = (state.getAvgSensorData(sensorNameA, filterlength) - state.getAvgSensorData(sensorNameB,filterlength));
+            diff = (state.getAvgSensorData(sensorNameA) - state.getAvgSensorData(sensorNameB));
             if(Math.signum(diff) == 1 && count==0){
                 drivetrain.setLeftMotors(-power);
                 drivetrain.setRightMotors(power);
@@ -157,46 +157,18 @@ public class Robot {
     // Then we will hit that button.
     // Otherwise, we go to the next light.
     public void colorSweep(SensorState.ColorType color, double low_threshold, double high_threshold, String lightname, String colorname, double power) {
-        // TODO: maybe add argument so that it can average over a specific number of points
-        // average + low_threshold < Light detected < average + high_threshold
-
-
         SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
         SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
         double average = 0.0;                     // Average of light values
         double reading = 0.0;
-//        int count = 0;
 
         drivetrain.move(power,"hero",waiter);
 
-//        do {
-//            if (!waiter.opModeIsActive()){
-//                return;
-//            }
-//            dominant = state.getColorData(colorname);
-//            tel.addData("Current color", dominant);
-////            count++;
-//            try {
-//                Thread.sleep(0, 500000);
-//            } catch (InterruptedException ex){}
-//        } while (!(dominant == SensorState.ColorType.RED || dominant == SensorState.ColorType.BLUE));
-//        drivetrain.move(0.0);
-
-
-//        while (true){
-//            tel.addData("Found color", dominant);
-//            try {
-//                Thread.sleep(10);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
-
-        average = state.getAvgSensorData(lightname, 10);
+        average = state.getAvgSensorData(lightname);
 
 
         while (waiter.opModeIsActive()) {
-            reading = state.getAvgSensorData(lightname, 10);
+            reading = state.getAvgSensorData(lightname);
             tel.addData("Reading", reading);
             tel.addData("Average", average);
 
@@ -222,6 +194,5 @@ public class Robot {
 //            drivetrain.move(0.0);
 //            ((TwoWheelDrive)drivetrain).moveDistance(-0.18, 8);
         }
-
     }
 }

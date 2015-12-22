@@ -1,72 +1,76 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
+import lib.Filter;
 import lib.Robot;
-//import lib.SensorData;
 import lib.SensorState;
 
 /**
  * Created by luke on 10/27/15.
  */
 
-public class SensorStateOpMode extends OpMode {
-//    private SensorState color_state;
-    private SensorState state;
-//    private SensorState.SensorData data;
-    SensorState.SensorData data;
+public class SensorStateOpMode extends LinearOpMode {
+    private Filter filter;
+    private Thread state_thread;
 
-    @Override
-    public void loop(){
-//        data = color_state.getSensorDataArray("mr");
-        data = state.getSensorDataObject("color");
-//        telemetry.addData("r / g / b", data.values[1] + " / " + data.values[2] + " / " + data.values[2]);
-        int index = data.index;
-        int index1 = data.index - 1;
-        int index2 = data.index - 2;
-        int len = data.colors.length;
+    public void runOpMode() throws InterruptedException{
+        Robot dave = new Robot(hardwareMap, telemetry, this);
 
-        if (index1 < 0){
-            index1 = len + index1;
-        }
+        Robot.state = new SensorState(hardwareMap, 1, 0);
+        Robot.state.registerSensor("mr", SensorState.SensorType.COLOR, true, 60);
+        Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 2000);
+        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 60);
+        Robot.state.setUltrasonicPin("ultraToggle");
 
-        if (index2 < 0){
-            index2 = len + index2;
-        }
+        state_thread = new Thread(Robot.state);
+        state_thread.start();
 
-//        telemetry.addData("Index", data.index);
-//        telemetry.addData("Index1", index1);
-//        telemetry.addData("Index2", index2);
-        telemetry.addData("Current", data.colors[data.index]);
-        telemetry.addData("Color 1", data.colors[index]);
-        telemetry.addData("Color 2", data.colors[index1]);
-        telemetry.addData("Color 3", data.colors[index2]);
-//        telemetry.addData("Test", (-5)%10);
-//        telemetry.addData("name", state.getSensorsFromType(SensorState.SensorType.COLOR)[0]);
-        try {
+        waitForStart();
+
+        //Start loop
+        while (Robot.state.gyroIsCalibrating("hero")){
             Thread.sleep(10);
-        } catch (InterruptedException ex){
-
+            telemetry.addData("calibrating", "");
         }
-    }
+        Thread.sleep(60);
+        Robot.state.changeFilterLength("rearUltra", 10);
 
-    @Override
-    public void init(){
-        state = new SensorState(hardwareMap, 1, 0);
-        state.registerSensor("color", SensorState.SensorType.COLOR, true, 60);
-
-//        sensor_state = new SensorState(hardwareMap, 50, 0);22
-//        sensor_state.registerSensor()
-
-//        SensorState.SensorData data;
-
-        (new Thread(state)).start();
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ex){};
-        state.changeUpdateStatus("color", true);
-//        new Thread(color_state).start();
-//        new Thread(sensor_state).start();
+        while (opModeIsActive()) {
+            filter = Robot.state.getFilter("rearUltra");
+            telemetry.addData("Filter_val", filter.getAvg());
+            telemetry.addData("Distance_Avg", Robot.state.getAvgSensorData("rearUltra"));
+//            telemetry.addData("Color_name", Robot.state.getSensorsFromType(SensorState.SensorType.COLOR)[0]);
+//            telemetry.addData("Color", Robot.state.getColorData("mr"));
+            telemetry.addData("Distance", Robot.state.getSensorReading("rearUltra"));
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                break;
+            }
+        }
+        state_thread.interrupt();
     }
 }
+
+
+
+//public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER }
+//
+//public enum ColorType{ RED, BLUE, WHITE, CLEAR, NONE;
+//    public static int toInt(ColorType c)
+//    public static int[] toInt(ColorType[] c)
+//    public static ColorType toColor(int i){
+//    public static ColorType[] toColor(int[] i)
+//}
+//
+//public SensorState(HardwareMap hmap, int milli_interval, int nano_interval)
+//public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length)
+//public void setUltrasonicPin(String pin_name)
+//public boolean gyroIsCalibrating(String gyro_name)
+//public synchronized ColorType getColorData(String name)
+//public synchronized double getSensorReading(String name)
+//public synchronized void changeUpdateStatus(String name, boolean update)
+//public synchronized Filter getFilter(String name)
+//public synchronized double getAvgSensorData(String name)
+//public synchronized String[] getSensorsFromType(SensorType type)
+//public void run()
