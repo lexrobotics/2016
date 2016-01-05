@@ -64,5 +64,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("SensorStateOpMode", SensorStateOpMode.class);
         manager.register("Meet2Path", MeetTwoPath.class);
 
+        manager.register("DropPath", DropPath.class);
+
     }
 }

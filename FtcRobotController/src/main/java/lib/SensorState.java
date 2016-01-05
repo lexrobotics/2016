@@ -119,6 +119,7 @@ public class SensorState implements Runnable{
     private HardwareMap hmap;
 
     private DigitalChannel usPin;
+    private boolean usPinWasSet;
 
     // interval determines how long run() waits between updates.
     private int milli_interval;
@@ -148,6 +149,8 @@ public class SensorState implements Runnable{
         types_inv.put(SensorType.GYRO, new SensorContainer[0]);
         types_inv.put(SensorType.COLOR, new SensorContainer[0]);
         types_inv.put(SensorType.ENCODER, new SensorContainer[0]);
+
+        usPinWasSet = false;
     }
 
 
@@ -181,7 +184,7 @@ public class SensorState implements Runnable{
             ((GyroSensor) sensor_obj).calibrate();
 
         if (type == SensorType.COLOR) {
-            ((ColorSensor) sen.sensor).enableLed(false);
+            ((ColorSensor) sensor_obj).enableLed(false);
         }
 
         sensorContainers.put(name, sen);
@@ -195,7 +198,10 @@ public class SensorState implements Runnable{
      * @param pin_name      The name of the digitalChannel in the config that connects to the ultrasonics
      */
     public void setUltrasonicPin(String pin_name){
-        this.usPin = hmap.digitalChannel.get(pin_name);
+        if (!this.usPinWasSet) {
+            this.usPin = hmap.digitalChannel.get(pin_name);
+            this.usPinWasSet = true;
+        }
     }
 
     /**
@@ -348,16 +354,21 @@ public class SensorState implements Runnable{
                     return ((DcMotor) sen.sensor).getCurrentPosition();
 
                 case ULTRASONIC:
-                    try {
-                        usPin.setState(true);
-                        Thread.sleep(0, 20);
-                        usPin.setState(false);
-                        value = (0.50026463999) * ((AnalogInput) sen.sensor).getValue();
-                        Thread.sleep(0, 20);
-                        return value;
+                    // If it hasn't been set, we get a nullpointer exception
+                    if (this.usPinWasSet) {
+                        try {
+                            usPin.setState(true);
+                            Thread.sleep(0, 20);
+                            usPin.setState(false);
+                            value = (0.50026463999) * ((AnalogInput) sen.sensor).getValue();
+                            Thread.sleep(0, 20);
+                            return value;
 
-                    } catch (InterruptedException ex){
-                        ex.printStackTrace();
+                        } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                        }
+                    } else {
+                        throw new RuntimeException();
                     }
 
                 case LIGHT:

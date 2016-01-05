@@ -139,15 +139,24 @@ public class Robot {
     // Then we will hit that button.
     // Otherwise, we go to the next light.
     public void colorSweep(SensorState.ColorType color, double low_threshold, double high_threshold, String lightname, String colorname, double power) {
+
         SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
         SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
         double average = 0.0;                     // Average of light values
         double reading = 0.0;
 
-        drivetrain.move(power,"hero",waiter);
+        drivetrain.move(power,"hero", waiter); // this guy doesn't work
+
+        try {
+            for (int i = 0; i < 30; i++) {
+                tel.addData("color2", "");
+                Thread.sleep(50);
+            }
+        } catch (InterruptedException ex){
+            return;
+        }
 
         average = state.getAvgSensorData(lightname);
-
 
         while (waiter.opModeIsActive()) {
             reading = state.getAvgSensorData(lightname);
@@ -161,6 +170,7 @@ public class Robot {
                 Thread.sleep(1);
             } catch (InterruptedException ex){}
         }
+
         drivetrain.stopMove();
 
 
