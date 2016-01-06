@@ -44,12 +44,12 @@ public class TwoWheelDrive implements DriveTrain {
 
     @Override
     public void setLeftMotors(double power){
-        this.setLeftMotors(power);
+        this.leftMotor.setPower(power);
     }
 
     @Override
     public void setRightMotors(double power){
-        this.setRightMotors(power);
+        this.rightMotor.setPower(power);
     }
 
     @Override
@@ -62,10 +62,9 @@ public class TwoWheelDrive implements DriveTrain {
 
         if(!thread_running) {
 
-            mover = new MovementThread(this, gyro_name, 0, waiter, 0.2);
+            mover = new MovementThread(this, gyro_name, 0, waiter, power);
             move_thread = new Thread(mover);
             move_thread.start();
-
             thread_running = true;
         }
 
@@ -73,29 +72,13 @@ public class TwoWheelDrive implements DriveTrain {
         else {
             mover.setPower(power);
         }
-
-        try {
-            for (int i = 0; i < 30; i++) {
-                Robot.tel.addData("move", "");
-                Thread.sleep(50);
-            }
-        } catch (InterruptedException ex){
-            return;
-        }
-
-        try {
-            for (int i = 0; i < 30; i++) {
-                Robot.tel.addData("second_move", "");
-                Thread.sleep(50);
-            }
-        } catch (InterruptedException ex){
-            return;
-        }
     }
 
     public void stopMove(){
-        move_thread.interrupt();
-        thread_running = false;
+        if (thread_running){
+            move_thread.interrupt();
+            thread_running = false;
+        }
     }
 
     public void resetEncoders() {

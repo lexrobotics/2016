@@ -145,16 +145,7 @@ public class Robot {
         double average = 0.0;                     // Average of light values
         double reading = 0.0;
 
-        drivetrain.move(power,"hero", waiter); // this guy doesn't work
-
-        try {
-            for (int i = 0; i < 30; i++) {
-                tel.addData("color2", "");
-                Thread.sleep(50);
-            }
-        } catch (InterruptedException ex){
-            return;
-        }
+//        drivetrain.move(power,"hero", waiter);
 
         average = state.getAvgSensorData(lightname);
 
@@ -164,7 +155,7 @@ public class Robot {
             tel.addData("Average", average);
 
             if (average + low_threshold <= reading && reading <= average + high_threshold){
-                break;
+//                break;
             }
             try{
                 Thread.sleep(1);

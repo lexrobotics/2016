@@ -51,17 +51,10 @@ public class MovementThread implements Runnable {
 
     @Override
     public void run() {
-        double motorPower;
-        synchronized(this) {
-            motorPower = this.power;
-        }
-        drivetrain.setLeftMotors(motorPower);
-        drivetrain.setRightMotors(motorPower);
+        drivetrain.setLeftMotors(power);
+        drivetrain.setRightMotors(power);
 
         while (!Thread.currentThread().isInterrupted() && waiter.opModeIsActive()) {
-            synchronized(this) {
-                motorPower = this.power;
-            }
 
             try {
                 int offset = angleDist((int)drivetrain.getActualHeading(gyro_name),
@@ -69,12 +62,12 @@ public class MovementThread implements Runnable {
 
                 if (Math.abs(offset) > minthresh && Math.abs(offset) < turnthresh) {
                     if (offset > 0) {
-                        drivetrain.setLeftMotors(motorPower * 0.1);
-                        drivetrain.setRightMotors(1 - (1 - motorPower) * 0.1);
+                        drivetrain.setLeftMotors(power * 0.1);
+                        drivetrain.setRightMotors(1 - (1 - power) * 0.1);
                     }
                     else {
-                        drivetrain.setLeftMotors(1 - (1 - motorPower) * 0.1);
-                        drivetrain.setRightMotors(motorPower * 0.1);
+                        drivetrain.setLeftMotors(1 - (1 - power) * 0.1);
+                        drivetrain.setRightMotors(power * 0.1);
                     }
                 }
                 else if (Math.abs(offset) > turnthresh) {
@@ -85,16 +78,16 @@ public class MovementThread implements Runnable {
                         Robot.tel.addData("IN TURNING", "");
                         offset = angleDist((int)drivetrain.getActualHeading(gyro_name),
                                 (int)drivetrain.getExpectedHeading());
-                        drivetrain.setLeftMotors((1 - (1 - motorPower) * 0.1) * Math.signum(offset) * -1);
-                        drivetrain.setRightMotors((1 - (1 - motorPower) * 0.1) * Math.signum(offset));
+                        drivetrain.setLeftMotors((1 - (1 - power) * 0.1) * Math.signum(offset) * -1);
+                        drivetrain.setRightMotors((1 - (1 - power) * 0.1) * Math.signum(offset));
 
                         Thread.sleep(1);
                     }
                     Thread.sleep(200);
                 }
                 else {
-                    drivetrain.setLeftMotors(motorPower);
-                    drivetrain.setRightMotors(motorPower);
+                    drivetrain.setLeftMotors(power);
+                    drivetrain.setRightMotors(power);
                 }
                 Thread.sleep(1);
             } catch (InterruptedException ex) {
