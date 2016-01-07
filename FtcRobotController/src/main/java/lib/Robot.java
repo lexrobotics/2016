@@ -11,171 +11,173 @@ import java.util.HashMap;
  * Created by luke on 10/7/15.
  */
 
-
 public class Robot {
     public static SensorState state;
 
     // Hardware map pulls device Objects from the robot.
     // Drivetrain handles functions specific to our drive type (four-wheeld, two-wheel, treads, etc).
-    private HardwareMap hmap;
-    public DriveTrain drivetrain;
+    private static HardwareMap hmap;
+    public static DriveTrain drivetrain;
+
+    // Telemetry lets any class anywhere print messages through Robot
     public static Telemetry tel;
+
     // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
-    private HashMap<String, Object> motors;
-    private HashMap<String, Servo> servos;
-    public UltraServoHelper ultraservohelper;
+    private static HashMap<String, Object> motors;
+    private static HashMap<String, Servo> servos;
+    public static UltraServoHelper ultraservohelper;
     public static LinearOpMode waiter;
 
-    public Robot (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
-        this.hmap = hmap;
-        this.tel = tel;
-        this.servos = new HashMap<String, Servo>();
-        this.ultraservohelper = new UltraServoHelper();
-        waiter = opm;
+    // Prevents instantiation
+    private Robot(){}
 
-        // 100 millisecond delay between updates.
-//        state = new SensorState(hmap, 100);
-//        Thread state_thread = new Thread(state);
-//        state_thread.start();
-    }
-
-    // If someone tries to get a device not registered in a hashmap.
-    public class HardwareNotRegisteredException extends Exception {
-        public HardwareNotRegisteredException() { super(); }
-        public HardwareNotRegisteredException(String cause) { super(cause); }
-    }
-    public void registerServo(String servoName) {
-        servos.put(servoName, hmap.servo.get(servoName));
-    }
-
-    public void setPosition(String name, int position) {
-        servos.get(name).setPosition(position/180);
+    public static void init (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
+        Robot.hmap = hmap;
+        Robot.tel = tel;
+        Robot.servos = new HashMap<String, Servo>();
+        Robot.ultraservohelper = new UltraServoHelper();
+        Robot.waiter = opm;
     }
 
     // REGISTRATION FUNCTIONS
-    // It makes more sense to have the opmode construct a drivetrain and pass it to Robot than to repeat
-    // constructors in Robot and the drivetrain classes.
-    public void registerDriveTrain(DriveTrain d){
-        this.drivetrain = d;
+    public static void registerDrivetrain(DriveTrain d){
+        Robot.drivetrain = d;
     }
 
-    public void registerUltrasonicServo(String sensorName, String servoName) {
+    public static void registerServo(String servoName) {
+        servos.put(servoName, hmap.servo.get(servoName));
+    }
+
+    public static void registerUltrasonicServo(String sensorName, String servoName) {
         if(servos.containsKey(servoName)) {
             ultraservohelper.registerServo(sensorName, servos.get(servoName));
         }
         else{
-            this.registerServo(servoName);
+            registerServo(servoName);
             ultraservohelper.registerServo(sensorName, servos.get(servoName));
         }
     }
 
-    public void tillSense(String sensorName, int servoPosition, double power, int distance, int filterlength) {
+    // MOVEMENT FUNCTIONS
+    public static void setPosition(String servoName, int position) {
+        servos.get(servoName).setPosition(position / 180);
+    }
+
+    public void tillSense(String sensorName, int servoPosition, double power, int distance, int filterlength, String gyro_name) {
         PID ultraPID = new PID(0.05, 0.005, 0, false,0.1);
+
         ultraPID.setTarget(distance);
         ultraPID.setMinOutput(-1);
         ultraPID.setMaxOutput(1);
+
         ultraservohelper.setPosition(sensorName, servoPosition);
+
         try {
             Thread.sleep(400);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        drivetrain.move(power,"hero",waiter);
+
+        drivetrain.move(power, gyro_name, waiter);
+
         while(!ultraPID.isAtTarget() && waiter.opModeIsActive()){
             power = ultraPID.update(state.getAvgSensorData(sensorName));
             drivetrain.move(power);
 
             Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName));
+
             try{
                 Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
         drivetrain.move(0);
     }
 
     public void parallel(String sensorNameA, String sensorNameB, double power, double thresh, int filterlength) {
         double diff;
-        int count =0;
-        do{
-            tel.addData("frontAvg", Robot.state.getAvgSensorData("frontUltra"));
-            tel.addData("rearAvg", Robot.state.getAvgSensorData("rearUltra"));
-            tel.addData("frontReading", Robot.state.getSensorReading("frontUltra"));
-            tel.addData("rearReading", Robot.state.getSensorReading("rearUltra"));
+        int count = 0;
 
+        do {
             diff = (state.getAvgSensorData(sensorNameA) - state.getAvgSensorData(sensorNameB));
-            if(Math.signum(diff) == 1 && count==0){
+
+            if(Math.signum(diff) == 1 && count==0) {
                 drivetrain.setLeftMotors(-power);
                 drivetrain.setRightMotors(power);
-            }
-            else if(Math.signum(diff) == -1 && count==0) {
+            } else if(Math.signum(diff) == -1 && count==0) {
                 drivetrain.setLeftMotors(power);
                 drivetrain.setRightMotors(-power);
             }
+
+            // If count isn't 0, then we're waiting to see if the robot slips at all, which means
+            // We need to keep the motors at 0.
             else{
                 drivetrain.setLeftMotors(0);
                 drivetrain.setRightMotors(0);
             }
 
+            // Wait to see if the robot slips
             if(Math.abs(diff) < thresh){
                 count ++;
-            }
-            else{
+            } else{
                 count = 0;
             }
+
             try {
                 Thread.sleep(5);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }while (count<15 && waiter.opModeIsActive());
+        } while (count<15 && waiter.opModeIsActive());
 
         drivetrain.move(0);
 
     }
 
     // tillSense for colors. If the first color we detect is the color argument (our teams color)
-    // Then we will hit that button.
-    // Otherwise, we go to the next light.
-    public void colorSweep(SensorState.ColorType color, double low_threshold, double high_threshold, String lightname, String colorname, double power) {
+    // Then we will hit that button. Otherwise, we go to the next light.
+    public static void colorSweep( SensorState.ColorType color,
+                            double low_threshold,
+                            double high_threshold,
+                            double power,
+                            String light_name,
+                            String color_name,
+                            String gyro_name) {
 
-        SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
-        SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
-        double average = 0.0;                     // Average of light values
-        double reading = 0.0;
+        SensorState.ColorType dominant = state.getColorData(color_name);   // Current dominant color detected
+        double average;   // Average of light values
+        double reading;   // reading of light values
 
-//        drivetrain.move(power,"hero", waiter);
+        drivetrain.move(power,gyro_name, waiter);
 
-        average = state.getAvgSensorData(lightname);
+        average = state.getAvgSensorData(light_name);
 
         while (waiter.opModeIsActive()) {
-            reading = state.getAvgSensorData(lightname);
-            tel.addData("Reading", reading);
-            tel.addData("Average", average);
+            reading = state.getAvgSensorData(light_name);
 
             if (average + low_threshold <= reading && reading <= average + high_threshold){
-//                break;
+                break;
             }
+
             try{
                 Thread.sleep(1);
-            } catch (InterruptedException ex){}
+            } catch (InterruptedException ex){
+                ex.printStackTrace();
+            }
         }
 
         drivetrain.stopMove();
 
-
+        // Add code here to drop the climbers in the right bin
         if (dominant == color){
             tel.addData("Color", "CORRECT");
-//            drivetrain.move(0.0);
-//            ((TwoWheelDrive)drivetrain).moveDistance(0.18, 8);
         }
 
         // First color detected is wrong color, so hit other button, which must be the right button.
         else {
             tel.addData("Color", "WRONG");
-//            drivetrain.move(0.0);
-//            ((TwoWheelDrive)drivetrain).moveDistance(-0.18, 8);
         }
     }
 }

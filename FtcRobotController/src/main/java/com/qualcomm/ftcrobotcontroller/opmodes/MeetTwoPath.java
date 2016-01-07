@@ -17,7 +17,7 @@ import lib.TwoWheelDrive;
 public class MeetTwoPath extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        Robot dave = new Robot(hardwareMap, telemetry, this); // makes Robot "dave"
+        Robot.init(hardwareMap, telemetry, this); // makes Robot "dave"
 
         Robot.state = new SensorState(hardwareMap, 1, 0);
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
@@ -33,7 +33,7 @@ public class MeetTwoPath extends LinearOpMode {
                 hardwareMap.dcMotor.get("rightRear"), false,
                 4);
 
-        dave.registerDriveTrain(dave_train);
+        Robot.registerDrivetrain(dave_train);
 
         waitForStart();
 

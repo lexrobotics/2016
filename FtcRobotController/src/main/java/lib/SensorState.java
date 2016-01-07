@@ -113,9 +113,14 @@ public class SensorState implements Runnable{
         }
     }
 
-    private HashMap<SensorType, HardwareMap.DeviceMapping> maps;    // HashMap of DeviceMappings from HardwareMap to grab sensor objects in registration.
-    private HashMap<String, SensorContainer> sensorContainers;                        // Stores SensorContainer objects (definition at bottom)
-    private HashMap<SensorType, SensorContainer[]> types_inv;                // Allows recovery of all sensors of a certain type.
+    // HashMap of DeviceMappings from HardwareMap to grab sensor objects in registration.
+    private HashMap<SensorType, HardwareMap.DeviceMapping> maps;
+
+    // Stores SensorContainer objects (definition at bottom)
+    private HashMap<String, SensorContainer> sensorContainers;
+
+    // Allows recovery of all sensors of a certain type.
+    private HashMap<SensorType, SensorContainer[]> types_inv;
     private HardwareMap hmap;
 
     private DigitalChannel usPin;
@@ -177,8 +182,11 @@ public class SensorState implements Runnable{
      * @param data_length   The number of sensor readings to store for the sensor
      */
     public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length){
-        Object sensor_obj = maps.get(type).get(name);                                   // Get underlying sensor object for the sensor
-        SensorContainer sen = new SensorContainer(sensor_obj, type, name, update, data_length);      // Make a SensorContainer to wrap around the object
+        // Get underlying sensor object for the sensor
+        Object sensor_obj = maps.get(type).get(name);
+
+        // Make a SensorContainer to wrap around the object
+        SensorContainer sen = new SensorContainer(sensor_obj, type, name, update, data_length);
 
         if (type == SensorType.GYRO)
             ((GyroSensor) sensor_obj).calibrate();
@@ -188,7 +196,7 @@ public class SensorState implements Runnable{
         }
 
         sensorContainers.put(name, sen);
-        updateTypes_Inv(sen);
+        updateTypesInv(sen);
     }
 
     /**
@@ -200,6 +208,7 @@ public class SensorState implements Runnable{
     public void setUltrasonicPin(String pin_name){
         if (!this.usPinWasSet) {
             this.usPin = hmap.digitalChannel.get(pin_name);
+            assert(this.usPin != null);
             this.usPinWasSet = true;
         }
     }
@@ -209,7 +218,7 @@ public class SensorState implements Runnable{
      *
      * @param sen   SensorContainer to add to the HashMap. This will be grouped into the array indexed by the sensor's type
      */
-    private void updateTypes_Inv(SensorContainer sen){
+    private void updateTypesInv(SensorContainer sen){
         SensorContainer[] old_sensors = types_inv.get(sen.type);        // Pull out the old array of sensors
         int old_length = old_sensors.length;
 
@@ -232,10 +241,13 @@ public class SensorState implements Runnable{
     ************************
      */
 
+    // All of these will throw errors if called with a name that hasn't been registered.
+
     /**
      * Returns true if the given gyro is currently calibrating, and therefore can't give good values.
      */
     public synchronized boolean gyroIsCalibrating(String gyro_name){
+        assert(sensorContainers.keySet().contains(gyro_name));
         return ((GyroSensor)sensorContainers.get(gyro_name).sensor).isCalibrating();
     }
 
@@ -243,10 +255,15 @@ public class SensorState implements Runnable{
      * Returns true if all the values of the filter array have been filled, allowing averaging.
      */
     public synchronized boolean filterIsFilled(String name){
+        assert(sensorContainers.keySet().contains(name));
         return sensorContainers.get(name).filter.isFilled();
     }
 
+    /**
+     * Change the length of the specified filter
+     */
     public synchronized void changeFilterLength(String name, int fl){
+        assert(sensorContainers.keySet().contains(name));
         sensorContainers.get(name).filter.changeFilter_length(fl);
     }
 
@@ -255,6 +272,7 @@ public class SensorState implements Runnable{
      * Allows us to access by name only in the public functions.
      */
     public synchronized ColorType getColorData(String name){
+        assert(sensorContainers.keySet().contains(name));
         return getDominantColor(sensorContainers.get(name));
     }
 
@@ -262,6 +280,7 @@ public class SensorState implements Runnable{
      * Immediately return a value for the given sensor, without waiting for another run().
      */
     public synchronized double getSensorReading(String name){
+        assert(sensorContainers.keySet().contains(name));
         return getSensorReading(sensorContainers.get(name));
     }
 
@@ -270,6 +289,7 @@ public class SensorState implements Runnable{
      * cpu cycles.
      */
     public synchronized void changeUpdateStatus(String name, boolean update){
+        assert(sensorContainers.keySet().contains(name));
         sensorContainers.get(name).update = update;
     }
 
@@ -280,6 +300,7 @@ public class SensorState implements Runnable{
      * @return      The SensorData object corresponding to the given sensor.
      */
     public synchronized Filter getFilter(String name){
+        assert(sensorContainers.keySet().contains(name));
         return sensorContainers.get(name).filter.clone();
     }
 
@@ -287,6 +308,7 @@ public class SensorState implements Runnable{
      * Using the most recent chronological sensor data, average the last several readings
      */
     public synchronized double getAvgSensorData(String name) {
+        assert(sensorContainers.keySet().contains(name));
         return sensorContainers.get(name).filter.getAvg();
     }
 
@@ -294,6 +316,7 @@ public class SensorState implements Runnable{
      * Get a String[] array of all sensor names belonging to sensors of a certain type.
      */
     public synchronized String[] getSensorsFromType(SensorType type){
+        assert(types_inv.keySet().contains(type));
         SensorContainer[] sens = types_inv.get(type);
         String[] ret = new String[sens.length];
 
@@ -368,7 +391,7 @@ public class SensorState implements Runnable{
                             ex.printStackTrace();
                         }
                     } else {
-                        throw new RuntimeException();
+                        throw new RuntimeException("usPin not set in SensorState");
                     }
 
                 case LIGHT:
