@@ -65,6 +65,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("Meet2Path", MeetTwoPath.class);
 
         manager.register("DropPath", DropPath.class);
+        manager.register("testdrive", NewDrivetrainTest.class);
 
     }
 }
