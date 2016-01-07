@@ -87,7 +87,7 @@ public class Filter {
         if (fl > filter_length){
             sign = 1;
             from = (index - fl + 1 + size) % size;
-            to = (index - filter_length + size) % size;
+            to = (index - filter_length + size) % size; //Dimitri was here
         }
         else {
             sign = -1;
@@ -130,3 +130,6 @@ public class Filter {
         return new_filter;
     }
 }
+
+
+//Dimitri was here

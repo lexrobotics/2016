@@ -108,74 +108,24 @@ public class DriveTrain {
     }
 
     public void turnWithGyro(int degrees, String name) {
-        // Stay positive
-        expectedHeading += degrees + 360;
-        expectedHeading %= 360;
+        PID turnPID = new PID(.031,0,0.05,true, 0.1); // 0.003
 
-        /*
-        In this system, the turnPID's target is the final rotation angle.
-        It sends rotational speed targets to the speedPID, which outputs motor values to add to the
-        existing motor values to reach those speeds.
-         */
-
-        // Tuned values
-        PID turnPID = new PID(1.6, 0, 0, true, 1.1);
-        PID speedPID = new PID(0.00071, 0, 0.0002, false, 0);
-
-        degrees= ((360 - (int) expectedHeading) + 360) % 360;
+        //need target thresh
         turnPID.setTarget(degrees);
-
-        turnPID.setMaxOutput(75);
-        turnPID.setMinOutput(-75);
-        speedPID.setMaxOutput(0.1);
-        speedPID.setMinOutput(-0.1);
-
-        double reading = Robot.state.getSensorReading(name);
-        double prevReading;
-        double power = 0.9;
-        double time;
-        double angle;
-        double currentSpeed;
-        double angVel;
-
-        Filter filter = new Filter(20);
-
-        prevReading = reading;
-        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
-
-        while(Robot.waiter.opModeIsActive() && !turnPID.isAtTarget(10)) {
-            time = timer.time();
-            angle = Robot.state.getSensorReading(name);
-            currentSpeed = angleDist(angle , prevReading)/time;
-            filter.update(currentSpeed);
-
-            angVel = turnPID.updateWithError(angleDist(angle,degrees));
-
-            // Don't want it to be able to slow down too much. Lower cap at 3, + or -
-            if (Math.abs(angVel) < 3) {
-                speedPID.setTarget(Math.signum(angVel)*3);
-            } else{
-                speedPID.setTarget(angVel);
-            }
-
-            power += speedPID.update(filter.getAvg());
-            power = Range.clip(power, -1, 1);
-
-            setLeftMotors(power);
-            setRightMotors(-power);
-
-            prevReading = angle;
-            timer.reset();
-
+        turnPID.setMaxOutput(1);
+        turnPID.setMinOutput(-1);
+        double update;
+        while (Robot.waiter.opModeIsActive()&& !turnPID.isAtTarget()) {
+            update = turnPID.update(Robot.state.getSensorReading(name));
+            this.setLeftMotors(update);
+            this.setRightMotors(-update);
             try {
-                Thread.sleep(25);
-
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
-        setLeftMotors(0);
-        setRightMotors(0);
+        this.setLeftMotors(0);
+        this.setRightMotors(0);
     }
 }
