@@ -15,28 +15,12 @@ public class NewDrivetrainTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException{
         Robot.init(hardwareMap, telemetry, this); // makes Robot "dave"
 
-        DriveTrain dave_train = new TwoWheelDrive(
-                hardwareMap.dcMotor.get("leftdrive"), true,
-                hardwareMap.dcMotor.get("rightdrive"), false, 10);
-
-        Robot.registerDrivetrain(dave_train);
-
         Robot.state = new SensorState(hardwareMap, 1, 0);
-        Robot.state.registerSensor("mr", SensorState.SensorType.COLOR, false, 12);
-        Robot.state.registerSensor("mrs", SensorState.SensorType.LIGHT, true, 12);
-        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
-        Robot.state.registerSensor("rearUltra", SensorState.SensorType.ULTRASONIC, true, 50);
-        Robot.state.registerSensor("frontUltra", SensorState.SensorType.ULTRASONIC, true, 50);
-        Robot.state.setUltrasonicPin("ultraToggle");
 
         Thread state_thread = new Thread(Robot.state);
         state_thread.start();
 
         waitForStart();
-
-        while (Robot.state.gyroIsCalibrating("hero"));
-
-        dave_train.turnWithGyro(45,"hero");
 
         while (opModeIsActive()){
             try {

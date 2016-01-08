@@ -1,12 +1,6 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.LightSensor;
-import com.qualcomm.robotcore.util.Range;
 
-import lib.FourWheelDrive;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import lib.Robot;
 import lib.SensorState;
 import lib.TwoWheelDrive;
@@ -39,7 +33,7 @@ public class DropPath extends LinearOpMode {
 
         while (Robot.state.gyroIsCalibrating("hero"));
 
-//        dave_train.move(0.2, "hero", this);
+        dave_train.turnWithGyro(90, "hero");
 
         Robot.colorSweep(SensorState.ColorType.BLUE, 4, 10, -0.3, "mrs", "mr", "hero");
 

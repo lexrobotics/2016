@@ -31,12 +31,12 @@ public class Robot {
     // Prevents instantiation
     private Robot(){}
 
-    public static void init (HardwareMap hmap, Telemetry tel, LinearOpMode opm) {
+    public static void init (HardwareMap hmap, Telemetry tel, LinearOpMode waiter) {
         Robot.hmap = hmap;
         Robot.tel = tel;
         Robot.servos = new HashMap<String, Servo>();
         Robot.ultraservohelper = new UltraServoHelper();
-        Robot.waiter = opm;
+        Robot.waiter = waiter;
     }
 
     // REGISTRATION FUNCTIONS
