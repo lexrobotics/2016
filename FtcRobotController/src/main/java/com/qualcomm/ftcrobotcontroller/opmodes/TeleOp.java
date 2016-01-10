@@ -13,29 +13,35 @@ public class TeleOp extends OpMode {
     DcMotor leftFrontDrive, leftRearDrive;
     DcMotor rightFrontDrive, rightRearDrive;
     DcMotor noodler, armTilter, liftStageOne, liftStageTwo;
-    Servo door, divider, rightZipline, leftZipline;
+    Servo divider, rightZipline, leftZipline, buttonPusher, climberDropper;
+    Servo redDoor, blueDoor;
 
     boolean driveInverted = false;
     boolean bWasDown = false;
 
     @Override
     public void init() {
-        leftFrontDrive = hardwareMap.dcMotor.get("leftFront");
-        leftRearDrive = hardwareMap.dcMotor.get("leftRear");
-        rightFrontDrive = hardwareMap.dcMotor.get("rightFront");
-        rightRearDrive = hardwareMap.dcMotor.get("rightRear");
+        leftFrontDrive = hardwareMap.dcMotor.get("leftFrontDrive");
+        leftRearDrive = hardwareMap.dcMotor.get("leftRearDrive");
+        rightFrontDrive = hardwareMap.dcMotor.get("rightFrontDrive");
+        rightRearDrive = hardwareMap.dcMotor.get("rightRearDrive");
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
 
         noodler = hardwareMap.dcMotor.get("noodler");
         armTilter = hardwareMap.dcMotor.get("armTilter");
-        liftStageOne = hardwareMap.dcMotor.get("liftOne");
-        liftStageTwo = hardwareMap.dcMotor.get("liftTwo");
+        liftStageOne = hardwareMap.dcMotor.get("liftStageOne");
+        liftStageTwo = hardwareMap.dcMotor.get("liftStageTwo");
 
-        door = hardwareMap.servo.get("door");
         divider = hardwareMap.servo.get("divider");
         rightZipline = hardwareMap.servo.get("rightClimber");
-        leftZipline = hardwareMap.servo.get("leftClimber");
+        leftZipline = hardwareMap.servo.get("leftZipline");
+
+        buttonPusher = hardwareMap.servo.get("buttonPusher");
+        climberDropper = hardwareMap.servo.get("climberDropper");
+
+        redDoor = hardwareMap.servo.get("redDoor");
+        blueDoor = hardwareMap.servo.get("blueDoor");
 
         noodler.setPower(0);
         armTilter.setPower(0);
@@ -122,6 +128,20 @@ public class TeleOp extends OpMode {
             rightZipline.setPosition(1);
         else
             rightZipline.setPosition(0.5);
+
+        if (gamepad2.x) {
+            redDoor.setPosition(0);
+            blueDoor.setPosition(0);
+        } else {
+            redDoor.setPosition(1);
+            blueDoor.setPosition(1);
+        }
+
+        if (gamepad2.a) {
+            climberDropper.setPosition(0);
+        } else {
+            climberDropper.setPosition(1);
+        }
 
     }
 
