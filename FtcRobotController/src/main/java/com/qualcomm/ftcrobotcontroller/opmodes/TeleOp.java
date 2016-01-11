@@ -18,15 +18,21 @@ public class TeleOp extends OpMode {
 
     boolean driveInverted = false;
     boolean bWasDown = false;
+    boolean climber_drop;
+    boolean a_was_down;
 
     @Override
     public void init() {
+        climber_drop = false;
+        a_was_down = true;
+
         leftFrontDrive = hardwareMap.dcMotor.get("leftFrontDrive");
         leftRearDrive = hardwareMap.dcMotor.get("leftRearDrive");
         rightFrontDrive = hardwareMap.dcMotor.get("rightFrontDrive");
         rightRearDrive = hardwareMap.dcMotor.get("rightRearDrive");
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
+//        fron
 
         noodler = hardwareMap.dcMotor.get("noodler");
         armTilter = hardwareMap.dcMotor.get("armTilter");
@@ -34,7 +40,7 @@ public class TeleOp extends OpMode {
         liftStageTwo = hardwareMap.dcMotor.get("liftStageTwo");
 
         divider = hardwareMap.servo.get("divider");
-        rightZipline = hardwareMap.servo.get("rightClimber");
+        rightZipline = hardwareMap.servo.get("rightZipline");
         leftZipline = hardwareMap.servo.get("leftZipline");
 
         buttonPusher = hardwareMap.servo.get("buttonPusher");
@@ -47,6 +53,13 @@ public class TeleOp extends OpMode {
         armTilter.setPower(0);
         liftStageOne.setPower(0);
         liftStageTwo.setPower(0);
+        leftZipline.setPosition(0.5);
+        rightZipline.setPosition(0.5);
+        buttonPusher.setPosition(0.5);
+        climberDropper.setPosition(0.5);
+        redDoor.setPosition(0);
+        blueDoor.setPosition(1);
+        divider.setPosition(0.5);
     }
 
     @Override
@@ -130,17 +143,26 @@ public class TeleOp extends OpMode {
             rightZipline.setPosition(0.5);
 
         if (gamepad2.x) {
-            redDoor.setPosition(0);
+            redDoor.setPosition(1);
             blueDoor.setPosition(0);
         } else {
-            redDoor.setPosition(1);
+            redDoor.setPosition(0);
             blueDoor.setPosition(1);
         }
 
         if (gamepad2.a) {
+            if (a_was_down){
+                climber_drop = !climber_drop;
+                a_was_down = false;
+            }
+        } else {
+            a_was_down = true;
+        }
+
+        if (climber_drop){
             climberDropper.setPosition(0);
         } else {
-            climberDropper.setPosition(1);
+            climberDropper.setPosition(0.5);
         }
 
     }
