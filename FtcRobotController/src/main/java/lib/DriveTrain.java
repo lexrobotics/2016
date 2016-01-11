@@ -17,7 +17,10 @@ public class DriveTrain {
     public void setRightMotors(double power) {}
 
     public void resetEncoders() {}
-    public int getEncoders() {return 0;}
+    public int getEncoders() {
+        Robot.tel.addData("BAD GETENCODERS CALLED", "");
+        return 0;
+    }
     // END OF OVERRIDDEN
 
     protected double wheel_circumference;
@@ -66,7 +69,9 @@ public class DriveTrain {
         distance = (distance / wheel_circumference) * 1120;
 
         move(power, gyro_name, waiter);
-        while (Math.abs(getEncoders()) < distance && waiter.opModeIsActive()) {}
+        while (Math.abs(this.getEncoders()) < distance && waiter.opModeIsActive()) {
+            Robot.tel.addData("encoder", this.getEncoders());
+        }
         stopMove();
 
         setLeftMotors(0);

@@ -368,7 +368,8 @@ public class SensorState implements Runnable{
                             ex.printStackTrace();
                         }
                     } else {
-                        throw new RuntimeException();
+                        value = (0.50026463999) * ((AnalogInput) sen.sensor).getValue();
+                        return value;
                     }
 
                 case LIGHT:

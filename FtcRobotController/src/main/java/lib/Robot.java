@@ -2,6 +2,7 @@ package lib;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
@@ -21,7 +22,7 @@ public class Robot {
     public DriveTrain drivetrain;
     public static Telemetry tel;
     // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
-    private HashMap<String, Object> motors;
+    public HashMap<String, DcMotor> motors;
     private HashMap<String, Servo> servos;
     public UltraServoHelper ultraservohelper;
     public static LinearOpMode waiter;
@@ -30,6 +31,7 @@ public class Robot {
         this.hmap = hmap;
         this.tel = tel;
         this.servos = new HashMap<String, Servo>();
+        this.motors = new HashMap<String, DcMotor>();
         this.ultraservohelper = new UltraServoHelper();
         waiter = opm;
 
@@ -44,8 +46,23 @@ public class Robot {
         public HardwareNotRegisteredException() { super(); }
         public HardwareNotRegisteredException(String cause) { super(cause); }
     }
-    public void registerServo(String servoName) {
-        servos.put(servoName, hmap.servo.get(servoName));
+
+    public void registerServo(String servoName, double initial_position) {
+        if (!servos.keySet().contains(servoName)){
+            hmap.servo.get(servoName).setPosition(initial_position);
+            servos.put(servoName, hmap.servo.get(servoName));
+        }
+    }
+
+    public void registerMotor (String motorName, double initial_power) {
+        if (!motors.containsKey(motorName)){
+            hmap.dcMotor.get(motorName).setPower(initial_power);
+            motors.put(motorName, hmap.dcMotor.get(motorName));
+        }
+    }
+
+    public void registerMotor (String motorName) {
+        registerMotor(motorName, 0.0);
     }
 
     public void setPosition(String name, int position) {
@@ -59,13 +76,13 @@ public class Robot {
         this.drivetrain = d;
     }
 
-    public void registerUltrasonicServo(String sensorName, String servoName) {
+    public void registerUltrasonicServo(String sensorName, String servoName, double center) {
         if(servos.containsKey(servoName)) {
-            ultraservohelper.registerServo(sensorName, servos.get(servoName));
+            ultraservohelper.registerServo(sensorName, servos.get(servoName), center);
         }
         else{
-            this.registerServo(servoName);
-            ultraservohelper.registerServo(sensorName, servos.get(servoName));
+            this.registerServo(servoName, 0);
+            ultraservohelper.registerServo(sensorName, servos.get(servoName), center);
         }
     }
 
