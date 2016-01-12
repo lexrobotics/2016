@@ -30,7 +30,7 @@ public class TeleOp extends OpMode {
         leftRearDrive = hardwareMap.dcMotor.get("leftRearDrive");
         rightFrontDrive = hardwareMap.dcMotor.get("rightFrontDrive");
         rightRearDrive = hardwareMap.dcMotor.get("rightRearDrive");
-        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
         rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
 
         noodler = hardwareMap.dcMotor.get("noodler");

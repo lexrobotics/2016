@@ -20,8 +20,8 @@ public class BotInits {
 
         DriveTrain dave_train = new FourWheelDrive(
                 hardwareMap.dcMotor.get("leftFrontDrive"), false,
-                hardwareMap.dcMotor.get("rightFrontDrive"), true,
-                hardwareMap.dcMotor.get("leftRearDrive"), false,
+                hardwareMap.dcMotor.get("rightFrontDrive"), false,
+                hardwareMap.dcMotor.get("leftRearDrive"), true,
                 hardwareMap.dcMotor.get("rightRearDrive"), true,
                 4);
         dave.registerDriveTrain(dave_train);

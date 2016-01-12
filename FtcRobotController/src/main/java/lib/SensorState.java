@@ -404,7 +404,9 @@ public class SensorState implements Runnable{
      * It then waits for the specified interval to allow other functions to run.
      */
     public void run() {
+//        while (Robot.waiter.opModeIsActive()){
         while (true){
+            Robot.tel.addData("running?", "");
             try {
                 for (SensorContainer sen : sensorContainers.values()) {
                     synchronized (this) {

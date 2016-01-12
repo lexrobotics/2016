@@ -155,7 +155,47 @@ public class Robot {
     // tillSense for colors. If the first color we detect is the color argument (our teams color)
     // Then we will hit that button.
     // Otherwise, we go to the next light.
-    public void colorSweep(SensorState.ColorType color, double low_threshold, double high_threshold, String lightname, String colorname, double power) {
+//    public void colorSweep(SensorState.ColorType color, double low_threshold, double high_threshold, String lightname, String colorname, double power) {
+//
+//        SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
+//        SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
+//        double average = 0.0;                     // Average of light values
+//        double reading = 0.0;
+//
+////        drivetrain.move(power,"hero", waiter);
+//
+//        average = state.getAvgSensorData(lightname);
+//
+//        while (waiter.opModeIsActive()) {
+//            reading = state.getAvgSensorData(lightname);
+//            tel.addData("Reading", reading);
+//            tel.addData("Average", average);
+//
+//            if (average + low_threshold <= reading && reading <= average + high_threshold){
+////                break;
+//            }
+//            try{
+//                Thread.sleep(1);
+//            } catch (InterruptedException ex){}
+//        }
+//
+//        drivetrain.stopMove();
+//
+//
+//        if (dominant == color){
+//            tel.addData("Color", "CORRECT");
+////            drivetrain.move(0.0);
+////            ((TwoWheelDrive)drivetrain).moveDistance(0.18, 8);
+//        }
+//
+//        // First color detected is wrong color, so hit other button, which must be the right button.
+//        else {
+//            tel.addData("Color", "WRONG");
+////            drivetrain.move(0.0);
+////            ((TwoWheelDrive)drivetrain).moveDistance(-0.18, 8);
+//        }
+//    }
+    public void colorSweep(SensorState.ColorType color, String lightname, String colorname, double power) {
 
         SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
         SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
@@ -164,19 +204,30 @@ public class Robot {
 
 //        drivetrain.move(power,"hero", waiter);
 
-        average = state.getAvgSensorData(lightname);
+        reading = state.getAvgSensorData(lightname);
+        drivetrain.move(power,"hero", this.waiter);
 
-        while (waiter.opModeIsActive()) {
+        int bump_counter =0;
+        double prev_reading = reading;
+        boolean bump_flag = false;
+        while(bump_counter<3 && waiter.opModeIsActive()){
             reading = state.getAvgSensorData(lightname);
-            tel.addData("Reading", reading);
-            tel.addData("Average", average);
+            Robot.tel.addData("reading",reading);
 
-            if (average + low_threshold <= reading && reading <= average + high_threshold){
-//                break;
+            if(reading-prev_reading>0.5 && bump_flag == false){
+                Robot.tel.addData("bump detected","");
+                bump_flag= true;
+                bump_counter ++;
             }
-            try{
-                Thread.sleep(1);
-            } catch (InterruptedException ex){}
+            if(reading-prev_reading<=0){
+                bump_flag= false;
+            }
+            prev_reading = reading;
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         drivetrain.stopMove();

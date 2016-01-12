@@ -41,7 +41,7 @@ public class DropPath extends LinearOpMode {
 
 //        dave_train.move(0.2, "hero", this);
 
-        dave.colorSweep(SensorState.ColorType.BLUE, 4, 10, "mrs", "mr", -0.3);
+//        dave.colorSweep(SensorState.ColorType.BLUE, 4, 10, "mrs", "mr", -0.3);
 
         while (opModeIsActive()){
 //            telemetry.addData("running", Robot.state.getSensorReading("hero"));

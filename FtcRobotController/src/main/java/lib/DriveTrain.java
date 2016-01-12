@@ -113,8 +113,9 @@ public class DriveTrain {
     }
 
     public void turnWithGyro(int degrees, String name) {
-        PID turnPID = new PID(.031,0,0.05,true, 0.1); // 0.003
-
+        int i=0;
+//        PID turnPID = new PID(.03,0.0078,0.005,true, 1.1, 20); // 0.003
+        PID turnPID = new PID(0.011, 0.01, 0, true, 0, -1); // 0.003
         //need target thresh
         turnPID.setTarget(degrees);
         turnPID.setMaxOutput(1);
@@ -122,15 +123,63 @@ public class DriveTrain {
         double update;
         while (Robot.waiter.opModeIsActive()&& !turnPID.isAtTarget()) {
             update = turnPID.update(Robot.state.getSensorReading(name));
-            this.setLeftMotors(update);
-            this.setRightMotors(-update);
+            Robot.tel.addData("PID update", scaleInput(update));
+            Robot.tel.addData("PID error", turnPID.getError());
+            Robot.tel.addData("loops", i);
+            this.setRightMotors(scaleInput(update));
+            this.setLeftMotors(scaleInput(-update));
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            i++;
         }
         this.setLeftMotors(0);
         this.setRightMotors(0);
     }
+
+    public void turn(double speed) {
+        this.setRightMotors(speed);
+        this.setLeftMotors(-speed);
+    }
+    /*
+ * This method scales the joystick input so for low joystick values, the
+ * scaled value is less than linear.  This is to make it easier to drive
+ * the robot more precisely at slower speeds.
+ */
+    double scaleInput(double dVal)  {
+        double direction = Math.signum(dVal);
+        dVal = Math.abs(dVal);
+
+//        double[] scaleArray = { 0.0, 0.2, 0.34, 0.44, 0.52, 0.59, 0.65, 0.70,
+//                0.75, 0.79, 0.83, 0.86, 0.89, 0.92, 0.95, 1, 1.00 };
+        double[] scaleArray = { 0.0, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
+                0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 1, 1.00 };
+
+        // get the corresponding index for the scaleInput array.
+        int index = (int) (dVal * 16.0);
+
+        // index should be positive.
+        if (index < 0) {
+            index = -index;
+        }
+
+        // index cannot exceed size of array minus 1.
+        if (index > 16) {
+            index = 16;
+        }
+
+        // get value from the array.
+        double dScale = 0.0;
+        if (dVal < 0) {
+            dScale = -scaleArray[index];
+        } else {
+            dScale = scaleArray[index];
+        }
+
+        // return scaled value.
+        return direction * dScale;
+    }
+
 }
