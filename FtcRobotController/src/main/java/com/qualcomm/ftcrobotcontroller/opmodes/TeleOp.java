@@ -1,9 +1,9 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
+        import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+        import com.qualcomm.robotcore.hardware.DcMotor;
+        import com.qualcomm.robotcore.hardware.Servo;
+        import com.qualcomm.robotcore.util.Range;
 
 /**
  * Created by lhscompsci on 9/28/15.
@@ -16,6 +16,12 @@ public class TeleOp extends OpMode {
     Servo divider, rightZipline, leftZipline, buttonPusher, climberDropper;
     Servo redDoor, blueDoor;
 
+    // The arm_locked and climber_drop variables say whether the climber or arm should currently be activated.
+    // The toggle is aided by a_was_down and b_was_down.
+    Servo armLock;
+    boolean arm_locked;
+    boolean b_was_down;
+
     boolean driveInverted = false;
     boolean bWasDown = false;
     boolean climber_drop;
@@ -24,12 +30,15 @@ public class TeleOp extends OpMode {
     @Override
     public void init() {
         climber_drop = false;
+        arm_locked = false;
         a_was_down = true;
+        b_was_down = true;
 
         leftFrontDrive = hardwareMap.dcMotor.get("leftFrontDrive");
         leftRearDrive = hardwareMap.dcMotor.get("leftRearDrive");
         rightFrontDrive = hardwareMap.dcMotor.get("rightFrontDrive");
         rightRearDrive = hardwareMap.dcMotor.get("rightRearDrive");
+//        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
         rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
 
@@ -48,6 +57,8 @@ public class TeleOp extends OpMode {
         redDoor = hardwareMap.servo.get("redDoor");
         blueDoor = hardwareMap.servo.get("blueDoor");
 
+        armLock = hardwareMap.servo.get("armLock");
+
         noodler.setPower(0);
         armTilter.setPower(0);
         liftStageOne.setPower(0);
@@ -59,6 +70,7 @@ public class TeleOp extends OpMode {
         redDoor.setPosition(0);
         blueDoor.setPosition(1);
         divider.setPosition(0.5);
+        armLock.setPosition(0.5);
     }
 
     @Override
@@ -158,10 +170,25 @@ public class TeleOp extends OpMode {
             a_was_down = true;
         }
 
+        if (gamepad2.b) {
+            if (b_was_down){
+                arm_locked = !arm_locked;
+                b_was_down = false;
+            }
+        } else {
+            b_was_down = true;
+        }
+
         if (climber_drop){
             climberDropper.setPosition(0);
         } else {
             climberDropper.setPosition(0.5);
+        }
+
+        if (arm_locked) {
+            armLock.setPosition(0);
+        } else {
+            armLock.setPosition(0.5);
         }
 
     }
