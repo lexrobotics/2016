@@ -86,8 +86,8 @@ public class Robot {
         }
     }
 
-    public void tillSense(String sensorName, int servoPosition, double power, int distance, int filterlength) {
-        PID ultraPID = new PID(0.05, 0.005, 0, false,0.1);
+    public void tillSense(String sensorName, double servoPosition, double power, int distance, int filterlength) {
+        PID ultraPID = new PID(0.05, 0.01, 0, true,0.1);
         ultraPID.setTarget(distance);
         ultraPID.setMinOutput(-1);
         ultraPID.setMaxOutput(1);
@@ -100,9 +100,9 @@ public class Robot {
         drivetrain.move(power,"hero",waiter);
         while(!ultraPID.isAtTarget() && waiter.opModeIsActive()){
             power = ultraPID.update(state.getAvgSensorData(sensorName));
-            drivetrain.move(power);
+            drivetrain.move(power, "hero", waiter);
 
-            Log.i("AvgUSDistance", "" + state.getAvgSensorData(sensorName));
+            tel.addData("AvgUSDistance", state.getAvgSensorData(sensorName));
             try{
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -197,53 +197,88 @@ public class Robot {
 //    }
     public void colorSweep(SensorState.ColorType color, String lightname, String colorname, double power) {
 
-        SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
+//        SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
+
         SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
+
         double average = 0.0;                     // Average of light values
         double reading = 0.0;
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        double baseline = state.getAvgSensorData("hero");
 
 //        drivetrain.move(power,"hero", waiter);
 
-        reading = state.getAvgSensorData(lightname);
-        drivetrain.move(power,"hero", this.waiter);
+//        reading = state.getAvgSensorData(lightname);
+        drivetrain.move(power, "hero", this.waiter);
 
-        int bump_counter =0;
-        double prev_reading = reading;
-        boolean bump_flag = false;
-        while(bump_counter<3 && waiter.opModeIsActive()){
-            reading = state.getAvgSensorData(lightname);
-            Robot.tel.addData("reading",reading);
+        do {
+            dominant = state.getColorData("color");
+//            tel.addData("")
 
-            if(reading-prev_reading>0.5 && bump_flag == false){
-                Robot.tel.addData("bump detected","");
-                bump_flag= true;
-                bump_counter ++;
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex){
+                ex.printStackTrace();
             }
-            if(reading-prev_reading<=0){
-                bump_flag= false;
+        } while (!(dominant == SensorState.ColorType.BLUE || dominant == SensorState.ColorType.RED) && waiter.opModeIsActive());
+        drivetrain.move(0, "hero", this.waiter);
+
+        drivetrain.stopMove();
+        drivetrain.moveDistance(power, 2);
+
+        drivetrain.move(-.75 * power, "hero", this.waiter);
+        while(waiter.opModeIsActive()){
+            reading = state.getSensorReading(lightname);
+            Robot.tel.addData("reading", reading);
+
+            if(Math.abs(reading - baseline) > 20 ) {
+                Robot.tel.addData("bump detected", "");
+                break;
             }
-            prev_reading = reading;
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+
         }
+        drivetrain.move(0, "hero", this.waiter);
 
         drivetrain.stopMove();
 
 
-        if (dominant == color){
+        if (dominant == color) {
             tel.addData("Color", "CORRECT");
-//            drivetrain.move(0.0);
-//            ((TwoWheelDrive)drivetrain).moveDistance(0.18, 8);
+            drivetrain.moveDistance(power, 4);
         }
-
-        // First color detected is wrong color, so hit other button, which must be the right button.
         else {
             tel.addData("Color", "WRONG");
-//            drivetrain.move(0.0);
-//            ((TwoWheelDrive)drivetrain).moveDistance(-0.18, 8);
+            drivetrain.moveDistance(power, 8);
         }
+
+        servos.get("buttonPusher").setPosition(1);
+        try{
+            Thread.sleep(2500);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
+
+        servos.get("buttonPusher").setPosition(0);
+
+        try{
+            Thread.sleep(1500);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
+
+        servos.get("buttonPusher").setPosition(0.5);
+        servos.get("climberDropper").setPosition(0.3);
+
+
     }
 }

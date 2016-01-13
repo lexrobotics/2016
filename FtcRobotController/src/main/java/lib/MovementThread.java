@@ -55,6 +55,7 @@ public class MovementThread implements Runnable {
         drivetrain.setRightMotors(power);
 
         while (!Thread.currentThread().isInterrupted() && waiter.opModeIsActive()) {
+            Robot.tel.addData("running movementThread", true);
 
             try {
                 int offset = angleDist((int)drivetrain.getActualHeading(gyro_name),
@@ -95,6 +96,8 @@ public class MovementThread implements Runnable {
                 break;
             }
         }
+
+        Robot.tel.addData("running movementThread", false);
 
         drivetrain.setLeftMotors(0);
         drivetrain.setRightMotors(0);

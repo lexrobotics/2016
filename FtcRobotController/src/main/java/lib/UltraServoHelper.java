@@ -31,7 +31,9 @@ public class UltraServoHelper {
         nameToCenter.put(name, center);
         serv.setPosition(center);
     }
-    public void setPosition(String name, int angle){
-        nameToServo.get(name).setPosition((angle/180.0) - nameToCenter.get(name));
+    public void setPosition(String name, double angle){
+        // TODO: implement for real
+        nameToServo.get(name).setPosition(angle);
+//        nameToServo.get(name).setPosition((angle/180.0) + nameToCenter.get(name));
     }
 }

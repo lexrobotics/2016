@@ -14,6 +14,10 @@ import lib.SensorState;
 public class bot2AutoTemplate extends LinearOpMode {
 
     public void runOpMode() throws InterruptedException{
+//        Garrett thinks that the dumbGyroTurn changes expectedHeading incorrectly
+//        Changed dumbGyroTurn to stop when the angledistance starts increasing again.
+
+
         Robot dave = BotInits.bot2(hardwareMap, telemetry, this);
         waitForStart();
 //        for(double i=0; i<1; i+=0.01) {
@@ -25,9 +29,25 @@ public class bot2AutoTemplate extends LinearOpMode {
 //
 //            }
 //        }
+        while (Robot.state.gyroIsCalibrating("hero")) ;
+
+//        dave.drivetrain.moveDistanceWithCorrections(0.6, "hero", 15, this);
+//        Thread.sleep(200);
+//        dave.drivetrain.dumbGyroTurn(-0.5, 45, "hero");
+        Thread.sleep(200);
+        dave.tillSense("ultra", 0.5, 0.5, 15, 10);
+        dave.drivetrain.dumbGyroTurn(0.5, 45, "hero");
+        Thread.sleep(200);
+
+        dave.tillSense("ultra", 0.8, 0.5, 30, 10);
+
+        dave.drivetrain.dumbGyroTurn(0.6, 90, "hero");
+
         while (Robot.state.gyroIsCalibrating("hero"));
-        HelperFunctions.bot2SensorPrint(dave, this);
-//        dave.colorSweep(SensorState.ColorType.RED, "light", "color", 0.2);
+        dave.colorSweep(SensorState.ColorType.RED, "light", "color", 0.2);
+        while(opModeIsActive()){
+            Thread.sleep(10);
+        }
 //        telemetry.addData("done", "yes");
     }
 }

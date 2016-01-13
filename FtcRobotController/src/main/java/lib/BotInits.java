@@ -36,7 +36,7 @@ public class BotInits {
         dave.registerServo("leftZipline", 0.5);
 
         dave.registerServo("buttonPusher", 0.5);
-        dave.registerServo("climberDropper", 0.575);
+        dave.registerServo("climberDropper", 0.85);
 
         dave.registerServo("redDoor", 0);
         dave.registerServo("blueDoor", 1);

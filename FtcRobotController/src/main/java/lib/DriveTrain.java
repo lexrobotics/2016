@@ -47,6 +47,7 @@ public class DriveTrain {
     }
 
     public void moveDistance(double power, double distance){
+        this.resetEncoders();
         distance = (distance / wheel_circumference) * 1120;
 
         while (Math.abs(getEncoders()) < distance) {
@@ -97,6 +98,9 @@ public class DriveTrain {
             move_thread.interrupt();
             thread_running = false;
         }
+        this.setLeftMotors(0);
+        this.setRightMotors(0);
+
     }
 
     public void turnWithEncoders(double power, double angle) {
@@ -148,7 +152,7 @@ public class DriveTrain {
  * scaled value is less than linear.  This is to make it easier to drive
  * the robot more precisely at slower speeds.
  */
-    double scaleInput(double dVal)  {
+    private double scaleInput(double dVal)  {
         double direction = Math.signum(dVal);
         dVal = Math.abs(dVal);
 
@@ -180,6 +184,27 @@ public class DriveTrain {
 
         // return scaled value.
         return direction * dScale;
+    }
+
+    public void dumbGyroTurn(double power, double angle, String name){
+        double goal = (Robot.state.getSensorReading(name) + Math.signum(power) * angle + 360) % 360;
+        this.setLeftMotors(power);
+        this.setRightMotors(-power);
+
+        double diff = angleDist(goal, Robot.state.getSensorReading(name));
+        double prevDiff = diff;
+
+        while (angleDist(goal, Robot.state.getSensorReading(name)) < 2.1 && Robot.waiter.opModeIsActive()){
+            diff = angleDist(goal, Robot.state.getSensorReading(name));
+            if (diff - prevDiff > 0){
+                break;
+            }
+        }
+
+        this.setLeftMotors(0);
+        this.setRightMotors(0);
+
+        expectedHeading = (expectedHeading + Math.signum(power) * angle + 360) % 360;
     }
 
 }
