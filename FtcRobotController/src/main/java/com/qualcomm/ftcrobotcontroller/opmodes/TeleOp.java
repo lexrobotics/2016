@@ -67,10 +67,10 @@ public class TeleOp extends OpMode {
         rightZipline.setPosition(0.5);
         buttonPusher.setPosition(0.5);
         climberDropper.setPosition(0.5);
-        redDoor.setPosition(0);
-        blueDoor.setPosition(1);
+        redDoor.setPosition(1);
+        blueDoor.setPosition(0);
         divider.setPosition(0.5);
-        armLock.setPosition(0.5);
+        armLock.setPosition(0.7);
     }
 
     @Override
@@ -154,11 +154,11 @@ public class TeleOp extends OpMode {
             rightZipline.setPosition(0.5);
 
         if (gamepad2.x) {
-            redDoor.setPosition(1);
-            blueDoor.setPosition(0);
-        } else {
             redDoor.setPosition(0);
             blueDoor.setPosition(1);
+        } else {
+            redDoor.setPosition(1);
+            blueDoor.setPosition(0);
         }
 
         if (gamepad2.a) {
@@ -186,9 +186,9 @@ public class TeleOp extends OpMode {
         }
 
         if (arm_locked) {
-            armLock.setPosition(0);
+            armLock.setPosition(1.0);
         } else {
-            armLock.setPosition(0.5);
+            armLock.setPosition(0.7);
         }
 
     }

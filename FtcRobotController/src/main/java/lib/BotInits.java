@@ -48,6 +48,15 @@ public class BotInits {
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
         Robot.state.registerSensor("ultra", SensorState.SensorType.ULTRASONIC, true, 50);
 
+        for (int i = 0; i < 30; i++){
+            try {
+                Thread.sleep(50);
+                Robot.tel.addData("opmode", Robot.waiter.opModeIsActive());
+            } catch (InterruptedException ex){
+                break;
+            }
+        }
+
         Thread state_thread = new Thread(Robot.state);
         state_thread.start();
 

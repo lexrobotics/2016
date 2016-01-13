@@ -346,6 +346,7 @@ public class SensorState implements Runnable{
         double value;
 
         synchronized (this) {
+            Robot.tel.addData("inside synch", "");
             switch (sen.type) {
                 case GYRO:
                     return ((GyroSensor) sen.sensor).getHeading();
@@ -405,11 +406,13 @@ public class SensorState implements Runnable{
      */
     public void run() {
 //        while (Robot.waiter.opModeIsActive()){
+        //opmodeisactive() returns false during init stage
         while (true){
-            Robot.tel.addData("running?", "");
+//            Robot.tel.addData("running?", "");
             try {
                 for (SensorContainer sen : sensorContainers.values()) {
                     synchronized (this) {
+//                        Robot.tel.addData("inside for", "");
                         sen.filter.update(getSensorReading(sen));
                     }
                 }

@@ -26,8 +26,8 @@ public class bot2AutoTemplate extends LinearOpMode {
 //            }
 //        }
         while (Robot.state.gyroIsCalibrating("hero"));
-//        HelperFunctions.bot2SensorPrint(dave, this);
-        dave.colorSweep(SensorState.ColorType.RED, "light", "color", 0.2);
+        HelperFunctions.bot2SensorPrint(dave, this);
+//        dave.colorSweep(SensorState.ColorType.RED, "light", "color", 0.2);
 //        telemetry.addData("done", "yes");
     }
 }
