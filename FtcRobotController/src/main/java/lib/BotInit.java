@@ -14,7 +14,7 @@ import lib.SensorState;
 /**
  * Created by lhscompsci on 1/11/16.
  */
-public class BotInits {
+public class BotInit {
     public static Robot bot2 (HardwareMap hardwareMap, Telemetry telemetry, LinearOpMode op) {
         Robot dave = new Robot(hardwareMap, telemetry, op);
 
@@ -38,8 +38,8 @@ public class BotInits {
         dave.registerServo("buttonPusher", 0.5);
         dave.registerServo("climberDropper", 0.85);
 
-        dave.registerServo("redDoor", 0);
-        dave.registerServo("blueDoor", 1);
+        dave.registerServo("redDoor", 1);
+        dave.registerServo("blueDoor", 0);
         dave.registerUltrasonicServo("ultra", "ultraServo", 0.2);
         Robot.state = new SensorState(hardwareMap, 1, 0);
 
@@ -47,15 +47,6 @@ public class BotInits {
         Robot.state.registerSensor("light", SensorState.SensorType.LIGHT, true, 12);
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
         Robot.state.registerSensor("ultra", SensorState.SensorType.ULTRASONIC, true, 50);
-
-        for (int i = 0; i < 30; i++){
-            try {
-                Thread.sleep(50);
-                Robot.tel.addData("opmode", Robot.waiter.opModeIsActive());
-            } catch (InterruptedException ex){
-                break;
-            }
-        }
 
         Thread state_thread = new Thread(Robot.state);
         state_thread.start();

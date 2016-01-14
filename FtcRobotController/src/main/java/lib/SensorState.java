@@ -48,6 +48,14 @@ Also, NEVER EVER return an actual filter object being used in the SensorState. o
 // use ordinal and .values()
 
 /**
+ * REALLY REALLY REALLY IMPORTANT
+ * ALWAYS START A SENSORSTATE THREAD AFTER WAITFORSTART
+ * opmodeIsActive() returns false in init stage, so it would end.
+ */
+
+
+
+/**
  * TODO:
  *  - Find out whether the getter functions need delays to not block run()
  *  - Exponential averages
@@ -346,7 +354,6 @@ public class SensorState implements Runnable{
         double value;
 
         synchronized (this) {
-            Robot.tel.addData("inside synch", "");
             switch (sen.type) {
                 case GYRO:
                     return ((GyroSensor) sen.sensor).getHeading();
@@ -407,7 +414,7 @@ public class SensorState implements Runnable{
     public void run() {
 //        while (Robot.waiter.opModeIsActive()){
         //opmodeisactive() returns false during init stage
-        while (true){
+        while (Robot.waiter.opModeIsActive()){
 //            Robot.tel.addData("running?", "");
             try {
                 for (SensorContainer sen : sensorContainers.values()) {

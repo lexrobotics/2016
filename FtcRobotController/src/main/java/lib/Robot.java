@@ -66,7 +66,7 @@ public class Robot {
     }
 
     public void setPosition(String name, int position) {
-        servos.get(name).setPosition(position/180);
+        servos.get(name).setPosition(position / 180);
     }
 
     // REGISTRATION FUNCTIONS
@@ -87,7 +87,7 @@ public class Robot {
     }
 
     public void tillSense(String sensorName, double servoPosition, double power, int distance, int filterlength) {
-        PID ultraPID = new PID(0.05, 0.01, 0, true,0.1);
+        PID ultraPID = new PID(0.05, 0.01, 0, true, 0.1);
         ultraPID.setTarget(distance);
         ultraPID.setMinOutput(-1);
         ultraPID.setMaxOutput(1);
@@ -97,10 +97,10 @@ public class Robot {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        drivetrain.move(power,"hero",waiter);
+        drivetrain.move(power, "hero", waiter);
         while(!ultraPID.isAtTarget() && waiter.opModeIsActive()){
             power = ultraPID.update(state.getAvgSensorData(sensorName));
-            drivetrain.move(power, "hero", waiter);
+            drivetrain.mover.setPower(power);
 
             tel.addData("AvgUSDistance", state.getAvgSensorData(sensorName));
             try{
@@ -109,7 +109,7 @@ public class Robot {
                 e.printStackTrace();
             }
         }
-        drivetrain.move(0);
+        drivetrain.stopMove();
     }
 
     public void parallel(String sensorNameA, String sensorNameB, double power, double thresh, int filterlength) {
@@ -195,25 +195,64 @@ public class Robot {
 ////            ((TwoWheelDrive)drivetrain).moveDistance(-0.18, 8);
 //        }
 //    }
-    public void colorSweep(SensorState.ColorType color, String lightname, String colorname, double power) {
+    public void pushButton(String servoName){
+        servos.get(servoName).setPosition(0);
+        try{
+            Thread.sleep(3000);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
 
-//        SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
+        servos.get(servoName).setPosition(1);
+
+        try{
+            Thread.sleep(3000);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
+        servos.get("buttonPusher").setPosition(0.5);
+
+    }
+
+    public void pushButton(String servoName, int duration){
+        servos.get(servoName).setPosition(0);
+        try{
+            Thread.sleep(duration);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
+
+        servos.get(servoName).setPosition(0.5);
+
+
+    }
+
+    public void colorSweep(SensorState.ColorType color, String lightname, String colorname, double power, int bumpthresh) {
+
 
         SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
+        this.pushButton("buttonPusher", 1200);
 
-        double average = 0.0;                     // Average of light values
         double reading = 0.0;
         try {
             Thread.sleep(20);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        double baseline = state.getAvgSensorData("hero");
-
-//        drivetrain.move(power,"hero", waiter);
+        double baseline = state.getAvgSensorData("light");
 
 //        reading = state.getAvgSensorData(lightname);
-        drivetrain.move(power, "hero", this.waiter);
+        if (color == SensorState.ColorType.RED) {
+            drivetrain.move(power, "hero", this.waiter);
+        }
+        else
+            drivetrain.move(-power, "hero", this.waiter);
+
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
 
         do {
             dominant = state.getColorData("color");
@@ -224,18 +263,35 @@ public class Robot {
             } catch (InterruptedException ex){
                 ex.printStackTrace();
             }
+
+            if (!waiter.opModeIsActive()){
+                return;
+            }
         } while (!(dominant == SensorState.ColorType.BLUE || dominant == SensorState.ColorType.RED) && waiter.opModeIsActive());
-        drivetrain.move(0, "hero", this.waiter);
-
         drivetrain.stopMove();
-        drivetrain.moveDistance(power, 2);
 
-        drivetrain.move(-.75 * power, "hero", this.waiter);
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
+
+
+        if(color == SensorState.ColorType.RED)
+            drivetrain.moveDistance(-power, 5);
+
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
+
+        drivetrain.move(.75 * power, "hero", this.waiter);
         while(waiter.opModeIsActive()){
             reading = state.getSensorReading(lightname);
             Robot.tel.addData("reading", reading);
 
-            if(Math.abs(reading - baseline) > 20 ) {
+            if(Math.abs(reading - baseline) > bumpthresh ) {
                 Robot.tel.addData("bump detected", "");
                 break;
             }
@@ -247,38 +303,28 @@ public class Robot {
 
 
         }
-        drivetrain.move(0, "hero", this.waiter);
 
         drivetrain.stopMove();
 
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
+
+        double correctScoot = 0 ;
+        double wrongScoot = 2 ;
 
         if (dominant == color) {
             tel.addData("Color", "CORRECT");
-            drivetrain.moveDistance(power, 4);
+            //drivetrain.moveDistance(-power, correctScoot);
         }
         else {
             tel.addData("Color", "WRONG");
-            drivetrain.moveDistance(power, 8);
+            drivetrain.moveDistance(power, wrongScoot);
         }
+        this.pushButton("buttonPusher");
 
-        servos.get("buttonPusher").setPosition(1);
-        try{
-            Thread.sleep(2500);
-        } catch (InterruptedException ex){
-            ex.printStackTrace();
-        }
-
-        servos.get("buttonPusher").setPosition(0);
-
-        try{
-            Thread.sleep(1500);
-        } catch (InterruptedException ex){
-            ex.printStackTrace();
-        }
-
-        servos.get("buttonPusher").setPosition(0.5);
         servos.get("climberDropper").setPosition(0.3);
-
-
     }
 }

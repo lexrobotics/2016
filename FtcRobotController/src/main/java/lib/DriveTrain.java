@@ -13,13 +13,17 @@ public class DriveTrain {
     // basic levels of wheel control.
 
     //OVERRIDDEN:
-    public void setLeftMotors(double power) {}
-    public void setRightMotors(double power) {}
-
-    public void resetEncoders() {}
+    public void setLeftMotors(double power) {
+        throw new RuntimeException("Bad function called from Drivetrain");
+    }
+    public void setRightMotors(double power) {
+        throw new RuntimeException("Bad function called from Drivetrain");
+    }
+    public void resetEncoders() {
+        throw new RuntimeException("Bad function called from Drivetrain");
+    }
     public int getEncoders() {
-        Robot.tel.addData("BAD GETENCODERS CALLED", "");
-        return 0;
+        throw new RuntimeException("Bad function called from Drivetrain");
     }
     // END OF OVERRIDDEN
 
@@ -39,6 +43,9 @@ public class DriveTrain {
 
     public double getExpectedHeading() { return expectedHeading; }
 
+    // Returns the difference between the first angle and the second.
+    // The returned value is between -180 and 180, so it does account for sign.
+    // Accounts for modulus around 360
     public double angleDist(double deg1, double deg2) {
         double absDist = (360 + deg2 - deg1) % 360;
         if (absDist > 180)
@@ -64,6 +71,7 @@ public class DriveTrain {
         setRightMotors(power);
     }
 
+    // Uses MovementThread to move a distance while correcting for nudges.
     public void moveDistanceWithCorrections(double power, String gyro_name, double distance, LinearOpMode waiter){
         // 1120 ticks in the encoder
         resetEncoders();
@@ -73,12 +81,10 @@ public class DriveTrain {
         while (Math.abs(this.getEncoders()) < distance && waiter.opModeIsActive()) {
             Robot.tel.addData("encoder", this.getEncoders());
         }
-        stopMove();
-
-        setLeftMotors(0);
-        setRightMotors(0);
+        this.stopMove();
     }
 
+    // Starts a new MovementThread, with protections to avoid creating a new one while one is running.
     public void move(double power, String gyro_name, LinearOpMode waiter){
         if(!thread_running) {
 
@@ -90,13 +96,23 @@ public class DriveTrain {
 
         else {
             mover.setPower(power);
+//            throw new RuntimeException("You have to stop the existing MovementThread.");
         }
     }
 
     public void stopMove() {
+        mover.setPower(0);
+        this.setLeftMotors(0);
+        this.setRightMotors(0);
         if (thread_running){
             move_thread.interrupt();
             thread_running = false;
+
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ex){
+                throw new RuntimeException("interrupted");
+            }
         }
         this.setLeftMotors(0);
         this.setRightMotors(0);
@@ -169,7 +185,7 @@ public class DriveTrain {
             index = -index;
         }
 
-        // index cannot exceed size of array minus 1.
+        // index cannot excmoveeed size of array minus 1.
         if (index > 16) {
             index = 16;
         }
@@ -187,24 +203,47 @@ public class DriveTrain {
     }
 
     public void dumbGyroTurn(double power, double angle, String name){
-        double goal = (Robot.state.getSensorReading(name) + Math.signum(power) * angle + 360) % 360;
+//        expectedHeading = (expectedHeading + Math.signum(power) * angle + 360) % 360;
+        expectedHeading = (360 - angle)%360;
+
         this.setLeftMotors(power);
         this.setRightMotors(-power);
 
-        double diff = angleDist(goal, Robot.state.getSensorReading(name));
-        double prevDiff = diff;
-
-        while (angleDist(goal, Robot.state.getSensorReading(name)) < 2.1 && Robot.waiter.opModeIsActive()){
-            diff = angleDist(goal, Robot.state.getSensorReading(name));
-            if (diff - prevDiff > 0){
-                break;
+        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(name))) > 6 && Robot.waiter.opModeIsActive()){
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex){
+                ex.printStackTrace();
             }
         }
 
         this.setLeftMotors(0);
         this.setRightMotors(0);
-
-        expectedHeading = (expectedHeading + Math.signum(power) * angle + 360) % 360;
     }
 
+    // angle should never be negative.
+    public void dumbGyroTurn(double power, boolean left, double angle, String name){
+//        expectedHeading = (expectedHeading + Math.signum(power) * angle + 360) % 360;
+
+        expectedHeading = (360 - angle)%360;
+
+        if (left){
+            this.setLeftMotors(power);
+            this.setRightMotors(0);
+        } else {
+            this.setLeftMotors(0);
+            this.setRightMotors(power);
+        }
+
+        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(name))) > 6 && Robot.waiter.opModeIsActive()){
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex){
+                ex.printStackTrace();
+            }
+        }
+
+        this.setLeftMotors(0);
+        this.setRightMotors(0);
+    }
 }
