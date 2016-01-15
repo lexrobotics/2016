@@ -67,18 +67,24 @@ public class RedPath extends LinearOpMode {
         // Path
 //        dave.drivetrain.moveDistanceWithCorrections(0.6, "hero", 10, this);
 //        Thread.sleep(200);
+        Robot.tel.addData("ultra", Robot.state.getAvgSensorData("ultra"));
+
         dave.drivetrain.dumbGyroTurn(0.75, false, 45, "hero");
+        dave.motors.get("noodler").setPower(.35);
         Thread.sleep(200);
-        dave.tillSense("ultra", 0.5, 0.5, 12, 10);
+        dave.tillSense("ultra", 0.5, 0.2, 12, 10);
         Thread.sleep(200);
-        dave.drivetrain.moveDistanceWithCorrections(0.6, "hero", 5, this);
+//        dave.drivetrain.moveDistance(0.6, 2);
 
         Thread.sleep(200);
-        dave.drivetrain.dumbGyroTurn(0.5, -0, "hero");
+        dave.drivetrain.dumbGyroTurn(0.5, true, 0, "hero");
+
         Thread.sleep(200);
-//
+        dave.motors.get("noodler").setPower(0);
+
         dave.colorSweep(SensorState.ColorType.RED, "light", "color", 0.4, 20);
 ////        dave.drivetrain.dumbGyroTurn(0.5, , 90, "hero");
+//        dave.drivetrain.moveDistance(-0.6, 10);
         while (opModeIsActive()) {
             telemetry.addData("done", "yes");
 

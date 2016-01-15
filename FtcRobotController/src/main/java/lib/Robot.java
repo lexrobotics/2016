@@ -23,7 +23,7 @@ public class Robot {
     public static Telemetry tel;
     // Store the objects corresponding to the devices of the robot (motors, sensors, servos) in hashmaps.
     public HashMap<String, DcMotor> motors;
-    private HashMap<String, Servo> servos;
+    public HashMap<String, Servo> servos;
     public UltraServoHelper ultraservohelper;
     public static LinearOpMode waiter;
 
@@ -198,7 +198,7 @@ public class Robot {
     public void pushButton(String servoName){
         servos.get(servoName).setPosition(0);
         try{
-            Thread.sleep(3000);
+            Thread.sleep(1200);
         } catch (InterruptedException ex){
             ex.printStackTrace();
         }
@@ -206,7 +206,7 @@ public class Robot {
         servos.get(servoName).setPosition(1);
 
         try{
-            Thread.sleep(3000);
+            Thread.sleep(1200);
         } catch (InterruptedException ex){
             ex.printStackTrace();
         }
@@ -231,7 +231,7 @@ public class Robot {
 
 
         SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
-        this.pushButton("buttonPusher", 1200);
+//        this.pushButton("buttonPusher", 1000);
 
         double reading = 0.0;
         try {
@@ -311,20 +311,40 @@ public class Robot {
         } catch (InterruptedException ex){
             ex.printStackTrace();
         }
+//        drivetrain.moveDistance(power, 4);
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-        double correctScoot = 0 ;
-        double wrongScoot = 2 ;
+
+//
+//        double correctScoot = 0 ;
+//        double wrongScoot = 2 ;
+//
+
 
         if (dominant == color) {
-            tel.addData("Color", "CORRECT");
-            //drivetrain.moveDistance(-power, correctScoot);
-        }
-        else {
-            tel.addData("Color", "WRONG");
-            drivetrain.moveDistance(power, wrongScoot);
-        }
-        this.pushButton("buttonPusher");
+//            drivetrain.moveDistance(power, 3);
+            tel.addData("Color", "First");
+        } else {
+            tel.addData("Color", "Second");
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
+        }
+        this.pushButton("buttonPusher", 1500);
         servos.get("climberDropper").setPosition(0.3);
+        this.pushButton("buttonPusher");
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 }
