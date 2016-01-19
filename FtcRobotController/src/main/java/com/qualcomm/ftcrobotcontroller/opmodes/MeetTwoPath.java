@@ -39,7 +39,7 @@ public class MeetTwoPath extends LinearOpMode {
 
         //movement//
 
-        dave_train.moveDistance(0.5, 65);
+        dave_train.moveDistance(0.5, 65, this);
 //        dave_train.turnWithGyro(90,"hero");
     }
 }

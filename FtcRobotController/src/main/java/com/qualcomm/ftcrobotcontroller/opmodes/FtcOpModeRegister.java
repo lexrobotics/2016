@@ -58,7 +58,9 @@ public class FtcOpModeRegister implements OpModeRegister {
      * The NullOp op mode
      */
         manager.register("NullOp", NullOp.class);
-        manager.register("SensorStateOpMode", SensorStateOpMode.class);
+//        manager.register("SensorStateOpMode", SensorStateOpMode.class);
+        manager.register("TestOpmode", TestOpMode.class);
+
 //        manager.register("Meet2Path", MeetTwoPath.class);
 //
 //        manager.register("DropPath", DropPath.class);

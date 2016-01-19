@@ -36,11 +36,17 @@ import java.util.HashMap;
 /*
 PRECAUTIONS:
 Never try reading gyro values until it's calibrated.
+
 Some of the private functions don't need to be synchronized only because they are only ever called from run()
 NEVER make them public. Very sneaky things could follow.
+
 The ColorSensors get their own functions. Don't try to use the general-purpose ones for color.
+
 Early in the program, remember that not all of the filter array will be filled, so the averages will start near zero.
-Remember to delete SensorData objects you get to avoid leaks.  (Actually that's probably handled by garbage collection)
+use filterIsFilled()
+
+delete Filter objects or other objects returned from SensorState
+
 Also, NEVER EVER return an actual filter object being used in the SensorState. only return clones, to avoid synchronization issues.
  */
 
@@ -58,6 +64,8 @@ Also, NEVER EVER return an actual filter object being used in the SensorState. o
 /**
  * TODO:
  *  - Find out whether the getter functions need delays to not block run()
+ *  oesn'
+ *
  *  - Exponential averages
  *  - Investigate problem of volatility:
  *

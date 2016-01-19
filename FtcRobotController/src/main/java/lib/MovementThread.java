@@ -109,6 +109,8 @@ public class MovementThread implements Runnable {
 
                 Thread.sleep(1);
             } catch (InterruptedException ex) {
+                drivetrain.setLeftMotors(0);
+                drivetrain.setRightMotors(0);
                 Thread.currentThread().interrupt();
                 break;
             }

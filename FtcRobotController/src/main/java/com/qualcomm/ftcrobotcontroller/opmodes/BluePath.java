@@ -101,7 +101,7 @@ public class BluePath extends LinearOpMode {
 
         dave.drivetrain.stopMove();
 
-        dave.drivetrain.moveDistance(0.5, 6);
+        dave.drivetrain.moveDistance(0.5, 6, dave.waiter);
         dave.drivetrain.stopMove();
         Thread.sleep(200);
         dave.pushButton("buttonPusher", 1500);

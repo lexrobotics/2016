@@ -53,11 +53,11 @@ public class DriveTrain {
         return absDist;
     }
 
-    public void moveDistance(double power, double distance){
+    public void moveDistance(double power, double distance, LinearOpMode waiter){
         this.resetEncoders();
         distance = (distance / wheel_circumference) * 1120;
 
-        while (Math.abs(getEncoders()) < distance) {
+        while (Math.abs(getEncoders()) < distance && waiter.opModeIsActive()) {
             //fix this later
             this.setLeftMotors(power);
             this.setRightMotors(power);
