@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import lib.DriveTrain;
 import lib.FourWheelDrive;
+import lib.HelperFunctions;
 import lib.Robot;
 import lib.SensorState;
 import lib.TwoWheelDrive;
@@ -59,8 +60,7 @@ public class TestOpMode extends LinearOpMode{
             Thread.sleep(10);
         }
 
-        dave.tillSense("ultra", 0.5, 0.7, 20, 1);
-
+        HelperFunctions.moveEncoderTest(dave,this);
         while (opModeIsActive()){
             Thread.sleep(10);
         }

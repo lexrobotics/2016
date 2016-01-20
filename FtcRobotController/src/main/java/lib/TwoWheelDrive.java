@@ -9,6 +9,7 @@ public class TwoWheelDrive extends DriveTrain {
     // Diameter and moveDistance should be measured in inches.
 
     private DcMotor leftMotor, rightMotor;
+    private int rightEncoder, leftEncoder;
 
     public TwoWheelDrive (DcMotor leftMotor, boolean leftRev, DcMotor rightMotor, boolean rightRev, double wheel_diameter) {
         this.wheel_circumference = wheel_diameter * Math.PI;

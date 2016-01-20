@@ -22,16 +22,16 @@ public class RedPath extends LinearOpMode {
 //        Changed dumbGyroTurn to stop when the angledistance starts increasing again.
 
 //        Robot dave = BotInit.bot2(hardwareMap, telemetry, this);
+        Robot dave = new Robot(hardwareMap, telemetry, this);
 
+        DriveTrain dave_train = new FourWheelDrive(
+                hardwareMap.dcMotor.get("leftFrontDrive"), false,
+                hardwareMap.dcMotor.get("rightFrontDrive"), false,
+                hardwareMap.dcMotor.get("leftRearDrive"), true,
+                hardwareMap.dcMotor.get("rightRearDrive"), true,
+                4);
         try {
-            Robot dave = new Robot(hardwareMap, telemetry, this);
 
-            DriveTrain dave_train = new FourWheelDrive(
-                    hardwareMap.dcMotor.get("leftFrontDrive"), false,
-                    hardwareMap.dcMotor.get("rightFrontDrive"), false,
-                    hardwareMap.dcMotor.get("leftRearDrive"), true,
-                    hardwareMap.dcMotor.get("rightRearDrive"), true,
-                    4);
             dave.registerDriveTrain(dave_train);
 
             dave.registerMotor("noodler");
@@ -70,9 +70,9 @@ public class RedPath extends LinearOpMode {
 
             // Path
             dave.drivetrain.dumbGyroTurn(0.75, false, 45, "hero");
-            dave.motors.get("noodler").setPower(.35);
+            dave.motors.get("noodler").setPower(.25);
             Thread.sleep(200);
-            dave.tillSense("ultra", 0.5, 0.2, 12, 10);
+            dave.tillSense("ultra", 0.5, 0.7, 12, 10);
 
             Thread.sleep(200);
             dave.drivetrain.moveDistance(0.6, 2,this);
@@ -92,6 +92,9 @@ public class RedPath extends LinearOpMode {
             }
         } catch(InterruptedException ex) {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");
+            dave.drivetrain.setLeftMotors(0);
+            dave.drivetrain.setRightMotors(0);
+
             return;
         }
     }

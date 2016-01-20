@@ -89,8 +89,8 @@ public class Robot {
     public void tillSense(String sensorName, double servoPosition, double power, int distance, int filterlength) throws InterruptedException{
         PID ultraPID = new PID(0.05, 0.01, 0, true, 0.1);
         ultraPID.setTarget(distance);
-        ultraPID.setMinOutput(-1);
-        ultraPID.setMaxOutput(1);
+        ultraPID.setMinOutput(-power);
+        ultraPID.setMaxOutput(power);
         ultraservohelper.setPosition(sensorName, servoPosition);
             Thread.sleep(400);
         drivetrain.move(power, "hero", waiter);
@@ -144,46 +144,7 @@ public class Robot {
     // tillSense for colors. If the first color we detect is the color argument (our teams color)
     // Then we will hit that button.
     // Otherwise, we go to the next light.
-//    public void colorSweep(SensorState.ColorType color, double low_threshold, double high_threshold, String lightname, String colorname, double power) {
-//
-//        SensorState.ColorType stored_color = SensorState.ColorType.NONE;               // First detected color
-//        SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
-//        double average = 0.0;                     // Average of light values
-//        double reading = 0.0;
-//
-////        drivetrain.move(power,"hero", waiter);
-//
-//        average = state.getAvgSensorData(lightname);
-//
-//        while (waiter.opModeIsActive()) {
-//            reading = state.getAvgSensorData(lightname);
-//            tel.addData("Reading", reading);
-//            tel.addData("Average", average);
-//
-//            if (average + low_threshold <= reading && reading <= average + high_threshold){
-////                break;
-//            }
-//            try{
-//                Thread.sleep(1);
-//            } catch (InterruptedException ex){}
-//        }
-//
-//        drivetrain.stopMove();
-//
-//
-//        if (dominant == color){
-//            tel.addData("Color", "CORRECT");
-////            drivetrain.move(0.0);
-////            ((TwoWheelDrive)drivetrain).moveDistance(0.18, 8);
-//        }
-//
-//        // First color detected is wrong color, so hit other button, which must be the right button.
-//        else {
-//            tel.addData("Color", "WRONG");
-////            drivetrain.move(0.0);
-////            ((TwoWheelDrive)drivetrain).moveDistance(-0.18, 8);
-//        }
-//    }
+
     public void pushButton(String servoName) throws InterruptedException{
         servos.get(servoName).setPosition(0);
             Thread.sleep(1200);

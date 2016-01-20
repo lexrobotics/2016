@@ -28,7 +28,6 @@ public class DriveTrain {
     // END OF OVERRIDDEN
 
     protected double wheel_circumference;
-    protected int rightEncoder, leftEncoder;
 
     protected Thread move_thread;
     protected MovementThread mover;
@@ -73,7 +72,7 @@ public class DriveTrain {
     }
 
     // Uses MovementThread to move a distance while correcting for nudges.
-    public void moveDistanceWithCorrections(double power, String gyro_name, double distance, LinearOpMode waiter){
+    public void moveDistanceWithCorrections(double power, String gyro_name, double distance, LinearOpMode waiter) throws InterruptedException {
         // 1120 ticks in the encoder
         resetEncoders();
         distance = (distance / wheel_circumference) * 1120;
@@ -101,7 +100,7 @@ public class DriveTrain {
         }
     }
 
-    public void stopMove() {
+    public void stopMove() throws InterruptedException {
         mover.setPower(0);
         this.setLeftMotors(0);
         this.setRightMotors(0);
@@ -109,11 +108,7 @@ public class DriveTrain {
             move_thread.interrupt();
             thread_running = false;
 
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException ex){
-                throw new RuntimeException("interrupted");
-            }
+            Thread.sleep(200);
         }
         this.setLeftMotors(0);
         this.setRightMotors(0);
@@ -133,7 +128,7 @@ public class DriveTrain {
         setRightMotors(0);
     }
 
-    public void turnWithGyro(int degrees, String name) {
+    public void turnWithGyro(int degrees, String name) throws InterruptedException {
         int i=0;
 //        PID turnPID = new PID(.03,0.0078,0.005,true, 1.1, 20); // 0.003
         PID turnPID = new PID(0.011, 0.01, 0, true, 0, -1); // 0.003
@@ -149,11 +144,7 @@ public class DriveTrain {
             Robot.tel.addData("loops", i);
             this.setRightMotors(scaleInput(update));
             this.setLeftMotors(scaleInput(-update));
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Thread.sleep(10);
             i++;
         }
         this.setLeftMotors(0);
@@ -203,7 +194,7 @@ public class DriveTrain {
         return direction * dScale;
     }
 
-    public void dumbGyroTurn(double power, double angle, String name){
+    public void dumbGyroTurn(double power, double angle, String name) throws InterruptedException {
 //        expectedHeading = (expectedHeading + Math.signum(power) * angle + 360) % 360;
         expectedHeading = (360 - angle)%360;
 
@@ -211,11 +202,7 @@ public class DriveTrain {
         this.setRightMotors(-power);
 
         while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(name))) > 6 && Robot.waiter.opModeIsActive()){
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex){
-                ex.printStackTrace();
-            }
+            Thread.sleep(10);
         }
 
         this.setLeftMotors(0);
@@ -223,7 +210,7 @@ public class DriveTrain {
     }
 
     // angle should never be negative.
-    public void dumbGyroTurn(double power, boolean left, double angle, String name){
+    public void dumbGyroTurn(double power, boolean left, double angle, String name) throws InterruptedException {
 //        expectedHeading = (expectedHeading + Math.signum(power) * angle + 360) % 360;
 
         expectedHeading = (360 - angle)%360;
@@ -237,11 +224,7 @@ public class DriveTrain {
         }
 
         while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(name))) > 6 && Robot.waiter.opModeIsActive()){
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex){
-                ex.printStackTrace();
-            }
+            Thread.sleep(10);
         }
 
         this.setLeftMotors(0);
@@ -250,7 +233,7 @@ public class DriveTrain {
 
     // angle should never be negative.
     // ^ screw you
-    public void dumbBlueGyroTurn(double power, boolean left, double angle, String name){
+    public void dumbBlueGyroTurn(double power, boolean left, double angle, String name) throws InterruptedException{
 //        expectedHeading = (expectedHeading + Math.signum(power) * angle + 360) % 360;
 
         expectedHeading = (angle)%360;
@@ -264,11 +247,7 @@ public class DriveTrain {
         }
 
         while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(name))) > 6 && Robot.waiter.opModeIsActive()){
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex){
-                ex.printStackTrace();
-            }
+            Thread.sleep(10);
         }
 
         this.setLeftMotors(0);
@@ -277,7 +256,7 @@ public class DriveTrain {
 
     // angle should never be negative.
     // ^ screw you
-    public void dumbLukeMakesMeSadBlueGyroTurn(double leftPower, double rightPower, double angle, String name){
+    public void dumbLukeMakesMeSadBlueGyroTurn(double leftPower, double rightPower, double angle, String name) throws InterruptedException {
 //        expectedHeading = (expectedHeading + Math.signum(power) * angle + 360) % 360;
 
         expectedHeading = (angle)%360;
@@ -286,11 +265,7 @@ public class DriveTrain {
         this.setRightMotors(rightPower);
 
         while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(name))) > 6 && Robot.waiter.opModeIsActive()){
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex){
-                ex.printStackTrace();
-            }
+            Thread.sleep(10);
         }
 
         this.setLeftMotors(0);

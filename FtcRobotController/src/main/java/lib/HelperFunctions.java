@@ -25,10 +25,10 @@ public class HelperFunctions {
             }
         }
     }
-    public static void moveEncoderTest(Robot dave, LinearOpMode op){
+    public static void moveEncoderTest(Robot dave, LinearOpMode op) throws InterruptedException {
         dave.drivetrain.moveDistanceWithCorrections(0.5,"hero",12,op);
     }
-    public static void turnWithGyroTest(Robot dave, LinearOpMode op){
+    public static void turnWithGyroTest(Robot dave, LinearOpMode op) throws InterruptedException {
         dave.drivetrain.turnWithGyro(90,"hero");
     }
     public static void encodersPrint(Robot dave, LinearOpMode op) {
