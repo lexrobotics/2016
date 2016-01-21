@@ -32,14 +32,14 @@ public class SimpleRobot
         opm = o;
     }
 
-    public void registerServo(String servoName, double initial_position) {
+    public static void registerServo(String servoName, double initial_position) {
         if (!servos.keySet().contains(servoName)){
             hmap.servo.get(servoName).setPosition(initial_position);
             servos.put(servoName, hmap.servo.get(servoName));
         }
     }
 
-    public void registerMotor (String motorName, double initial_power) {
+    public static void registerMotor (String motorName, double initial_power) {
         if (!motors.containsKey(motorName)){
             hmap.dcMotor.get(motorName).setPower(initial_power);
             motors.put(motorName, hmap.dcMotor.get(motorName));
