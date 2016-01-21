@@ -19,7 +19,7 @@ public class SimpleRobot
     public static Telemetry tel;
     public static LinearOpMode opm;
     public static HardwareMap hmap;
-    public static DriveTrain drivetrain;
+    public DriveTrain drivetrain;
 
     public HashMap<String, DcMotor> motors;
     public HashMap<String, Servo> servos;
@@ -31,7 +31,7 @@ public class SimpleRobot
     }
 
     public void registerDriveTrain(DriveTrain d) {
-        drivetrain = d;
+        this.drivetrain = d;
     }
 
     public void registerServo(String servoName) {
