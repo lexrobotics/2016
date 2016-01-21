@@ -16,9 +16,9 @@ import java.util.HashMap;
 public class SimpleRobot
 {
     // Objects for Functions
-    public HardwareMap hmap;
     public static Telemetry tel;
-    public LinearOpMode opm;
+    public static LinearOpMode opm;
+    public HardwareMap hmap;
     public DriveTrain drivetrain;
 
     // HashMap Stores Moving Parts
