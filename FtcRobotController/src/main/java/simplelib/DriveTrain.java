@@ -13,27 +13,29 @@ import java.util.HashMap;
 
 public class DriveTrain
 {
-  private final double TURN_SCALAR = 0.23;
-  private double wheel_circumference, expectedHeading;
+    /*
+     * REGISTRATION FUNCTIONS
+     **/
 
-  private HashMap<String, DcMotor> left, right;
-  private HashMap<String, int> leftEncoder, rightEncoder;
+    private final double TURN_SCALAR = 0.23;
+    private double wheel_circumference, expectedHeading;
 
-  public DriveTrain(String[] leftnames, String[] rightnames, double wheel_diameter)
-  {
+    private HashMap<String, DcMotor> left, right;
+    private HashMap<String, Integer> leftEncoder, rightEncoder;
+
+    public DriveTrain(String[] leftnames, String[] rightnames, double wheel_diameter)
+    {
         this.wheel_circumference = Math.PI * wheel_diameter;
 
-        for (String name : leftnames) left.putIfAbsent(name, SimpleRobot.hmap.dcMotor.get(name));
-        for (String name : rightnames) right.putIfAbsent(name, SimpleRobot.hmap.dcMotor.get(name));
+        for (String name : leftnames) left.put(name, SimpleRobot.hmap.dcMotor.get(name));
+        for (String name : rightnames) right.put(name, SimpleRobot.hmap.dcMotor.get(name));
 
-        this.leftEncoder = new int[left.length];
-        this.rightEncoder = new int[right.length];
-        this.resetEncoders();
+        resetEncoders();
     }
     
     public void reverseMotor(String name) {
-        if (left.containsKey(name)) left[name].setDirection(DcMotor.Direction.REVERSE);
-        else if (right.containsKey(name)) right[name].setDirection(DcMotor.Direction.REVERSE);
+        if (left.containsKey(name)) left.get(name).setDirection(DcMotor.Direction.REVERSE);
+        else if (right.containsKey(name)) right.get(name).setDirection(DcMotor.Direction.REVERSE);
         else throw new RuntimeException("Motor not registered");
     }
 
@@ -46,14 +48,21 @@ public class DriveTrain
     }
 
     public void resetEncoders() {
-        for (String i : left.keys()) leftEncoder[i] = left[i].getCurrentPosition();
-        for (String i : right.keys()) rightEncoder[i] = right[i].getCurrentPosition();
+        for (String i : left.keySet()) leftEncoder.put(i, left.get(i).getCurrentPosition());
+        for (String i : right.keySet()) rightEncoder.put(i, right.get(i).getCurrentPosition());
     }
     
     public int getEncoders() {
-      double ans = 0.0;
-      for (String name : left.keys()) ans += left[name].getCurrentPosition() - leftEncoder[name];
-      for (String name : right.keys()) ans += right[name].getCurrentPosition() - rightEncoder[name];
-      return ans / (double)(left.length + right.length);
+      int ans = 0;
+      for (String name : left.keySet())
+          ans += left.get(name).getCurrentPosition() - leftEncoder.get(name);
+      for (String name : right.keySet())
+          ans += right.get(name).getCurrentPosition() - rightEncoder.get(name);
+      return ans / (left.keySet().size() + right.keySet().size());
     }
+
+    /*
+     * MOVEMENT FUNCTIONS
+     **/
+
 }

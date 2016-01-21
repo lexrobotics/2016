@@ -24,7 +24,7 @@ public class SimpleRobot
     public static HashMap<String, DcMotor> motors;
     public static HashMap<String, Servo> servos;
 
-    public static init(HardwareMap h, Telemetry t, LinearOpMode o) {
+    public static void init(HardwareMap h, Telemetry t, LinearOpMode o) {
         hmap = h;
         tel = t;
         opm = o;
