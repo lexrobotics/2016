@@ -9,42 +9,46 @@ import java.util.HashMap;
 
 /**
  * SimpleRobot is a rewrite of the orignal Robot, with more simplicity.
- * It is not static; chose to make it an object.
- * 
+ * It is not 100% static; chose to make it more object-like.
+ *
+ * Written by Vivek Bhupatiraju & Luke West
  */
 
 public class SimpleRobot
 {
-    // Objects for Functions
     public static Telemetry tel;
     public static LinearOpMode opm;
-    public HardwareMap hmap;
-    public DriveTrain drivetrain;
+    public static HardwareMap hmap;
+    public static DriveTrain drivetrain;
 
-    // HashMap Stores Moving Parts
     public HashMap<String, DcMotor> motors;
     public HashMap<String, Servo> servos;
 
-    // Cannot Make Instance of Mah Boi
     public SimpleRobot(HardwareMap h, Telemetry t, LinearOpMode o) {
-        this.hmap = h;
-        this.tel = t;
-        this.opm = o;
+        hmap = h;
+        tel = t;
+        opm = o;
     }
 
-    public void registerServo(String servoName, double initial_position) {
-        if (!servos.keySet().contains(servoName)){
-            hmap.servo.get(servoName).setPosition(initial_position);
+    public void registerDriveTrain(DriveTrain d) {
+        drivetrain = d;
+    }
+
+    public void registerServo(String servoName) {
+        if (!servos.keySet().contains(servoName))
             servos.put(servoName, hmap.servo.get(servoName));
-        }
     }
 
-    public void registerMotor (String motorName, double initial_power) {
-        if (!motors.containsKey(motorName)){
-            hmap.dcMotor.get(motorName).setPower(initial_power);
+    public void registerMotor (String motorName) {
+        if (!motors.containsKey(motorName))
             motors.put(motorName, hmap.dcMotor.get(motorName));
-        }
     }
 
+    public void setPosition(String name, double pos) {
+        servos.get(name).setPosition(pos / 180.0);
+    }
 
+    public void setPower(String name, double power) {
+        motors.get(name).setPower(power);
+    }
 }
