@@ -75,7 +75,15 @@ public class BluePath extends LinearOpMode {
 
             dave.drivetrain.dumbBlueGyroTurn(0.75, true, 45, "hero");
             Thread.sleep(200);
-            dave.tillSense("ultra", 1, 0.2, 15, 10);
+            dave.drivetrain.moveDistanceWithCorrections(0.3, "hero", 30, this);
+
+            dave.drivetrain.dumbGyroTurn(-0.75, 0, "hero");
+            Thread.sleep(100);
+            dave.drivetrain.moveDistanceWithCorrections(0.3, "hero", 18, this);
+            Thread.sleep(100);
+            dave.drivetrain.dumbGyroTurn(0.75, 260, "hero");
+            Thread.sleep(100);
+            dave.tillLimitSwitch("limit", 0.2, "ultraServo", 1, 0.3);
             Thread.sleep(200);
             dave.drivetrain.dumbLukeMakesMeSadBlueGyroTurn(0.75, -0.5, 180, "hero");
             Thread.sleep(200);
@@ -97,12 +105,12 @@ public class BluePath extends LinearOpMode {
 
             dave.drivetrain.stopMove();
 
-            dave.drivetrain.moveDistance(0.5, 6, dave.waiter);
+            dave.drivetrain.moveDistance(0.5, 3, dave.waiter);
             dave.drivetrain.stopMove();
             Thread.sleep(200);
-            dave.pushButton("buttonPusher", 1500);
+            //dave.pushButton("buttonPusher", 1500);
             dave.servos.get("climberDropper").setPosition(0.3);
-            dave.pushButton("buttonPusher");
+            //dave.pushButton("buttonPusher");
 
 
         } catch(InterruptedException ex) {

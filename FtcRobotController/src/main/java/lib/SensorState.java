@@ -220,6 +220,10 @@ public class SensorState implements Runnable{
         }
     }
 
+    public void colorLightToggle(String color_name, boolean toggle){
+        ((ColorSensor) sensorContainers.get(color_name).sensor).enableLed(toggle);
+    }
+
     /**
      * Updates the types_inv HashMap.
      *

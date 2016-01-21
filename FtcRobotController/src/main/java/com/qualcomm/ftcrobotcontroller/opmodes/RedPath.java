@@ -48,7 +48,8 @@ public class RedPath extends LinearOpMode {
 
             dave.registerServo("redDoor", 1);
             dave.registerServo("blueDoor", 0);
-            dave.registerUltrasonicServo("ultra", "ultraServo", 0.2);
+            hardwareMap.servo.get("ultraServo").setPosition(0.3);
+//            dave.registerUltrasonicServo("ultra", "ultraServo", 0.2);
             Robot.state = new SensorState(hardwareMap, 1, 0);
 
             Robot.state.registerSensor("color", SensorState.SensorType.COLOR, false, 12);
@@ -70,22 +71,29 @@ public class RedPath extends LinearOpMode {
 
             // Path
             dave.drivetrain.dumbGyroTurn(0.75, false, 45, "hero");
-            dave.motors.get("noodler").setPower(.25);
+            dave.motors.get("noodler").setPower(.75);
             Thread.sleep(200);
-            dave.tillSense("ultra", 0.5, 0.7, 12, 10);
 
-            Thread.sleep(200);
-            dave.drivetrain.moveDistance(0.6, 2,this);
 
-            Thread.sleep(200);
-            dave.drivetrain.dumbGyroTurn(0.5, true, 0, "hero");
-//////
-            Thread.sleep(200);
-            dave.motors.get("noodler").setPower(0);
+            dave_train.moveDistanceWithCorrections(0.3, "hero", 30, this);
+            dave.tillLimitSwitch("limit", 0.2, "ultraServo", 0.8, 0.3);
+//            dave_train.dumbLukeMakesMeSadBlueGyroTurn(0.5, 0.2, 0, "hero");
 
+
+//            dave.tillSense("ultra", 0.5, 0.5, 12, 10, false);
+
+//            Thread.sleep(200);
+//            dave.drivetrain.moveDistance(0.6, 3, this);
+//
+//            Thread.sleep(200);
+            dave.drivetrain.dumbGyroTurn(0.5, 0, "hero");
+////////
+//            Thread.sleep(200);
+//            dave.motors.get("noodler").setPower(0);
+//
             dave.colorSweep(SensorState.ColorType.RED, "light", "color", 0.4, 20);
-            ////        dave.drivetrain.dumbGyroTurn(0.5, , 90, "hero");
-            //        dave.drivetrain.moveDistance(-0.6, 10);
+//            ////        dave.drivetrain.dumbGyroTurn(0.5, , 90, "hero");
+//            //        dave.drivetrain.moveDistance(-0.6, 10);
             while (opModeIsActive()) {
                 telemetry.addData("done", "yes");
                 Thread.sleep(10);
@@ -94,7 +102,6 @@ public class RedPath extends LinearOpMode {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");
             dave.drivetrain.setLeftMotors(0);
             dave.drivetrain.setRightMotors(0);
-
             return;
         }
     }

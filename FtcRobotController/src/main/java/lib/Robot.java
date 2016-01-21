@@ -86,17 +86,31 @@ public class Robot {
         }
     }
 
-    public void tillSense(String sensorName, double servoPosition, double power, int distance, int filterlength) throws InterruptedException{
-        PID ultraPID = new PID(0.05, 0.01, 0, true, 0.1);
-        ultraPID.setTarget(distance);
-        ultraPID.setMinOutput(-power);
-        ultraPID.setMaxOutput(power);
+    public void tillLimitSwitch(String limitName, double power, String servoName, double positionActive, double positionInactive) throws InterruptedException {
+        drivetrain.move(power, "hero", waiter);
+        hmap.servo.get(servoName).setPosition(positionActive);
+        Thread.sleep(500);
+
+        while (!hmap.digitalChannel.get(limitName).getState() && waiter.opModeIsActive()){
+            Thread.sleep(10);
+        }
+
+        hmap.servo.get(servoName).setPosition(positionInactive);
+        drivetrain.stopMove();
+        Thread.sleep(500);
+    }
+
+    public void tillSense(String sensorName, double servoPosition, double power, int distance, int filterlength, boolean overshootExit) throws InterruptedException{
+//        PID ultraPID = new PID(0.05, 0.02, 0, true, 0.2);
+//        ultraPID.setTarget(distance);
+//        ultraPID.setMinOutput(-power);
+//        ultraPID.setMaxOutput(power);
         ultraservohelper.setPosition(sensorName, servoPosition);
             Thread.sleep(400);
         drivetrain.move(power, "hero", waiter);
-        while(!ultraPID.isAtTarget() && waiter.opModeIsActive()){
-            power = ultraPID.update(state.getAvgSensorData(sensorName));
-            drivetrain.mover.setPower(power);
+        while((Math.abs(distance-state.getAvgSensorData(sensorName)) > 0.5) && waiter.opModeIsActive() ){
+//            power = ultraPID.update(state.getAvgSensorData(sensorName));
+//            drivetrain.mover.setPower(power);
 
             tel.addData("AvgUSDistance", state.getAvgSensorData(sensorName));
             Thread.sleep(10);
@@ -177,34 +191,27 @@ public class Robot {
 
         double baseline = state.getAvgSensorData("light");
 
-//        reading = state.getAvgSensorData(lightname);
-        if (color == SensorState.ColorType.RED) {
-            drivetrain.move(power, "hero", this.waiter);
-        }
-        else
-            drivetrain.move(-power, "hero", this.waiter);
+//        Thread.sleep(300);
 
-        Thread.sleep(300);
+//        do {
+//            dominant = state.getColorData("color");
+////            tel.addData("")
+//
+//            Thread.sleep(10);
+//
+//            if (!waiter.opModeIsActive()){
+//                return;
+//            }
+//        } while (!(dominant == SensorState.ColorType.BLUE || dominant == SensorState.ColorType.RED) && waiter.opModeIsActive());
+//        drivetrain.stopMove();
+//
+//        Thread.sleep(300);
+//
+//
+//        if(color == SensorState.ColorType.RED)
+//            drivetrain.moveDistance(-power, 5, this.waiter);
 
-        do {
-            dominant = state.getColorData("color");
-//            tel.addData("")
-
-            Thread.sleep(1);
-
-            if (!waiter.opModeIsActive()){
-                return;
-            }
-        } while (!(dominant == SensorState.ColorType.BLUE || dominant == SensorState.ColorType.RED) && waiter.opModeIsActive());
-        drivetrain.stopMove();
-
-        Thread.sleep(300);
-
-
-        if(color == SensorState.ColorType.RED)
-            drivetrain.moveDistance(-power, 5, this.waiter);
-
-        Thread.sleep(300);
+//        Thread.sleep(300);
 
         drivetrain.move(.75 * power, "hero", this.waiter);
         while(waiter.opModeIsActive()){
@@ -221,26 +228,31 @@ public class Robot {
         drivetrain.stopMove();
 
         Thread.sleep(300);
+        drivetrain.moveDistanceWithCorrections(.3,"hero", 2, this.waiter);
+        Thread.sleep(300);
+
 
 //        drivetrain.moveDistance(power, 4);
-        Thread.sleep(300);
+//        Thread.sleep(300);
 
 //
 //        double correctScoot = 0 ;
 //        double wrongScoot = 2 ;
 //
+//
+//
+//        if (dominant == color) {
+////            drivetrain.moveDistance(power, 3);
+//            tel.addData("Color", "First");
+//        } else {
+//            tel.addData("Color", "Second");
+//            Thread.sleep(300);
+//        }
 
 
-        if (dominant == color) {
-//            drivetrain.moveDistance(power, 3);
-            tel.addData("Color", "First");
-        } else {
-            tel.addData("Color", "Second");
-            Thread.sleep(300);
-        }
-        this.pushButton("buttonPusher", 1500);
+//        this.pushButton("buttonPusher", 1500);
         servos.get("climberDropper").setPosition(0.3);
-        this.pushButton("buttonPusher");
+//        this.pushButton("buttonPusher");
         Thread.sleep(300);
     }
 }
