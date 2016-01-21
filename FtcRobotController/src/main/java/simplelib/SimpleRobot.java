@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 /**
  * SimpleRobot is a rewrite of the orignal Robot, with more simplicity.
- * It is not 100% static; chose to make it more object-like.
+ * It's essentially a data center with all stuffs.
  *
  * Written by Vivek Bhupatiraju & Luke West
  */
@@ -19,19 +19,15 @@ public class SimpleRobot
     public static Telemetry tel;
     public static LinearOpMode opm;
     public static HardwareMap hmap;
-    public DriveTrain drivetrain;
+    
+    public static DriveTrain drivetrain;
+    public static HashMap<String, DcMotor> motors;
+    public static HashMap<String, Servo> servos;
 
-    public HashMap<String, DcMotor> motors;
-    public HashMap<String, Servo> servos;
-
-    public SimpleRobot(HardwareMap h, Telemetry t, LinearOpMode o) {
+    public static init(HardwareMap h, Telemetry t, LinearOpMode o) {
         hmap = h;
         tel = t;
         opm = o;
-    }
-
-    public void registerDriveTrain(DriveTrain d) {
-        this.drivetrain = d;
     }
 
     public void registerServo(String servoName) {
