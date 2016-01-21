@@ -52,8 +52,8 @@ public class DriveTrain
     
     public int getEncoders() {
       double ans = 0.0;
-      for (int i = 0; i < left.length; i++) ans += left[i].getCurrentPosition() - leftEncoder[i];
-      for (int i = 0; i < right.length; i++) ans += right[i].getCurrentPosition() - rightEncoder[i];
+      for (String name : left.keys()) ans += left[name].getCurrentPosition() - leftEncoder[name];
+      for (String name : right.keys()) ans += right[name].getCurrentPosition() - rightEncoder[name];
       return ans / (double)(left.length + right.length);
     }
 }
