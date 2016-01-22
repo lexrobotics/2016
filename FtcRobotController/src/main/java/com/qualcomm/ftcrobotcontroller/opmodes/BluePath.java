@@ -75,17 +75,19 @@ public class BluePath extends LinearOpMode {
 
             dave.drivetrain.dumbBlueGyroTurn(0.75, true, 45, "hero");
             Thread.sleep(200);
-            dave.drivetrain.moveDistanceWithCorrections(0.3, "hero", 30, this);
-
+            dave.motors.get("noodler").setPower(0.75);
+            dave.drivetrain.moveDistanceWithCorrections(0.3, "hero", 33, this);
+            Thread.sleep(200);
+            dave.motors.get("noodler").setPower(0);
             dave.drivetrain.dumbGyroTurn(-0.75, 0, "hero");
             Thread.sleep(100);
-            dave.drivetrain.moveDistanceWithCorrections(0.3, "hero", 18, this);
+            dave.drivetrain.moveDistanceWithCorrections(0.3, "hero", 33, this);
             Thread.sleep(100);
             dave.drivetrain.dumbGyroTurn(0.75, 260, "hero");
             Thread.sleep(100);
             dave.tillLimitSwitch("limit", 0.2, "ultraServo", 1, 0.3);
             Thread.sleep(200);
-            dave.drivetrain.dumbLukeMakesMeSadBlueGyroTurn(0.75, -0.5, 180, "hero");
+            dave.drivetrain.dumbLukeMakesMeSadBlueGyroTurn(0.75, -0.5, 175, "hero");
             Thread.sleep(200);
             double baseline = Robot.state.getAvgSensorData("light");
             double reading = baseline;
@@ -105,13 +107,14 @@ public class BluePath extends LinearOpMode {
 
             dave.drivetrain.stopMove();
 
-            dave.drivetrain.moveDistance(0.5, 3, dave.waiter);
+            dave.drivetrain.moveDistance(0.5, 7.5, dave.waiter);
             dave.drivetrain.stopMove();
             Thread.sleep(200);
             //dave.pushButton("buttonPusher", 1500);
             dave.servos.get("climberDropper").setPosition(0.3);
             //dave.pushButton("buttonPusher");
-
+            Thread.sleep(2000);
+            dave.servos.get("climberDropper").setPosition(0.6);
 
         } catch(InterruptedException ex) {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");

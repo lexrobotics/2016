@@ -70,7 +70,7 @@ public class TeleOp extends OpMode {
         redDoor.setPosition(1);
         blueDoor.setPosition(0);
         divider.setPosition(0.5);
-        armLock.setPosition(0.7);
+        armLock.setPosition(0.5);
     }
 
     @Override
@@ -186,9 +186,9 @@ public class TeleOp extends OpMode {
         }
 
         if (arm_locked) {
-            armLock.setPosition(1.0);
+            armLock.setPosition(0);
         } else {
-            armLock.setPosition(0.7);
+            armLock.setPosition(0.5);
         }
 
     }

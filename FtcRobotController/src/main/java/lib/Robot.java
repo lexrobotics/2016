@@ -252,6 +252,8 @@ public class Robot {
 
 //        this.pushButton("buttonPusher", 1500);
         servos.get("climberDropper").setPosition(0.3);
+        Thread.sleep(2000);
+        servos.get("climberDropper").setPosition(0.85);
 //        this.pushButton("buttonPusher");
         Thread.sleep(300);
     }

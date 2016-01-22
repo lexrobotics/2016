@@ -75,7 +75,7 @@ public class RedPath extends LinearOpMode {
             Thread.sleep(200);
 
 
-            dave_train.moveDistanceWithCorrections(0.3, "hero", 30, this);
+            dave_train.moveDistanceWithCorrections(0.25, "hero", 30, this);
             dave.tillLimitSwitch("limit", 0.2, "ultraServo", 0.8, 0.3);
 //            dave_train.dumbLukeMakesMeSadBlueGyroTurn(0.5, 0.2, 0, "hero");
 
@@ -92,6 +92,8 @@ public class RedPath extends LinearOpMode {
 //            dave.motors.get("noodler").setPower(0);
 //
             dave.colorSweep(SensorState.ColorType.RED, "light", "color", 0.4, 20);
+            dave.motors.get("noodler").setPower(0);
+
 //            ////        dave.drivetrain.dumbGyroTurn(0.5, , 90, "hero");
 //            //        dave.drivetrain.moveDistance(-0.6, 10);
             while (opModeIsActive()) {
@@ -102,6 +104,7 @@ public class RedPath extends LinearOpMode {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");
             dave.drivetrain.setLeftMotors(0);
             dave.drivetrain.setRightMotors(0);
+            dave.motors.get("noodler").setPower(0);
             return;
         }
     }
