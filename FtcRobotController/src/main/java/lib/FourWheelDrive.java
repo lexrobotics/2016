@@ -11,6 +11,9 @@ public class FourWheelDrive extends DriveTrain{
     private DcMotor frontLeftMotor, frontRightMotor,
             backLeftMotor, backRightMotor;
 
+
+    private int frontRightEncoder, frontLeftEncoder, backRightEncoder, backLeftEncoder;
+
     public FourWheelDrive (DcMotor frontLeftMotor, boolean frontLeftRev,
                            DcMotor frontRightMotor, boolean frontRightRev,
                            DcMotor backLeftMotor, boolean backLeftRev,
@@ -23,8 +26,10 @@ public class FourWheelDrive extends DriveTrain{
         this.backLeftMotor = backLeftMotor;
         this.backRightMotor = backRightMotor;
 
-        rightEncoder = backRightMotor.getCurrentPosition();
-        leftEncoder = backLeftMotor.getCurrentPosition();
+        frontRightEncoder = frontRightMotor.getCurrentPosition();
+        frontLeftEncoder = frontLeftMotor.getCurrentPosition();
+        backRightEncoder = backRightMotor.getCurrentPosition();
+        backLeftEncoder = backLeftMotor.getCurrentPosition();
 
         if (frontLeftRev) frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         if (frontRightRev) frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -48,12 +53,26 @@ public class FourWheelDrive extends DriveTrain{
 
     @Override
     public void resetEncoders() {
-        rightEncoder = backRightMotor.getCurrentPosition();
-        leftEncoder = backLeftMotor.getCurrentPosition();
+        frontRightEncoder = frontRightMotor.getCurrentPosition();
+        frontLeftEncoder = frontLeftMotor.getCurrentPosition();
+        backRightEncoder = backRightMotor.getCurrentPosition();
+        backLeftEncoder = backLeftMotor.getCurrentPosition();
     }
 
     @Override
     public int getEncoders() {
-        return (Math.abs(backRightMotor.getCurrentPosition() - rightEncoder));
+        return (Math.abs(
+            (backRightMotor.getCurrentPosition() - backRightEncoder) +
+            (backLeftMotor.getCurrentPosition() - backLeftEncoder) +
+            (frontRightMotor.getCurrentPosition() - frontRightEncoder) +
+            (frontLeftMotor.getCurrentPosition() - frontLeftEncoder)
+        ) / 4);
+    }
+
+    public void outputEncoders() {
+        Robot.tel.addData("frontLeft", frontLeftMotor.getCurrentPosition());
+        Robot.tel.addData("frontRight", frontRightMotor.getCurrentPosition());
+        Robot.tel.addData("backLeft", backLeftMotor.getCurrentPosition());
+        Robot.tel.addData("backRight", backRightMotor.getCurrentPosition());
     }
 }

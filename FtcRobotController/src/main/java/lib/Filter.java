@@ -62,6 +62,8 @@ public class Filter {
     }
 
     public void update(double val){
+
+//        Robot.tel.addData("ata: " + val + "  avg: " + avg + "  stdevs: " + stdevs, "");
         if (stdevs >-1) {
 
             if (Math.abs(val - avg) < findDeviation(data) * stdevs) {
@@ -110,7 +112,9 @@ public class Filter {
         return filled;
     }
 
-    public double getAvg(){ return avg; }
+    public double getAvg(){
+//        Robot.tel.addData("From filter", avg);
+        return avg; }
 
     public double[] getData(){ return data; }
 

@@ -36,11 +36,17 @@ import java.util.HashMap;
 /*
 PRECAUTIONS:
 Never try reading gyro values until it's calibrated.
+
 Some of the private functions don't need to be synchronized only because they are only ever called from run()
 NEVER make them public. Very sneaky things could follow.
+
 The ColorSensors get their own functions. Don't try to use the general-purpose ones for color.
+
 Early in the program, remember that not all of the filter array will be filled, so the averages will start near zero.
-Remember to delete SensorData objects you get to avoid leaks.  (Actually that's probably handled by garbage collection)
+use filterIsFilled()
+
+delete Filter objects or other objects returned from SensorState
+
 Also, NEVER EVER return an actual filter object being used in the SensorState. only return clones, to avoid synchronization issues.
  */
 
@@ -48,8 +54,18 @@ Also, NEVER EVER return an actual filter object being used in the SensorState. o
 // use ordinal and .values()
 
 /**
+ * REALLY REALLY REALLY IMPORTANT
+ * ALWAYS START A SENSORSTATE THREAD AFTER WAITFORSTART
+ * opmodeIsActive() returns false in init stage, so it would end.
+ */
+
+
+
+/**
  * TODO:
  *  - Find out whether the getter functions need delays to not block run()
+ *  oesn'
+ *
  *  - Exponential averages
  *  - Investigate problem of volatility:
  *
@@ -213,6 +229,10 @@ public class SensorState implements Runnable{
         }
     }
 
+    public void colorLightToggle(String color_name, boolean toggle){
+        ((ColorSensor) sensorContainers.get(color_name).sensor).enableLed(toggle);
+    }
+
     /**
      * Updates the types_inv HashMap.
      *
@@ -258,6 +278,7 @@ public class SensorState implements Runnable{
         assert(sensorContainers.keySet().contains(name));
         return sensorContainers.get(name).filter.isFilled();
     }
+
 
     /**
      * Change the length of the specified filter
@@ -338,13 +359,9 @@ public class SensorState implements Runnable{
 
     /**
      * Get the most important color visible to the sensor
-     * Also used by run() to update the ColorSensor.
-     * There shouldn't be any sync issues.
      *
      * @return          The most dominant color visible, as a SensorState.ColorType
      */
-
-    //should be private, no synch
     private ColorType getDominantColor(SensorContainer sen) {
         ColorSensor sen_obj = (ColorSensor) sen.sensor;
         int r = sen_obj.red(), b = sen_obj.blue(), g = sen_obj.green();
@@ -361,9 +378,8 @@ public class SensorState implements Runnable{
     }
 
     /**
-     * Returns a single sensor reading immediately, for when you can't wait a millisecond to get the reading.
-     * Use getDominantColor instead for ColorSensors.
-     * The pin fiddling with UltraSonic prevents interference.
+     * Returns a single sensor reading immediately.
+     * The pin fiddling with UltraSonic prevents interference, if multiple ultrasonics are present.
      */
     private double getSensorReading(SensorContainer sen){
         double value;
@@ -391,7 +407,8 @@ public class SensorState implements Runnable{
                             ex.printStackTrace();
                         }
                     } else {
-                        throw new RuntimeException("usPin not set in SensorState");
+                        value = (0.50026463999) * ((AnalogInput) sen.sensor).getValue();
+                        return value;
                     }
 
                 case LIGHT:
@@ -418,15 +435,15 @@ public class SensorState implements Runnable{
      */
 
     /**
-     * The body of the thread. This function continually updates all sensorContainers for which an
-     * update is requested.
-     * It loops through every sensor in the sensors HashMap and then uses getSensorReading with updateArray
-     * to update the SensorContainer.
+     * The body of the thread. This function loops through every registered sensor, and updates their
+     * filters with getSensorReading().
      *
      * It then waits for the specified interval to allow other functions to run.
      */
     public void run() {
-        while (true){
+        // opModeIsActive() returns false during init stage
+
+        while (Robot.waiter.opModeIsActive()){
             try {
                 for (SensorContainer sen : sensorContainers.values()) {
                     synchronized (this) {

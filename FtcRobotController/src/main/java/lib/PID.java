@@ -69,15 +69,19 @@ public class PID {
         if(iCap != -1)
             iTerm = Range.clip(iTerm, -1*iCap, iCap);
 
+        if(Math.signum(prevError) != Math.signum(error)) {
+            iTerm = 0;
+        }
+
         double dTerm = (error - prevError)/dt;
 
         double output = Kp * error + Ki * iTerm + Kd * dTerm;
         output = Range.clip(output, minOutput, maxOutput);
 
-        prevOutput = output;
         if(reversed)
             output *= -1;
 
+        prevOutput = output;
         prevError = error;
         timer.reset(); // reset timer and start counting time till next update
         return output;
@@ -155,5 +159,9 @@ public class PID {
             atTarget = 0;
 
         return (atTarget >= count);
+    }
+
+    public double getError() {
+        return prevError;
     }
 }

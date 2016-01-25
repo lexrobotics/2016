@@ -1,9 +1,9 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
+        import com.qualcomm.robotcore.hardware.DcMotor;
+        import com.qualcomm.robotcore.hardware.Servo;
+        import com.qualcomm.robotcore.util.Range;
 
 /**
  * Created by lhscompsci on 9/28/15.
@@ -13,34 +13,64 @@ public class TeleOp extends OpMode {
     DcMotor leftFrontDrive, leftRearDrive;
     DcMotor rightFrontDrive, rightRearDrive;
     DcMotor noodler, armTilter, liftStageOne, liftStageTwo;
-    Servo door, divider, rightZipline, leftZipline;
+    Servo divider, rightZipline, leftZipline, buttonPusher, climberDropper;
+    Servo redDoor, blueDoor;
+
+    // The arm_locked and climber_drop variables say whether the climber or arm should currently be activated.
+    // The toggle is aided by a_was_down and b_was_down.
+    Servo armLock;
+    boolean arm_locked;
+    boolean b_was_down;
 
     boolean driveInverted = false;
     boolean bWasDown = false;
+    boolean climber_drop;
+    boolean a_was_down;
 
     @Override
     public void init() {
-        leftFrontDrive = hardwareMap.dcMotor.get("leftFront");
-        leftRearDrive = hardwareMap.dcMotor.get("leftRear");
-        rightFrontDrive = hardwareMap.dcMotor.get("rightFront");
-        rightRearDrive = hardwareMap.dcMotor.get("rightRear");
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        climber_drop = false;
+        arm_locked = false;
+        a_was_down = true;
+        b_was_down = true;
+
+        leftFrontDrive = hardwareMap.dcMotor.get("leftFrontDrive");
+        leftRearDrive = hardwareMap.dcMotor.get("leftRearDrive");
+        rightFrontDrive = hardwareMap.dcMotor.get("rightFrontDrive");
+        rightRearDrive = hardwareMap.dcMotor.get("rightRearDrive");
+//        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
 
         noodler = hardwareMap.dcMotor.get("noodler");
         armTilter = hardwareMap.dcMotor.get("armTilter");
-        liftStageOne = hardwareMap.dcMotor.get("liftOne");
-        liftStageTwo = hardwareMap.dcMotor.get("liftTwo");
+        liftStageOne = hardwareMap.dcMotor.get("liftStageOne");
+        liftStageTwo = hardwareMap.dcMotor.get("liftStageTwo");
 
-        door = hardwareMap.servo.get("door");
         divider = hardwareMap.servo.get("divider");
-        rightZipline = hardwareMap.servo.get("rightClimber");
-        leftZipline = hardwareMap.servo.get("leftClimber");
+        rightZipline = hardwareMap.servo.get("rightZipline");
+        leftZipline = hardwareMap.servo.get("leftZipline");
+
+        buttonPusher = hardwareMap.servo.get("buttonPusher");
+        climberDropper = hardwareMap.servo.get("climberDropper");
+
+        redDoor = hardwareMap.servo.get("redDoor");
+        blueDoor = hardwareMap.servo.get("blueDoor");
+
+        armLock = hardwareMap.servo.get("armLock");
 
         noodler.setPower(0);
         armTilter.setPower(0);
         liftStageOne.setPower(0);
         liftStageTwo.setPower(0);
+        leftZipline.setPosition(0.5);
+        rightZipline.setPosition(0.5);
+        buttonPusher.setPosition(0.5);
+        climberDropper.setPosition(0.5);
+        redDoor.setPosition(1);
+        blueDoor.setPosition(0);
+        divider.setPosition(0.5);
+        armLock.setPosition(0.5);
     }
 
     @Override
@@ -123,9 +153,47 @@ public class TeleOp extends OpMode {
         else
             rightZipline.setPosition(0.5);
 
+        if (gamepad2.x) {
+            redDoor.setPosition(0);
+            blueDoor.setPosition(1);
+        } else {
+            redDoor.setPosition(1);
+            blueDoor.setPosition(0);
+        }
+
+        if (gamepad2.a) {
+            if (a_was_down){
+                climber_drop = !climber_drop;
+                a_was_down = false;
+            }
+        } else {
+            a_was_down = true;
+        }
+
+        if (gamepad2.b) {
+            if (b_was_down){
+                arm_locked = !arm_locked;
+                b_was_down = false;
+            }
+        } else {
+            b_was_down = true;
+        }
+
+        if (climber_drop){
+            climberDropper.setPosition(0);
+        } else {
+            climberDropper.setPosition(0.5);
+        }
+
+        if (arm_locked) {
+            armLock.setPosition(0);
+        } else {
+            armLock.setPosition(0.5);
+        }
+
     }
 
-    /*
+    /**
      * This method scales the joystick input so for low joystick values, the
      * scaled value is less than linear.  This is to make it easier to drive
      * the robot more precisely at slower speeds.
