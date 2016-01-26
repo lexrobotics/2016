@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.HashMap;
 
 /**
@@ -133,17 +134,22 @@ public class Robot {
         }
     }
 
-    public static void tillLimitSwitch(String limitName,
-                                       String servoName,
-                                       double power,
-                                       double positionActive,
-                                       double positionInactive) throws InterruptedException {
+    public static void tillLimitSwitch  (String limitName,
+                                         String servoName,
+                                         double power,
+                                         double positionActive,
+                                         double positionInactive,
+                                         int killTime // Time until the function is ended
+                                        ) throws InterruptedException {
         drivetrain.move(power, waiter);
+        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         hmap.servo.get(servoName).setPosition(positionActive);
         Thread.sleep(500);
 
-        while (!hmap.digitalChannel.get(limitName).getState() && waiter.opModeIsActive()){
-            Thread.sleep(10);
+        timer.reset();
+
+        while (!hmap.digitalChannel.get(limitName).getState() && timer.time() < killTime && waiter.opModeIsActive()){
+            waiter.waitOneFullHardwareCycle();
         }
 
         hmap.servo.get(servoName).setPosition(positionInactive);
@@ -179,8 +185,21 @@ public class Robot {
         drivetrain.stopMove();
     }
 
+    public static void colorSweep   (SensorState.ColorType color,
+                                     String bottomName,
+                                     String topName,
+                                     double power) throws InterruptedException {
+
+        tillColor(SensorState.ColorType.WHITE, bottomName, power);
+//        tillColor(SensorState.)
+
+    }
+
+
+    /*
     // tillSense for colors. If the first color we detect is the color argument (our teams color)
     // Then we will hit that button.
+    // REWRITE TO USE COLOR
     // Otherwise, we go to the next light.
     public static void colorSweep(SensorState.ColorType color,
                                   String lightname,
@@ -262,6 +281,7 @@ public class Robot {
 //        this.pushButton("buttonPusher");
         Thread.sleep(300);
     }
+    */
 
 
 

@@ -224,12 +224,17 @@ public class SensorState implements Runnable{
     public void setUltrasonicPin(String pin_name){
         if (!this.usPinWasSet) {
             this.usPin = hmap.digitalChannel.get(pin_name);
-            assert(this.usPin != null);
+            if (this.usPin == null){
+                throw new RuntimeException("setUltrasonicPin(): pin name not found in HardwareMap.");
+            }
             this.usPinWasSet = true;
         }
     }
 
     public void colorLightToggle(String color_name, boolean toggle){
+        if (!sensorContainers.keySet().contains(color_name)){
+            throw new RuntimeException("colorLightToggle(): Color sensor not found.");
+        }
         ((ColorSensor) sensorContainers.get(color_name).sensor).enableLed(toggle);
     }
 
@@ -267,7 +272,8 @@ public class SensorState implements Runnable{
      * Returns true if the given gyro is currently calibrating, and therefore can't give good values.
      */
     public synchronized boolean gyroIsCalibrating(String gyro_name){
-        assert(sensorContainers.keySet().contains(gyro_name));
+        if (!sensorContainers.keySet().contains(gyro_name))
+            throw new RuntimeException("gyroIsCalibrating(): Gyro not registered.");
         return ((GyroSensor)sensorContainers.get(gyro_name).sensor).isCalibrating();
     }
 
@@ -275,25 +281,41 @@ public class SensorState implements Runnable{
      * Returns true if all the values of the filter array have been filled, allowing averaging.
      */
     public synchronized boolean filterIsFilled(String name){
-        assert(sensorContainers.keySet().contains(name));
+        if (!sensorContainers.keySet().contains(name)){
+            throw new RuntimeException("filterIsFilled(): Sensor not registered.");
+        }
         return sensorContainers.get(name).filter.isFilled();
     }
 
+    /**
+     * Returns true if all registered sensors have had their filters filled.
+     */
+    public synchronized boolean allFiltersFilled(){
+        for (SensorContainer sen: sensorContainers.values()){
+            if (!sen.filter.isFilled())
+                return false;
+        }
+        return true;
+    }
 
     /**
      * Change the length of the specified filter
      */
     public synchronized void changeFilterLength(String name, int fl){
-        assert(sensorContainers.keySet().contains(name));
+        if(!sensorContainers.keySet().contains(name)){
+            throw new RuntimeException("changeFilterLength(): Sensor not registered.");
+        }
         sensorContainers.get(name).filter.changeFilter_length(fl);
     }
 
     /**
      * These two are the public wrappers around the private getDominantColor and getSensorReading functions.
-     * Allows us to access by name only in the public functions.
+     * Allows us to access by name only in the public functions, and be more efficient by accessing with SensorContainers privately.
      */
     public synchronized ColorType getColorData(String name){
-        assert(sensorContainers.keySet().contains(name));
+        if(!sensorContainers.keySet().contains(name)){
+            throw new RuntimeException("getColorData(): Color sensor not registered.");
+        }
         return getDominantColor(sensorContainers.get(name));
     }
 
@@ -301,7 +323,9 @@ public class SensorState implements Runnable{
      * Immediately return a value for the given sensor, without waiting for another run().
      */
     public synchronized double getSensorReading(String name){
-        assert(sensorContainers.keySet().contains(name));
+        if(!sensorContainers.keySet().contains(name)){
+            throw new RuntimeException("getSensorReading(): Sensor not registered.");
+        }
         return getSensorReading(sensorContainers.get(name));
     }
 
@@ -310,7 +334,9 @@ public class SensorState implements Runnable{
      * cpu cycles.
      */
     public synchronized void changeUpdateStatus(String name, boolean update){
-        assert(sensorContainers.keySet().contains(name));
+        if (!sensorContainers.keySet().contains(name)){
+            throw new RuntimeException("changeUpdateStatus: Sensor not registered.");
+        }
         sensorContainers.get(name).update = update;
     }
 
@@ -321,7 +347,9 @@ public class SensorState implements Runnable{
      * @return      The SensorData object corresponding to the given sensor.
      */
     public synchronized Filter getFilter(String name){
-        assert(sensorContainers.keySet().contains(name));
+        if (!sensorContainers.keySet().contains(name)){
+            throw new RuntimeException("getFilter(): Sensor not registered.");
+        }
         return sensorContainers.get(name).filter.clone();
     }
 
@@ -329,7 +357,9 @@ public class SensorState implements Runnable{
      * Using the most recent chronological sensor data, average the last several readings
      */
     public synchronized double getAvgSensorData(String name) {
-        assert(sensorContainers.keySet().contains(name));
+        if(!sensorContainers.keySet().contains(name)){
+            throw new RuntimeException("getAvgSensorData(): Sensor not registered.");
+        }
         return sensorContainers.get(name).filter.getAvg();
     }
 
@@ -337,7 +367,9 @@ public class SensorState implements Runnable{
      * Get a String[] array of all sensor names belonging to sensors of a certain type.
      */
     public synchronized String[] getSensorsFromType(SensorType type){
-        assert(types_inv.keySet().contains(type));
+        if (!types_inv.keySet().contains(type)){
+            throw new RuntimeException("getSensorsFromType(): Type not found in registered sensors.");
+        }
         SensorContainer[] sens = types_inv.get(type);
         String[] ret = new String[sens.length];
 
