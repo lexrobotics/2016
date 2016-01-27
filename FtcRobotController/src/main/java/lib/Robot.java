@@ -212,9 +212,9 @@ public class Robot {
         found_color = tillColor(sideName, power, SensorState.ColorType.BLUE, SensorState.ColorType.RED);
 
         if (found_color == SensorState.ColorType.RED){
-            drivetrain.moveDistanceWithCorrections(power, ?, waiter);
+            drivetrain.moveDistanceWithCorrections(power, 0, waiter);
         } else if (found_color == SensorState.ColorType.BLUE){
-            drivetrain.moveDistanceWithCorrections(power, ?, waiter);
+            drivetrain.moveDistanceWithCorrections(power, 0, waiter);
         }
 
         servos.get("buttonPusher").setPosition(0);
