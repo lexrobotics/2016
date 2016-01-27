@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * Created by luke on 10/7/15.
@@ -175,24 +176,52 @@ public class Robot {
         servos.get(servoName).setPosition(0.5);
     }
 
-    public static void tillColor(SensorState.ColorType color, String colorName, double power) throws InterruptedException{
+    public static SensorState.ColorType tillColor(String colorName, double power, SensorState.ColorType... colors) throws InterruptedException{
         drivetrain.move(power, waiter);
+        SensorState.ColorType real_color = null;
 
-        while (!(state.getColorData(colorName) == color) && waiter.opModeIsActive()){
+        main:
+        while (waiter.opModeIsActive()) {
+            real_color = state.getColorData(colorName);
+
+            for (SensorState.ColorType color : colors) {
+                if (real_color == color) {
+                    break main;
+                }
+            }
+
             waiter.waitOneFullHardwareCycle();
         }
 
         drivetrain.stopMove();
+        return real_color;
     }
 
     public static void colorSweep   (SensorState.ColorType color,
                                      String bottomName,
-                                     String topName,
+                                     String sideName,
                                      double power) throws InterruptedException {
 
-        tillColor(SensorState.ColorType.WHITE, bottomName, power);
-//        tillColor(SensorState.)
+        SensorState.ColorType found_color;
+        tillColor(bottomName, power, SensorState.ColorType.WHITE);
 
+        servos.get("buttonPusher").setPosition(0);
+        Thread.sleep(700);
+        servos.get("buttonPusher").setPosition(0.5);
+
+        found_color = tillColor(sideName, power, SensorState.ColorType.BLUE, SensorState.ColorType.RED);
+
+        if (found_color == SensorState.ColorType.RED){
+            drivetrain.moveDistanceWithCorrections(power, ?, waiter);
+        } else if (found_color == SensorState.ColorType.BLUE){
+            drivetrain.moveDistanceWithCorrections(power, ?, waiter);
+        }
+
+        servos.get("buttonPusher").setPosition(0);
+        Thread.sleep(1500);
+        servos.get("buttonPusher").setPosition(1);
+        Thread.sleep(2000);
+        servos.get("buttonPusher").setPosition(0.5);
     }
 
 
@@ -294,7 +323,7 @@ public class Robot {
      ************************
      */
 
-    /*
+
     public static void tillSense(String sensorName, double servoPosition, double power, int distance, int filterlength, boolean overshootExit) throws InterruptedException{
 //        PID ultraPID = new PID(0.05, 0.02, 0, true, 0.2);
 //        ultraPID.setTarget(distance);
@@ -302,7 +331,7 @@ public class Robot {
 ////        ultraPID.setMaxOutput(power);
 //        ultraservohelper.setPosition(sensorName, servoPosition);
             Thread.sleep(400);
-        drivetrain.move(power, "hero", waiter);
+        drivetrain.move(power, waiter);
         while((Math.abs(distance-state.getAvgSensorData(sensorName)) > 0.5) && waiter.opModeIsActive() ){
 //            power = ultraPID.update(state.getAvgSensorData(sensorName));
 //            drivetrain.mover.setPower(power);
@@ -348,5 +377,4 @@ public class Robot {
         drivetrain.move(0);
 
     }
-    */
 }

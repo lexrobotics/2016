@@ -34,46 +34,36 @@ import java.util.HashMap;
  * */
 
 /*
-PRECAUTIONS:
-Never try reading gyro values until it's calibrated.
-
-Some of the private functions don't need to be synchronized only because they are only ever called from run()
-NEVER make them public. Very sneaky things could follow.
-
-The ColorSensors get their own functions. Don't try to use the general-purpose ones for color.
-
-Early in the program, remember that not all of the filter array will be filled, so the averages will start near zero.
-use filterIsFilled()
-
-delete Filter objects or other objects returned from SensorState
-
-Also, NEVER EVER return an actual filter object being used in the SensorState. only return clones, to avoid synchronization issues.
- */
-
-//New system: all of our data is in a filter. Colors become ints before they go in, and we get the colors back with a Sensorstate function
-// use ordinal and .values()
-
-/**
+ * PRECAUTIONS:
+ * Never try reading gyro values until it's calibrated.
+ *
+ * Some of the private functions don't need to be synchronized only because they are only ever called from run()
+ * NEVER make them public. Very sneaky things could follow.
+ *
+ * The ColorSensors get their own functions. Using the general-purpose ones returns the int version of color.
+ *
+ * Early in the program, remember that not all of the filter array will be filled, so the averages will start near zero.
+ * use filterIsFilled()
+ *
+ * delete Filter objects or other objects returned from SensorState
+ *
+ * Also, NEVER EVER return an actual filter object being used in the SensorState. only return clones, to avoid synchronization issues.
+ *
  * REALLY REALLY REALLY IMPORTANT
  * ALWAYS START A SENSORSTATE THREAD AFTER WAITFORSTART
  * opmodeIsActive() returns false in init stage, so it would end.
+ *
+ * When grabbing sensor data in a loop, remember to put in a small wait so run() can grab the lock.
  */
 
-
-
-/**
- * TODO:
- *  - Find out whether the getter functions need delays to not block run()
- *  oesn'
- *
- *  - Exponential averages
- *  - Investigate problem of volatility:
- *
- // Potential problem that should be investigated: If two functions operate on a shared variable without synchronization,
- //    They might be reading or writing to variables only local to that thread.
- //    With synchronization, the problem disappears, but not all of the functions below are synchronized like that.
- //    Can also be declared volatile to fix.
- // Or, make more synchronized functions.
+/*
+ * Potential problem that should be investigated: If two functions operate on a shared variable,
+ * They might be reading or writing to variables only local to that thread, depending on the version.
+ * For efficiency, each variable is copied to a local memory, not the main memory.
+ * Can also be declared volatile to fix.
+ * Or, make more synchronized functions.
+ * ACTUALLY, THIS IS FINE. WHY? ALL OF THE PUBLIC VARIABLES IN SENSORSTATE, WHICH ARE THE ONLY ONES SENSORSTATE MUTATES,
+ * ARE EITHER CONSTANT OR ONLY MODIFIED AND RETURNED WITHIN SENSORSTATE.
  */
 
 public class SensorState implements Runnable{
@@ -85,11 +75,13 @@ public class SensorState implements Runnable{
     private static class SensorContainer {
         public Filter filter;
 
+        // Stores the actual sensor object
         public Object sensor;
+
         public SensorState.SensorType type;
+        public String name;
 
         public boolean update;
-        public String name;
 
         public SensorContainer(Object sensor, SensorState.SensorType type, String name, boolean update, int size) {
             this.filter = new Filter(size);
@@ -100,9 +92,11 @@ public class SensorState implements Runnable{
         }
     }
 
-    // To make run() more readable
+    // Types of sensors
     public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER }
 
+    // Names of colors. Can also convert back and forth from the names to their index in this enum, for
+    // single values or arrays of values.
     public enum ColorType{ RED, BLUE, WHITE, CLEAR, NONE;
         public static int toInt(ColorType c){
             return c.ordinal();
@@ -190,7 +184,7 @@ public class SensorState implements Runnable{
      * the internal HashMaps.
      * Special cases:
      *  - Calibrates a gyro
-     *  - Initializes the Color SensorContainer differently and disables its LED
+     *  - Disables the LED of a color sensor.
      *
      * @param name          The name of the sensor to register, as recorded in the config
      * @param type          The type of the sensor to register, either GYRO, ULTRASONIC, COLOR, LIGHT, or ENCODER
@@ -217,7 +211,7 @@ public class SensorState implements Runnable{
 
     /**
      * The ultrasonics can interfere with each other if they fall out of sync. The pin lets us
-     * notify them in a consistent way.
+     * notify them in a consistent way, if we're using multiple.
      *
      * @param pin_name      The name of the digitalChannel in the config that connects to the ultrasonics
      */
@@ -231,6 +225,9 @@ public class SensorState implements Runnable{
         }
     }
 
+    /**
+     * Determine whether a sensor's values will be updated or not on each loop.
+     */
     public void colorLightToggle(String color_name, boolean toggle){
         if (!sensorContainers.keySet().contains(color_name)){
             throw new RuntimeException("colorLightToggle(): Color sensor not found.");
@@ -240,8 +237,6 @@ public class SensorState implements Runnable{
 
     /**
      * Updates the types_inv HashMap.
-     *
-     * @param sen   SensorContainer to add to the HashMap. This will be grouped into the array indexed by the sensor's type
      */
     private void updateTypesInv(SensorContainer sen){
         SensorContainer[] old_sensors = types_inv.get(sen.type);        // Pull out the old array of sensors
@@ -343,8 +338,7 @@ public class SensorState implements Runnable{
     /**
      * Used to get all currently stored chronological sensor data for a sensor, along with the most recent index.
      * Clones to avoid sync issues, Should therefore be deleted after use.
-     *
-     * @return      The SensorData object corresponding to the given sensor.
+     * Returns the filter object of the given sensor.
      */
     public synchronized Filter getFilter(String name){
         if (!sensorContainers.keySet().contains(name)){
@@ -428,19 +422,18 @@ public class SensorState implements Runnable{
                     // If it hasn't been set, we get a nullpointer exception
                     if (this.usPinWasSet) {
                         try {
-                            usPin.setState(true);
+                            usPin.setState(true);   // Put voltage on the pin for 20 nanoseconds.
                             Thread.sleep(0, 20);
                             usPin.setState(false);
                             value = (0.50026463999) * ((AnalogInput) sen.sensor).getValue();
-                            Thread.sleep(0, 20);
+                            Thread.sleep(0, 20);    // Wait again in case we're updating another ultrasonic next.
                             return value;
 
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
                     } else {
-                        value = (0.50026463999) * ((AnalogInput) sen.sensor).getValue();
-                        return value;
+                        return (0.50026463999) * ((AnalogInput) sen.sensor).getValue();
                     }
 
                 case LIGHT:
@@ -475,7 +468,7 @@ public class SensorState implements Runnable{
     public void run() {
         // opModeIsActive() returns false during init stage
 
-        while (Robot.waiter.opModeIsActive()){
+        while (Robot.waiter.opModeIsActive() && !Thread.currentThread().isInterrupted()){
             try {
                 for (SensorContainer sen : sensorContainers.values()) {
                     synchronized (this) {
