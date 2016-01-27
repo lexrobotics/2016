@@ -14,7 +14,7 @@ public class SensorStateOpMode extends LinearOpMode {
     private Thread state_thread;
 
     public void runOpMode() throws InterruptedException{
-        Robot.init(hardwareMap, telemetry, this);
+        Robot.init(hardwareMap, telemetry, this, null, "hero");
 
         Robot.state = new SensorState(hardwareMap, 1, 0);
         Robot.state.registerSensor("mr", SensorState.SensorType.COLOR, true, 60);

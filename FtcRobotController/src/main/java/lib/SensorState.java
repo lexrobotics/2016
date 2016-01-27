@@ -468,7 +468,7 @@ public class SensorState implements Runnable{
     public void run() {
         // opModeIsActive() returns false during init stage
 
-        while (Robot.waiter.opModeIsActive() && !Thread.currentThread().isInterrupted()){
+        while (!Thread.currentThread().isInterrupted()){
             try {
                 for (SensorContainer sen : sensorContainers.values()) {
                     synchronized (this) {

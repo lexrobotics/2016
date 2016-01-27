@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.robocol.Telemetry;
  * Created by lhscompsci on 1/11/16.
  */
 public class HelperFunctions {
-    public static void bot2SensorPrint(Robot dave, LinearOpMode op){
+    public static void bot2SensorPrint(LinearOpMode op){
         while(op.opModeIsActive()){
 //            Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
 //            Robot.tel.addData("ultra", Robot.state.getSensorReading("ultra"));
@@ -25,15 +25,15 @@ public class HelperFunctions {
             }
         }
     }
-    public static void moveEncoderTest(Robot dave, LinearOpMode op) throws InterruptedException {
-        dave.drivetrain.moveDistanceWithCorrections(0.5,"hero",12,op);
+    public static void moveEncoderTest(LinearOpMode op) throws InterruptedException {
+        Robot.drivetrain.moveDistanceWithCorrections(0.5, 12);
     }
-    public static void turnWithGyroTest(Robot dave, LinearOpMode op) throws InterruptedException {
-        dave.drivetrain.turnWithGyro(90,"hero");
+    public static void turnWithGyroTest() throws InterruptedException {
+        Robot.drivetrain.turnWithGyro(90);
     }
-    public static void encodersPrint(Robot dave, LinearOpMode op) {
+    public static void encodersPrint(LinearOpMode op) {
         while(op.opModeIsActive()) {
-            ((FourWheelDrive) dave.drivetrain).outputEncoders();
+            ((FourWheelDrive) Robot.drivetrain).outputEncoders();
         }
     }
 }

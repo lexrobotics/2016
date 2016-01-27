@@ -16,8 +16,6 @@ public class TestOpMode extends LinearOpMode{
 
     @Override
     public void runOpMode() throws InterruptedException{
-        Robot dave = new Robot(hardwareMap, telemetry, this);
-
         DriveTrain dave_train = new FourWheelDrive(
                 hardwareMap.dcMotor.get("leftFrontDrive"), false,
                 hardwareMap.dcMotor.get("rightFrontDrive"), false,
@@ -25,23 +23,27 @@ public class TestOpMode extends LinearOpMode{
                 hardwareMap.dcMotor.get("rightRearDrive"), true,
                 4);
 
-        dave.registerDriveTrain(dave_train);
+        Robot.init(hardwareMap, telemetry, this, dave_train, "hero");
 
-        dave.registerMotor("noodler");
-        dave.registerMotor("armTilter");
-        dave.registerMotor("liftStageOne");
-        dave.registerMotor("liftStageTwo");
+        Robot.registerMotor("noodler");
+        Robot.registerMotor("armTilter");
+        Robot.registerMotor("liftStageOne");
+        Robot.registerMotor("liftStageTwo");
 
-        dave.registerServo("divider", 0.5);
-        dave.registerServo("rightZipline", 0.5);
-        dave.registerServo("leftZipline", 0.5);
+        Robot.registerServo("divider", 0.5);
+        Robot.registerServo("rightZipline", 0.5);
+        Robot.registerServo("leftZipline", 0.5);
 
-        dave.registerServo("buttonPusher", 0.5);
-        dave.registerServo("climberDropper", 0.85);
+        Robot.registerServo("buttonPusher", 0.5);
+        Robot.registerServo("climberDropper", 0.85);
 
-        dave.registerServo("redDoor", 1);
-        dave.registerServo("blueDoor", 0);
-        dave.registerUltrasonicServo("ultra", "ultraServo", 0.2);
+        Robot.registerServo("redDoor", 1);
+        Robot.registerServo("blueDoor", 0);
+
+        Robot.registerUltrasonic("ultra");
+        Robot.registerServo("ultraServo", 0.0);
+
+        Robot.registerUltraServo("ultra", "ultraServo");
 
         Robot.state = new SensorState(hardwareMap, 1, 0);
 
@@ -60,7 +62,7 @@ public class TestOpMode extends LinearOpMode{
             Thread.sleep(10);
         }
 
-        HelperFunctions.moveEncoderTest(dave,this);
+        HelperFunctions.moveEncoderTest(this);
         while (opModeIsActive()){
             Thread.sleep(10);
         }

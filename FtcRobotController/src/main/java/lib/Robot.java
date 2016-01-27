@@ -18,6 +18,9 @@ public class Robot {
     // SensorState to store sensor values. Universal access point.
     public static SensorState state;
 
+    // Thread to run the state class.
+    public static Thread state_thread;
+
     // We really only ever need one gyro, so we can keep it here.
     public static String gyroName;
 
@@ -67,12 +70,12 @@ public class Robot {
                 s = hmap.servo.get(servoName);
                 s.setPosition(initial_position);
             } catch (Exception ex){
-                throw new RuntimeException("Grabbing servo from HardwareMap failed somehow.");
+                throw new RuntimeException("registerServo(): Grabbing servo from HardwareMap failed somehow.");
             }
 
             servos.put(servoName, s);
         } else {
-            throw new RuntimeException("Servo already registered.");
+            throw new RuntimeException("registerServo(): Servo already registered.");
         }
     }
 
@@ -84,12 +87,12 @@ public class Robot {
                 m = hmap.dcMotor.get(motorName);
                 m.setPower(0.0);
             } catch (Exception ex){
-                throw new RuntimeException("Grabbing motor from HardwareMap failed somehow.");
+                throw new RuntimeException("registerMotor(): Grabbing motor from HardwareMap failed somehow.");
             }
 
             motors.put(motorName, m);
         } else {
-            throw new RuntimeException("Motor already registered.");
+            throw new RuntimeException("registerMotor(): Motor already registered.");
         }
     }
 
@@ -100,12 +103,12 @@ public class Robot {
             try {
                 u = hmap.analogInput.get(ultraName);
             } catch (Exception ex){
-                throw new RuntimeException("Grabbing AnalogInput ultrasonic from HardwareMap failed somehow.");
+                throw new RuntimeException("registerUltrasonic(): Grabbing AnalogInput ultrasonic from HardwareMap failed somehow.");
             }
 
             ultras.put(ultraName, u);
         } else {
-            throw new RuntimeException("Ultrasonic already registered.");
+            throw new RuntimeException("registerUltrasonic(): Ultrasonic already registered.");
         }
     }
 
@@ -164,7 +167,7 @@ public class Robot {
 
         servos.get(servoName).setPosition(1);
 
-            Thread.sleep(1200);
+        Thread.sleep(1200);
         servos.get("buttonPusher").setPosition(0.5);
 
     }
@@ -212,9 +215,9 @@ public class Robot {
         found_color = tillColor(sideName, power, SensorState.ColorType.BLUE, SensorState.ColorType.RED);
 
         if (found_color == SensorState.ColorType.RED){
-            drivetrain.moveDistanceWithCorrections(power, 0, waiter);
+            drivetrain.moveDistanceWithCorrections(power, 0);
         } else if (found_color == SensorState.ColorType.BLUE){
-            drivetrain.moveDistanceWithCorrections(power, 0, waiter);
+            drivetrain.moveDistanceWithCorrections(power, 0);
         }
 
         servos.get("buttonPusher").setPosition(0);
@@ -330,7 +333,7 @@ public class Robot {
 //        ultraPID.setMinOutput(-power);
 ////        ultraPID.setMaxOutput(power);
 //        ultraservohelper.setPosition(sensorName, servoPosition);
-            Thread.sleep(400);
+        Thread.sleep(400);
         drivetrain.move(power, waiter);
         while((Math.abs(distance-state.getAvgSensorData(sensorName)) > 0.5) && waiter.opModeIsActive() ){
 //            power = ultraPID.update(state.getAvgSensorData(sensorName));

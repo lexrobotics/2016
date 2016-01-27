@@ -69,14 +69,14 @@ public class DriveTrain {
     }
 
     // Uses MovementThread to move a distance while correcting for nudges.
-    public void moveDistanceWithCorrections(double power, double distance, LinearOpMode waiter) throws InterruptedException {
+    public void moveDistanceWithCorrections(double power, double distance) throws InterruptedException {
         // 1120 ticks in the encoder
         resetEncoders();
         distance = (distance / wheel_circumference) * 1120;
 
-        move(power, waiter);
+        move(power);
 
-        while (Math.abs(getEncoders()) < distance && waiter.opModeIsActive()) {
+        while (Math.abs(getEncoders()) < distance && Robot.waiter.opModeIsActive()) {
             Robot.waiter.waitOneFullHardwareCycle();
         }
         this.stopMove();
@@ -86,7 +86,7 @@ public class DriveTrain {
     public void move(double power, LinearOpMode waiter){
         if(!thread_running) {
 
-            mover = new MovementThread(this, Robot.gyroName, 0, waiter, power);
+            mover = new MovementThread(this, Robot.gyroName, 0, Robot.waiter, power);
             move_thread = new Thread(mover);
             move_thread.start();
             thread_running = true;

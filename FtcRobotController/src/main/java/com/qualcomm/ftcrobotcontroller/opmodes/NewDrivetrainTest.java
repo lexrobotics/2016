@@ -13,13 +13,11 @@ import lib.TwoWheelDrive;
 public class NewDrivetrainTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException{
-        Robot.init(hardwareMap, telemetry, this); // makes Robot "dave"
-
         DriveTrain dave_train = new TwoWheelDrive(
                 hardwareMap.dcMotor.get("leftdrive"), true,
                 hardwareMap.dcMotor.get("rightdrive"), false, 10);
 
-        Robot.registerDrivetrain(dave_train);
+        Robot.init(hardwareMap, telemetry, this, dave_train, "hero");
 
         Robot.state = new SensorState(hardwareMap, 1, 0);
         Robot.state.registerSensor("mr", SensorState.SensorType.COLOR, false, 12);
@@ -36,7 +34,7 @@ public class NewDrivetrainTest extends LinearOpMode {
 
         while (Robot.state.gyroIsCalibrating("hero"));
 
-        dave_train.turnWithGyro(45,"hero");
+        dave_train.turnWithGyro(45);
 
         while (opModeIsActive()){
             try {

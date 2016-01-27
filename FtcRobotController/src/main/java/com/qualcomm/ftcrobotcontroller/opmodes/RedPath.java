@@ -22,32 +22,32 @@ public class RedPath extends LinearOpMode {
 //        Changed dumbGyroTurn to stop when the angledistance starts increasing again.
 
 //        Robot dave = BotInit.bot2(hardwareMap, telemetry, this);
-        Robot dave = new Robot(hardwareMap, telemetry, this);
-
         DriveTrain dave_train = new FourWheelDrive(
                 hardwareMap.dcMotor.get("leftFrontDrive"), false,
                 hardwareMap.dcMotor.get("rightFrontDrive"), false,
                 hardwareMap.dcMotor.get("leftRearDrive"), true,
                 hardwareMap.dcMotor.get("rightRearDrive"), true,
                 4);
+        Robot.init(hardwareMap, telemetry, this, dave_train,"hero");
+
+
         try {
 
-            dave.registerDriveTrain(dave_train);
 
-            dave.registerMotor("noodler");
-            dave.registerMotor("armTilter");
-            dave.registerMotor("liftStageOne");
-            dave.registerMotor("liftStageTwo");
+            Robot.registerMotor("noodler");
+            Robot.registerMotor("armTilter");
+            Robot.registerMotor("liftStageOne");
+            Robot.registerMotor("liftStageTwo");
 
-            dave.registerServo("divider", 0.5);
-            dave.registerServo("rightZipline", 0.5);
-            dave.registerServo("leftZipline", 0.5);
+            Robot.registerServo("divider", 0.5);
+            Robot.registerServo("rightZipline", 0.5);
+            Robot.registerServo("leftZipline", 0.5);
 
-            dave.registerServo("buttonPusher", 0.5);
-            dave.registerServo("climberDropper", 0.85);
+            Robot.registerServo("buttonPusher", 0.5);
+            Robot.registerServo("climberDropper", 0.85);
 
-            dave.registerServo("redDoor", 1);
-            dave.registerServo("blueDoor", 0);
+            Robot.registerServo("redDoor", 1);
+            Robot.registerServo("blueDoor", 0);
             hardwareMap.servo.get("ultraServo").setPosition(0.3);
 //            dave.registerUltrasonicServo("ultra", "ultraServo", 0.2);
             Robot.state = new SensorState(hardwareMap, 1, 0);
@@ -70,13 +70,13 @@ public class RedPath extends LinearOpMode {
             }
 
             // Path
-            dave.drivetrain.dumbGyroTurn(0.75, false, 45, "hero");
-            dave.motors.get("noodler").setPower(.75);
+            Robot.drivetrain.dumbGyroTurn(0, 1, 45);
+            Robot.motors.get("noodler").setPower(.75);
             Thread.sleep(200);
 
 
-            dave_train.moveDistanceWithCorrections(0.25, "hero", 30, this);
-            dave.tillLimitSwitch("limit", 0.2, "ultraServo", 0.8, 0.3);
+            dave_train.moveDistanceWithCorrections(0.25, 30);
+            Robot.tillLimitSwitch("limit","ultraServo",  0.2, 0.8, 0.3,100000);
 //            dave_train.dumbLukeMakesMeSadBlueGyroTurn(0.5, 0.2, 0, "hero");
 
 
@@ -86,13 +86,13 @@ public class RedPath extends LinearOpMode {
 //            dave.drivetrain.moveDistance(0.6, 3, this);
 //
 //            Thread.sleep(200);
-            dave.drivetrain.dumbGyroTurn(0.5, 0, "hero");
-////////
-//            Thread.sleep(200);
-//            dave.motors.get("noodler").setPower(0);
-//
-            dave.colorSweep(SensorState.ColorType.RED, "light", "color", 0.4, 20);
-            dave.motors.get("noodler").setPower(0);
+//            Robot.drivetrain.dumbGyroTurn(-0.5, 0, 0);
+//////////
+////            Thread.sleep(200);
+////            dave.motors.get("noodler").setPower(0);
+////
+////            Robot.colorSweep(SensorState.ColorType.RED, "light", "color", 0.4, 20);
+            Robot.motors.get("noodler").setPower(0);
 
 //            ////        dave.drivetrain.dumbGyroTurn(0.5, , 90, "hero");
 //            //        dave.drivetrain.moveDistance(-0.6, 10);
@@ -102,9 +102,9 @@ public class RedPath extends LinearOpMode {
             }
         } catch(InterruptedException ex) {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");
-            dave.drivetrain.setLeftMotors(0);
-            dave.drivetrain.setRightMotors(0);
-            dave.motors.get("noodler").setPower(0);
+            Robot.drivetrain.setLeftMotors(0);
+            Robot.drivetrain.setRightMotors(0);
+            Robot.motors.get("noodler").setPower(0);
             return;
         }
     }

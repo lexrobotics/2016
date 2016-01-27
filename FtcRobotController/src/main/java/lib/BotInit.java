@@ -15,45 +15,43 @@ import lib.SensorState;
  * Created by lhscompsci on 1/11/16.
  */
 public class BotInit {
-    public static Robot bot2 (HardwareMap hardwareMap, Telemetry telemetry, LinearOpMode op) {
-        Robot dave = new Robot(hardwareMap, telemetry, op);
-
+    public static void bot2 (HardwareMap hardwareMap, Telemetry telemetry, LinearOpMode op) {
         DriveTrain dave_train = new FourWheelDrive(
                 hardwareMap.dcMotor.get("leftFrontDrive"), false,
                 hardwareMap.dcMotor.get("rightFrontDrive"), false,
                 hardwareMap.dcMotor.get("leftRearDrive"), true,
                 hardwareMap.dcMotor.get("rightRearDrive"), true,
                 4);
-        dave.registerDriveTrain(dave_train);
 
-        dave.registerMotor("noodler");
-        dave.registerMotor("armTilter");
-        dave.registerMotor("liftStageOne");
-        dave.registerMotor("liftStageTwo");
+        Robot.init(hardwareMap, telemetry, op, dave_train, "hero");
 
-        dave.registerServo("divider", 0.5);
-        dave.registerServo("rightZipline", 0.5);
-        dave.registerServo("leftZipline", 0.5);
+        Robot.registerMotor("noodler");
+        Robot.registerMotor("armTilter");
+        Robot.registerMotor("liftStageOne");
+        Robot.registerMotor("liftStageTwo");
 
-        dave.registerServo("buttonPusher", 0.5);
-        dave.registerServo("climberDropper", 0.85);
+        Robot.registerServo("divider", 0.5);
+        Robot.registerServo("rightZipline", 0.5);
+        Robot.registerServo("leftZipline", 0.5);
 
-        dave.registerServo("redDoor", 1);
-        dave.registerServo("blueDoor", 0);
-        dave.registerUltrasonicServo("ultra", "ultraServo", 0.2);
+        Robot.registerServo("buttonPusher", 0.5);
+        Robot.registerServo("climberDropper", 0.85);
+
+        Robot.registerServo("redDoor", 1);
+        Robot.registerServo("blueDoor", 0);
+
+        Robot.registerServo("leftLimitServo", 0.3);
+        Robot.registerServo("rightLimitServo", 0.7);
+
         Robot.state = new SensorState(hardwareMap, 1, 0);
 
-        Robot.state.registerSensor("color", SensorState.SensorType.COLOR, false, 12);
-        Robot.state.registerSensor("light", SensorState.SensorType.LIGHT, true, 12);
+        Robot.state.registerSensor("beacon", SensorState.SensorType.COLOR, false, 12);
+        Robot.state.registerSensor("ground", SensorState.SensorType.COLOR, false, 12);
+
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
-        Robot.state.registerSensor("ultra", SensorState.SensorType.ULTRASONIC, true, 50);
 
-        Thread state_thread = new Thread(Robot.state);
-        state_thread.start();
-
-        return dave;
-
-        // SENSORSTATE EXPECTS AN ULTRATOGGLE, FIX THAT
+        Robot.state_thread = new Thread(Robot.state);
+        Robot.state_thread.start();
 
     }
 }
