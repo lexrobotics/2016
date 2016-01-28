@@ -70,12 +70,12 @@ public class Robot {
                 s = hmap.servo.get(servoName);
                 s.setPosition(initial_position);
             } catch (Exception ex){
-                throw new RuntimeException("registerServo(): Grabbing servo from HardwareMap failed somehow.");
+                throw new RuntimeException("Robot.registerServo: Failed to get servo " + servoName + " from HardwareMap.");
             }
 
             servos.put(servoName, s);
         } else {
-            throw new RuntimeException("registerServo(): Servo already registered.");
+            throw new RuntimeException("Robot.registerServo: servo " + servoName + " already registered.");
         }
     }
 
@@ -87,12 +87,12 @@ public class Robot {
                 m = hmap.dcMotor.get(motorName);
                 m.setPower(0.0);
             } catch (Exception ex){
-                throw new RuntimeException("registerMotor(): Grabbing motor from HardwareMap failed somehow.");
+                throw new RuntimeException("Robot.registerMotor: Failed to get motor " + motorName + " from HardwareMap.");
             }
 
             motors.put(motorName, m);
         } else {
-            throw new RuntimeException("registerMotor(): Motor already registered.");
+            throw new RuntimeException("Robot.registerMotor: motor " + motorName + " already registered.");
         }
     }
 
@@ -103,12 +103,12 @@ public class Robot {
             try {
                 u = hmap.analogInput.get(ultraName);
             } catch (Exception ex){
-                throw new RuntimeException("registerUltrasonic(): Grabbing AnalogInput ultrasonic from HardwareMap failed somehow.");
+                throw new RuntimeException("Robot.registerUltrasonic: Failed to get ultrasonic " + ultraName + " from HardwareMap.");
             }
 
             ultras.put(ultraName, u);
         } else {
-            throw new RuntimeException("registerUltrasonic(): Ultrasonic already registered.");
+            throw new RuntimeException("Robot.registerUltrasonic: ultrasonic " + ultraName + " already registered.");
         }
     }
 
@@ -128,7 +128,7 @@ public class Robot {
         if (servos.keySet().contains(servoName)) {
             servos.get(servoName).setPosition(position / 180.0);
         } else {
-            throw new RuntimeException("In setServoPosition, the servo has not been registered.");
+            throw new RuntimeException("Robot.setServoPosition: servo " + servoName + " has not been registered.");
         }
     }
 
