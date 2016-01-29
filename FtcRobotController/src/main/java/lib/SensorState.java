@@ -268,7 +268,7 @@ public class SensorState implements Runnable{
      */
     public synchronized boolean gyroIsCalibrating(String gyro_name){
         if (!sensorContainers.keySet().contains(gyro_name))
-            throw new RuntimeException("gyroIsCalibrating(): Gyro not registered.");
+            throw new RuntimeException("SensorState.gyroIsCalibrating: gyro " + gyro_name + " not registered.");
         return ((GyroSensor)sensorContainers.get(gyro_name).sensor).isCalibrating();
     }
 
@@ -277,7 +277,7 @@ public class SensorState implements Runnable{
      */
     public synchronized boolean filterIsFilled(String name){
         if (!sensorContainers.keySet().contains(name)){
-            throw new RuntimeException("filterIsFilled(): Sensor not registered.");
+            throw new RuntimeException("SensorState.filterIsFilled: sensor " + name + " not registered.");
         }
         return sensorContainers.get(name).filter.isFilled();
     }
@@ -298,7 +298,7 @@ public class SensorState implements Runnable{
      */
     public synchronized void changeFilterLength(String name, int fl){
         if(!sensorContainers.keySet().contains(name)){
-            throw new RuntimeException("changeFilterLength(): Sensor not registered.");
+            throw new RuntimeException("SensorState.changeFilterLength: sensor " + name + " not registered.");
         }
         sensorContainers.get(name).filter.changeFilter_length(fl);
     }
@@ -309,7 +309,7 @@ public class SensorState implements Runnable{
      */
     public synchronized ColorType getColorData(String name){
         if(!sensorContainers.keySet().contains(name)){
-            throw new RuntimeException("getColorData(): Color sensor not registered.");
+            throw new RuntimeException("SensorState.getColorData: color sensor " + name + " not registered.");
         }
         return getDominantColor(sensorContainers.get(name));
     }
@@ -319,7 +319,7 @@ public class SensorState implements Runnable{
      */
     public synchronized double getSensorReading(String name){
         if(!sensorContainers.keySet().contains(name)){
-            throw new RuntimeException("getSensorReading(): Sensor not registered.");
+            throw new RuntimeException("SensorState.getSensorReading: sensor " + name + " not registered.");
         }
         return getSensorReading(sensorContainers.get(name));
     }
@@ -330,7 +330,7 @@ public class SensorState implements Runnable{
      */
     public synchronized void changeUpdateStatus(String name, boolean update){
         if (!sensorContainers.keySet().contains(name)){
-            throw new RuntimeException("changeUpdateStatus: Sensor not registered.");
+            throw new RuntimeException("SensorState.changeUpdateStatus: sensor " + name + " not registered.");
         }
         sensorContainers.get(name).update = update;
     }
@@ -342,7 +342,7 @@ public class SensorState implements Runnable{
      */
     public synchronized Filter getFilter(String name){
         if (!sensorContainers.keySet().contains(name)){
-            throw new RuntimeException("getFilter(): Sensor not registered.");
+            throw new RuntimeException("SensorState.getFilter: sensor " + name + " not registered.");
         }
         return sensorContainers.get(name).filter.clone();
     }
@@ -352,7 +352,7 @@ public class SensorState implements Runnable{
      */
     public synchronized double getAvgSensorData(String name) {
         if(!sensorContainers.keySet().contains(name)){
-            throw new RuntimeException("getAvgSensorData(): Sensor not registered.");
+            throw new RuntimeException("SensorState.getAvgSensorData: sensor " + name + " not registered.");
         }
         return sensorContainers.get(name).filter.getAvg();
     }
@@ -362,7 +362,7 @@ public class SensorState implements Runnable{
      */
     public synchronized String[] getSensorsFromType(SensorType type){
         if (!types_inv.keySet().contains(type)){
-            throw new RuntimeException("getSensorsFromType(): Type not found in registered sensors.");
+            throw new RuntimeException("SensorState.getSensorsFromType: type " + type + " not found in registered sensors.");
         }
         SensorContainer[] sens = types_inv.get(type);
         String[] ret = new String[sens.length];
