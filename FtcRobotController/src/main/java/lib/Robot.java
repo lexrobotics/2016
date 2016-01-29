@@ -2,6 +2,7 @@ package lib;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -198,6 +199,17 @@ public class Robot {
 
         drivetrain.stopMove();
         return real_color;
+    }
+
+    public static void tillWhite(String colorName, double power) throws InterruptedException{
+        drivetrain.move(power, waiter);
+        ColorSensor c = hmap.colorSensor.get(colorName);
+
+        while (!(c.alpha() >= 6 && c.red() >= 6 && c.green() >= 6 && c.blue() >= 6) && waiter.opModeIsActive()){
+            waiter.waitOneFullHardwareCycle();
+        }
+
+        drivetrain.stopMove();
     }
 
     public static void colorSweep   (SensorState.ColorType color,

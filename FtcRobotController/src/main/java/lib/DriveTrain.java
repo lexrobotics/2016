@@ -74,7 +74,7 @@ public class DriveTrain {
         resetEncoders();
         distance = (distance / wheel_circumference) * 1120;
 
-        move(power);
+        move(power,Robot.waiter);
 
         while (Math.abs(getEncoders()) < distance && Robot.waiter.opModeIsActive()) {
             Robot.waiter.waitOneFullHardwareCycle();

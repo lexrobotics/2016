@@ -3,6 +3,7 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Hardware;
 
@@ -27,8 +28,16 @@ public class BluePath extends LinearOpMode {
             while (Robot.state.gyroIsCalibrating("hero")) {
                 waitOneFullHardwareCycle();
             }
+            Robot.drivetrain.dumbGyroTurn(1, 0, 45);
+            Robot.drivetrain.moveDistanceWithCorrections(0.25, 30);
+            Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.2, 0.25, 1, 1000);
+//            Robot.drivetrain.move(0.3, this);
+            Robot.drivetrain.dumbGyroTurn(1, -1, 135);
 
-            Robot.tillColor("ground", 0.8, SensorState.ColorType.WHITE);
+
+            Robot.tillWhite("ground", -0.3); //dont we want to be looking for white? this needs to be explained?
+
+//            Robot.tillColor("ground", 0.8, SensorState.ColorType.WHITE);
 //
 ////            //dave.pushButton("buttonPusher", 1500);
 ////            dave.servos.get("climberDropper").setPosition(0.3);

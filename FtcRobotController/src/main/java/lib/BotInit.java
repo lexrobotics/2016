@@ -41,12 +41,14 @@ public class BotInit {
         Robot.registerServo("blueDoor", 0);
 
         Robot.registerServo("leftLimitServo", 0.3);
-        Robot.registerServo("rightLimitServo", 0.7);
+        Robot.registerServo("rightLimitServo", 1);
 
         Robot.state = new SensorState(hardwareMap, 1, 0);
 
         Robot.state.registerSensor("beacon", SensorState.SensorType.COLOR, false, 12);
         Robot.state.registerSensor("ground", SensorState.SensorType.COLOR, false, 12);
+        hardwareMap.colorSensor.get("ground").setI2cAddress(0x42);
+        Robot.state.colorLightToggle("ground", true);
 
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
 
