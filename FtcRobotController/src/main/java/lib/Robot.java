@@ -240,116 +240,12 @@ public class Robot {
     }
 
 
-    /*
-    // tillSense for colors. If the first color we detect is the color argument (our teams color)
-    // Then we will hit that button.
-    // REWRITE TO USE COLOR
-    // Otherwise, we go to the next light.
-    public static void colorSweep(SensorState.ColorType color,
-                                  String lightname,
-                                  String colorname,
-                                  double power,
-                                  int bumpthresh) throws InterruptedException{
-
-        SensorState.ColorType dominant = state.getColorData(colorname);   // Current dominant color detected
-
-        double reading = 0.0;
-
-        Thread.sleep(20);
-
-        double baseline = state.getAvgSensorData("light");
-
-//        Thread.sleep(300);
-
-//        do {
-//            dominant = state.getColorData("color");
-////            tel.addData("")
-//
-//            Thread.sleep(10);
-//
-//            if (!waiter.opModeIsActive()){
-//                return;
-//            }
-//        } while (!(dominant == SensorState.ColorType.BLUE || dominant == SensorState.ColorType.RED) && waiter.opModeIsActive());
-//        drivetrain.stopMove();
-//
-//        Thread.sleep(300);
-//
-//
-//        if(color == SensorState.ColorType.RED)
-//            drivetrain.moveDistance(-power, 5, this.waiter);
-
-//        Thread.sleep(300);
-
-        drivetrain.move(.75 * power, waiter);
-        while(waiter.opModeIsActive()){
-            reading = state.getSensorReading(lightname);
-            Robot.tel.addData("reading", reading);
-
-            if(Math.abs(reading - baseline) > bumpthresh ) {
-                Robot.tel.addData("bump detected", "");
-                break;
-            }
-            Thread.sleep(10);
-        }
-
-        drivetrain.stopMove();
-
-        Thread.sleep(300);
-        drivetrain.moveDistanceWithCorrections(.3, 2, waiter);
-        Thread.sleep(300);
-
-
-//        drivetrain.moveDistance(power, 4);
-//        Thread.sleep(300);
-
-//
-//        double correctScoot = 0 ;
-//        double wrongScoot = 2 ;
-//
-//
-//
-//        if (dominant == color) {
-////            drivetrain.moveDistance(power, 3);
-//            tel.addData("Color", "First");
-//        } else {
-//            tel.addData("Color", "Second");
-//            Thread.sleep(300);
-//        }
-
-
-//        this.pushButton("buttonPusher", 1500);
-        servos.get("climberDropper").setPosition(0.3);
-        Thread.sleep(2000);
-        servos.get("climberDropper").setPosition(0.85);
-//        this.pushButton("buttonPusher");
-        Thread.sleep(300);
-    }
-    */
-
-
-
-
-
-
-    /*
-     ***********************
-     UNUSED ULTRASONIC CODE
-     ************************
-     */
-
 
     public static void tillSense(String sensorName, double servoPosition, double power, int distance, int filterlength, boolean overshootExit) throws InterruptedException{
-//        PID ultraPID = new PID(0.05, 0.02, 0, true, 0.2);
-//        ultraPID.setTarget(distance);
-//        ultraPID.setMinOutput(-power);
-////        ultraPID.setMaxOutput(power);
-//        ultraservohelper.setPosition(sensorName, servoPosition);
+
         Thread.sleep(400);
         drivetrain.move(power, waiter);
         while((Math.abs(distance-state.getAvgSensorData(sensorName)) > 0.5) && waiter.opModeIsActive() ){
-//            power = ultraPID.update(state.getAvgSensorData(sensorName));
-//            drivetrain.mover.setPower(power);
 
             tel.addData("AvgUSDistance", state.getAvgSensorData(sensorName));
             Thread.sleep(10);

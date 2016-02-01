@@ -86,7 +86,7 @@ public class DriveTrain {
     public void move(double power, LinearOpMode waiter){
         if(!thread_running) {
 
-            mover = new MovementThread(this, Robot.gyroName, 0, Robot.waiter, power);
+            mover = new MovementThread(this, Robot.gyroName, Robot.waiter, power);
             move_thread = new Thread(mover);
             move_thread.start();
             thread_running = true;

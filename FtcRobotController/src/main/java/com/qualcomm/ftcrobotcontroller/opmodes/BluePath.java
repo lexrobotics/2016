@@ -28,26 +28,22 @@ public class BluePath extends LinearOpMode {
             while (Robot.state.gyroIsCalibrating("hero")) {
                 waitOneFullHardwareCycle();
             }
+
+
             Robot.drivetrain.dumbGyroTurn(1, 0, 45);
+
             Robot.drivetrain.moveDistanceWithCorrections(0.25, 30);
             Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.2, 0.25, 1, 1000);
+
+                Thread.sleep(500);
 //            Robot.drivetrain.move(0.3, this);
-            Robot.drivetrain.dumbGyroTurn(1, -1, 135);
+            Robot.drivetrain.dumbGyroTurn(0.6, 135);
+
+                Thread.sleep(500);
+
+            Robot.tillWhite("ground",-0.2);
 
 
-            Robot.tillWhite("ground", -0.3); //dont we want to be looking for white? this needs to be explained?
-
-//            Robot.tillColor("ground", 0.8, SensorState.ColorType.WHITE);
-//
-////            //dave.pushButton("buttonPusher", 1500);
-////            dave.servos.get("climberDropper").setPosition(0.3);
-////            //dave.pushButton("buttonPusher");
-////            Thread.sleep(2000);
-////            dave.servos.get("climberDropper").setPosition(0.6);
-//            while (opModeIsActive()) {
-//                telemetry.addData("done", "yes");
-//                Thread.sleep(10);
-//            }
         } catch(InterruptedException ex) {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");
         }

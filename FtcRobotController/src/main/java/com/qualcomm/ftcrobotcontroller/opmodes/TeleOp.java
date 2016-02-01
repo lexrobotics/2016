@@ -15,6 +15,7 @@ public class TeleOp extends OpMode {
     DcMotor noodler, armTilter, liftStageOne, liftStageTwo;
     Servo divider, rightZipline, leftZipline, buttonPusher, climberDropper;
     Servo redDoor, blueDoor;
+    Servo rightLimitServo, leftLimitServo;
 
     // The arm_locked and climber_drop variables say whether the climber or arm should currently be activated.
     // The toggle is aided by a_was_down and b_was_down.
@@ -59,6 +60,9 @@ public class TeleOp extends OpMode {
 
         armLock = hardwareMap.servo.get("armLock");
 
+        leftLimitServo = hardwareMap.servo.get("leftLimitServo");
+        rightLimitServo = hardwareMap.servo.get("rightLimitServo");
+
         noodler.setPower(0);
         armTilter.setPower(0);
         liftStageOne.setPower(0);
@@ -70,7 +74,10 @@ public class TeleOp extends OpMode {
         redDoor.setPosition(1);
         blueDoor.setPosition(0);
         divider.setPosition(0.5);
-        armLock.setPosition(0.5);
+        armLock.setPosition(0.3);
+
+        leftLimitServo.setPosition(0);
+        rightLimitServo.setPosition(1);
     }
 
     @Override
@@ -188,7 +195,7 @@ public class TeleOp extends OpMode {
         if (arm_locked) {
             armLock.setPosition(0);
         } else {
-            armLock.setPosition(0.5);
+            armLock.setPosition(0.3);
         }
 
     }

@@ -20,7 +20,7 @@ public class MovementThread implements Runnable {
     private double scalingfactor;
 
 
-    public MovementThread (DriveTrain drivetrain, String gyro_name, int expectedHeading, LinearOpMode waiter, double power) {
+    public MovementThread (DriveTrain drivetrain, String gyro_name, LinearOpMode waiter, double power) {
         this.drivetrain = drivetrain;
         this.gyro_name = gyro_name;
         this.power = power;
@@ -61,26 +61,35 @@ public class MovementThread implements Runnable {
         drivetrain.setLeftMotors(power);
         drivetrain.setRightMotors(power);
 
+        int offset;
+
         while (!Thread.currentThread().isInterrupted() && waiter.opModeIsActive()) {
             Robot.tel.addData("expHead: " + drivetrain.getExpectedHeading() + " active: " + waiter.opModeIsActive(), "");
 
-    
+
+
 
             try {
-                int offset = angleDist((int)drivetrain.getActualHeading(gyro_name), (int)drivetrain.getExpectedHeading());
+
+                offset = angleDist((int)drivetrain.getActualHeading(gyro_name), (int)drivetrain.getExpectedHeading());
+                Robot.tel.addData("offset",offset);
+
+
 
                 if (Math.abs(offset) > minthresh && Math.abs(offset) < turnthresh) {
-                    Robot.tel.addData("slight turning", offset);
-                    if (offset > 0) {
+
+                    if (offset * Math.signum(power) > 0) {
                         // This scales the distance of the rightMotor value from 0 down by 0.6
                         drivetrain.setRightMotors(power * scalar);
 
                         // This scales the distance of the leftMotor value from 1 down by 0.6
-                        drivetrain.setLeftMotors(1 - (1 - power) * scalar);
+                        drivetrain.setLeftMotors(Math.signum(power) * (1 - (1 - Math.abs(power)) * scalar));
+                        Robot.tel.addData("rightMotors: " + power * scalar + "  leftMotors", Math.signum(power) * (1 - (1 - Math.abs(power)) * scalar));
                     }
                     else {
-                        drivetrain.setRightMotors(1 - (1 - power) * scalar);
+                        drivetrain.setRightMotors(Math.signum(power) * (1 - (1 - Math.abs(power)) * scalar));
                         drivetrain.setLeftMotors(power * scalar);
+                        Robot.tel.addData("rightMotors: " + Math.signum(power) * (1 - (1 - Math.abs(power)) * scalar) + "  leftMotors", power * scalar);
                     }
                 }
 
@@ -90,6 +99,7 @@ public class MovementThread implements Runnable {
                     Thread.sleep(200);
 
                     while (Math.abs(offset) > turnthresh && waiter.opModeIsActive()) {
+                        Robot.tel.addData("offset",offset);
                         offset = angleDist((int)drivetrain.getActualHeading(gyro_name), (int)drivetrain.getExpectedHeading());
                         drivetrain.setRightMotors(0.4 * Math.signum(offset) * -1);
                         drivetrain.setLeftMotors(0.4 * Math.signum(offset));
