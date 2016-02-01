@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import java.util.HashMap;
 
+import simplelib.helper.SensorState;
+
 /**
  * SimpleRobot is a rewrite of the orignal Robot, with more simplicity.
  * It's essentially a data center with all stuffs.
@@ -19,11 +21,14 @@ public class SimpleRobot
     public static Telemetry tel;
     public static LinearOpMode opm;
     public static HardwareMap hmap;
+    public static SensorState state;
     
     public static DriveTrain drivetrain;
     public static HashMap<String, DcMotor> motors;
     public static HashMap<String, Servo> servos;
     public static String gyroName;
+
+    private static double expectedHeading;
 
     public static void init(HardwareMap h, Telemetry t, LinearOpMode o) {
         hmap = h;
@@ -51,5 +56,13 @@ public class SimpleRobot
 
     public void setPower(String name, double power) {
         motors.get(name).setPower(power);
+    }
+
+    public double getExpectedHeading() {
+        return this.expectedHeading;
+    }
+
+    public void setExpectedHeading(double expectedHeading) {
+        this.expectedHeading = expectedHeading;
     }
 }

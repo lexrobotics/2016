@@ -1,4 +1,4 @@
-package simplelib;
+package simplelib.helper;
 
 /**
  * Created by lhscompsci on 12/7/15.

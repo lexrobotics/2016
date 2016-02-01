@@ -13,14 +13,8 @@ import java.util.HashMap;
 
 public class DriveTrain
 {
-    /*
-    **********************
-    REGISTRATION FUNCTIONS
-    **********************
-     */
-
     private final double TURN_SCALAR = 0.23;
-    private double wheel_circumference, expectedHeading;
+    private double wheel_circumference;
 
     private HashMap<String, DcMotor> left, right;
     private HashMap<String, Integer> leftEncoder, rightEncoder;

@@ -1,4 +1,4 @@
-package simplelib;
+package simplelib.helper;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.HashMap;
+
+import simplelib.SimpleRobot;
 
 /**
  * public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER }
@@ -396,7 +398,7 @@ public class SensorState implements Runnable {
     public void run() {
 //        while (Robot.waiter.opModeIsActive()){
         //opmodeisactive() returns false during init stage
-        while (Robot.waiter.opModeIsActive()){
+        while (SimpleRobot.opm.opModeIsActive()){
 //            Robot.tel.addData("running?", "");
             try {
                 for (SensorContainer sen : sensorContainers.values()) {

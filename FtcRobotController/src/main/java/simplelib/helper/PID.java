@@ -1,4 +1,4 @@
-package simplelib;
+package simplelib.helper;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;

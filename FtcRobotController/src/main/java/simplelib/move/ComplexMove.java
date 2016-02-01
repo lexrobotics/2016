@@ -1,4 +1,4 @@
-package simplelib;
+package simplelib.move;
 
 /**
  * Created by lhscompsci on 1/21/16.
