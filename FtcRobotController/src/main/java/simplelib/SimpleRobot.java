@@ -23,6 +23,7 @@ public class SimpleRobot
     public static DriveTrain drivetrain;
     public static HashMap<String, DcMotor> motors;
     public static HashMap<String, Servo> servos;
+    public static String gyroName;
 
     public static void init(HardwareMap h, Telemetry t, LinearOpMode o) {
         hmap = h;
@@ -38,6 +39,10 @@ public class SimpleRobot
     public void registerMotor (String motorName) {
         if (!motors.containsKey(motorName))
             motors.put(motorName, hmap.dcMotor.get(motorName));
+    }
+
+    public void registerGyro (String name) {
+        gyroName = name;
     }
 
     public void setPosition(String name, double pos) {

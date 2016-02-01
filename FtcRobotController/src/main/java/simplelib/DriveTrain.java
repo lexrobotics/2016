@@ -14,8 +14,10 @@ import java.util.HashMap;
 public class DriveTrain
 {
     /*
-     * REGISTRATION FUNCTIONS
-     **/
+    **********************
+    REGISTRATION FUNCTIONS
+    **********************
+     */
 
     private final double TURN_SCALAR = 0.23;
     private double wheel_circumference, expectedHeading;
@@ -26,10 +28,8 @@ public class DriveTrain
     public DriveTrain(String[] leftnames, String[] rightnames, double wheel_diameter)
     {
         this.wheel_circumference = Math.PI * wheel_diameter;
-
         for (String name : leftnames) left.put(name, SimpleRobot.hmap.dcMotor.get(name));
         for (String name : rightnames) right.put(name, SimpleRobot.hmap.dcMotor.get(name));
-
         resetEncoders();
     }
     
@@ -40,16 +40,21 @@ public class DriveTrain
     }
 
     public void setLeftMotors(double power) {
-        for (DcMotor l : left.values()) l.setPower(power);
+        for (DcMotor l : left.values())
+            l.setPower(power);
     }
 
     public void setRightMotors(double power) {
-        for (DcMotor r : right.values()) r.setPower(power);
+        for (DcMotor r : right.values())
+            r.setPower(power);
     }
 
     public void resetEncoders() {
-        for (String i : left.keySet()) leftEncoder.put(i, left.get(i).getCurrentPosition());
-        for (String i : right.keySet()) rightEncoder.put(i, right.get(i).getCurrentPosition());
+        for (String i : left.keySet())
+            leftEncoder.put(i, left.get(i).getCurrentPosition());
+
+        for (String i : right.keySet())
+            rightEncoder.put(i, right.get(i).getCurrentPosition());
     }
     
     public int getEncoders() {
@@ -60,9 +65,4 @@ public class DriveTrain
           ans += right.get(name).getCurrentPosition() - rightEncoder.get(name);
       return ans / (left.keySet().size() + right.keySet().size());
     }
-
-    /*
-     * MOVEMENT FUNCTIONS
-     **/
-
 }
