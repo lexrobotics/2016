@@ -40,7 +40,7 @@ public class BotInit {
         Robot.registerServo("redDoor", 1);
         Robot.registerServo("blueDoor", 0);
 
-        Robot.registerServo("leftLimitServo", 0.3);
+        Robot.registerServo("leftLimitServo", 0);
         Robot.registerServo("rightLimitServo", 1);
 
         Robot.state = new SensorState(hardwareMap, 1, 0);

@@ -29,19 +29,19 @@ public class BluePath extends LinearOpMode {
                 waitOneFullHardwareCycle();
             }
 
-
             Robot.drivetrain.dumbGyroTurn(1, 0, 45);
 
             Robot.drivetrain.moveDistanceWithCorrections(0.25, 30);
             Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.2, 0.25, 1, 1000);
 
-                Thread.sleep(500);
-//            Robot.drivetrain.move(0.3, this);
-            Robot.drivetrain.dumbGyroTurn(0.6, 135);
+            Thread.sleep(500);
+
+            Robot.drivetrain.dumbGyroTurn(0.6, -0.4, 135);
 
                 Thread.sleep(500);
 
-            Robot.tillWhite("ground",-0.2);
+
+            Robot.tillWhite(-0.2,"ground","beacon");
 
 
         } catch(InterruptedException ex) {

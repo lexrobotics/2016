@@ -1,5 +1,7 @@
 package lib;
 
+import android.hardware.Sensor;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -201,44 +203,24 @@ public class Robot {
         return real_color;
     }
 
-    public static void tillWhite(String colorName, double power) throws InterruptedException{
+    public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException{
         drivetrain.move(power, waiter);
-        ColorSensor c = hmap.colorSensor.get(colorName);
+        ColorSensor ground = hmap.colorSensor.get(groundName);
+        ColorSensor beacon = hmap.colorSensor.get(beaconName);
+        SensorState.ColorType dominant = null;
+        int threshold = 6;
 
-        while (!(c.alpha() >= 6 && c.red() >= 6 && c.green() >= 6 && c.blue() >= 6) && waiter.opModeIsActive()){
+        while (!(ground.alpha() >= threshold && ground.red() >= threshold && ground.green() >= threshold && ground.blue() >= threshold) && waiter.opModeIsActive()){
+            if(dominant != null && (state.getColorData(beaconName) == SensorState.ColorType.RED ||state.getColorData(beaconName) == SensorState.ColorType.BLUE   )){
+                dominant = state.getColorData(beaconName);
+            }
             waiter.waitOneFullHardwareCycle();
         }
-
         drivetrain.stopMove();
+
+        return dominant;
+
     }
-
-    public static void colorSweep   (SensorState.ColorType color,
-                                     String bottomName,
-                                     String sideName,
-                                     double power) throws InterruptedException {
-
-        SensorState.ColorType found_color;
-        tillColor(bottomName, power, SensorState.ColorType.WHITE);
-
-        servos.get("buttonPusher").setPosition(0);
-        Thread.sleep(700);
-        servos.get("buttonPusher").setPosition(0.5);
-
-        found_color = tillColor(sideName, power, SensorState.ColorType.BLUE, SensorState.ColorType.RED);
-
-        if (found_color == SensorState.ColorType.RED){
-            drivetrain.moveDistanceWithCorrections(power, 0);
-        } else if (found_color == SensorState.ColorType.BLUE){
-            drivetrain.moveDistanceWithCorrections(power, 0);
-        }
-
-        servos.get("buttonPusher").setPosition(0);
-        Thread.sleep(1500);
-        servos.get("buttonPusher").setPosition(1);
-        Thread.sleep(2000);
-        servos.get("buttonPusher").setPosition(0.5);
-    }
-
 
 
     public static void tillSense(String sensorName, double servoPosition, double power, int distance, int filterlength, boolean overshootExit) throws InterruptedException{
