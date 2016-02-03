@@ -15,9 +15,9 @@ public class HelperFunctions {
 //            Robot.tel.addData("color", Robot.state.getSensorReading("color"));
 //            Robot.tel.addData("light", Robot.state.getSensorReading("light"));
             Robot.tel.addData("gyro", Robot.state.getAvgSensorData("hero"));
-            Robot.tel.addData("ultra", Robot.state.getAvgSensorData("ultra"));
-            Robot.tel.addData("color", Robot.state.getAvgSensorData("color"));
-            Robot.tel.addData("light", Robot.state.getAvgSensorData("light"));
+            Robot.tel.addData("beacon", Robot.state.getColorData("beacon"));
+            Robot.tel.addData("ground", Robot.state.getColorData("ground"));
+
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {

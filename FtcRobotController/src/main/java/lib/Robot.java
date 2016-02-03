@@ -10,7 +10,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.io.FileNotFoundException;
 import java.util.HashMap;
+
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -164,21 +169,19 @@ public class Robot {
         Thread.sleep(500);
     }
 
-    public static void pushButton(String servoName) throws InterruptedException{
-        servos.get(servoName).setPosition(0);
-            Thread.sleep(1200);
-
-        servos.get(servoName).setPosition(1);
-
-        Thread.sleep(1200);
-        servos.get("buttonPusher").setPosition(0.5);
-
+    public static void scoreEverything(String servoName) throws InterruptedException{
+        scoreEverything(servoName, 2000, 100, 2000);
     }
 
-    public static void pushButton(String servoName, int duration) throws InterruptedException{
+    public static void scoreEverything(String servoName, int outduration, int pause, int induration) throws InterruptedException{
         servos.get(servoName).setPosition(0);
-        Thread.sleep(duration);
-
+        Robot.servos.get("climberDropper").setPosition(0.3);
+        Thread.sleep(outduration);
+        Robot.servos.get("climberDropper").setPosition(0.6);
+        servos.get(servoName).setPosition(0.5);
+        Thread.sleep(pause);
+        servos.get(servoName).setPosition(1);
+        Thread.sleep(induration);
         servos.get(servoName).setPosition(0.5);
     }
 
@@ -203,20 +206,47 @@ public class Robot {
         return real_color;
     }
 
-    public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException{
+    public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException {
+        File ground_file = new File("ground_output.txt");
+        File beacon_file = new File("beacon_output.txt");
+        PrintWriter ground_out = null;
+        PrintWriter beacon_out = null;
+
+        try {
+            ground_out = new PrintWriter(ground_file);
+            beacon_out = new PrintWriter(beacon_file);
+        } catch (java.io.FileNotFoundException ex) {
+            throw new RuntimeException("could not create file");
+        }
+
         drivetrain.move(power, waiter);
         ColorSensor ground = hmap.colorSensor.get(groundName);
-        ColorSensor beacon = hmap.colorSensor.get(beaconName);
+        ColorSensor b = hmap.colorSensor.get(beaconName);
         SensorState.ColorType dominant = null;
-        int threshold = 6;
+        int threshold = 3;
+
 
         while (!(ground.alpha() >= threshold && ground.red() >= threshold && ground.green() >= threshold && ground.blue() >= threshold) && waiter.opModeIsActive()){
-            if(dominant != null && (state.getColorData(beaconName) == SensorState.ColorType.RED ||state.getColorData(beaconName) == SensorState.ColorType.BLUE   )){
+            beacon_out.println("alpha: " + b.alpha() + "   red: " + b.red() + "   green: " + b.green() + "   blue: " + b.blue());
+            ground_out.println("alpha: " + ground.alpha() + "   red: " + ground.red() + "   green: " + ground.green() + "   blue: " + ground.blue());
+
+
+            Robot.tel.addData("color", ground.argb());
+            if(dominant == null && (state.getColorData(beaconName) == SensorState.ColorType.RED || state.getColorData(beaconName) == SensorState.ColorType.BLUE)){
                 dominant = state.getColorData(beaconName);
             }
-            waiter.waitOneFullHardwareCycle();
+
+            else if(dominant!= null){
+                Robot.tel.addData("color",dominant);
+            }
+
+            Thread.sleep(10);
         }
         drivetrain.stopMove();
+
+        beacon_out.println("chose " + dominant + " as dominant color");
+        ground_out.close();
+        beacon_out.close();
 
         return dominant;
 

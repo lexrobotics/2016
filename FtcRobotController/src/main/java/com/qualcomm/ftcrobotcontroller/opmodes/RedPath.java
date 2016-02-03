@@ -32,24 +32,36 @@ public class RedPath extends LinearOpMode {
                 waitOneFullHardwareCycle();
             }
 
-            // Path
-            Robot.drivetrain.dumbGyroTurn(0, 1, 45);
-//            Robot.motors.get("noodler").setPower(.75);
-            Thread.sleep(200);
-            Robot.drivetrain.moveDistanceWithCorrections(0.25, 30);
-            Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.8, 0, 1000);
-            Robot.drivetrain.dumbGyroTurn(0.6, -0.4, 45);
+////             Path
+//            Robot.drivetrain.dumbGyroTurn(0, 1, 45);
+////            Robot.motors.get("noodler").setPower(.75);
+//            Thread.sleep(200);
+//            Robot.drivetrain.moveDistanceWithCorrections(0.25, 30);
+//            Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.8, 0, 1000);
+//            Robot.drivetrain.dumbGyroTurn(0.6, -0.6, 45);
+//            Thread.sleep(200);
 
             boolean dominant = (SensorState.ColorType.RED == Robot.tillWhite(0.2, "ground", "beacon"));
-            if(dominant){
 
-            }
-            else{
-                Robot.drivetrain.moveDistanceWithCorrections(0.25, 4);
 
-            }
-
-//            Robot.motors.get("noodler").setPower(0);
+//            Thread.sleep(200);
+//            Robot.tillWhite(-0.2, "ground", "beacon");
+//            Robot.drivetrain.dumbGyroTurn(-0.4, 0.4, 0);
+//
+//
+//            Thread.sleep(300);
+//
+//            if(dominant){
+//
+//            }
+//            else{
+//                Robot.drivetrain.moveDistance(0.25, 3.5,this);
+//
+//            }
+//
+//            Robot.scoreEverything("buttonPusher");
+//
+////            Robot.motors.get("noodler").setPower(0);
 
             while (opModeIsActive()) {
                 telemetry.addData("done", "yes");
@@ -60,6 +72,7 @@ public class RedPath extends LinearOpMode {
             Robot.drivetrain.setLeftMotors(0);
             Robot.drivetrain.setRightMotors(0);
             Robot.motors.get("noodler").setPower(0);
+            Robot.state_thread.interrupt();
             return;
         }
     }
