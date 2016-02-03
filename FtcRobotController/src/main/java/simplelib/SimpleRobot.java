@@ -36,33 +36,37 @@ public class SimpleRobot
         opm = o;
     }
 
-    public void registerServo(String servoName) {
+    public static void registerServo(String servoName) {
         if (!servos.keySet().contains(servoName))
             servos.put(servoName, hmap.servo.get(servoName));
     }
 
-    public void registerMotor (String motorName) {
+    public static void registerMotor (String motorName) {
         if (!motors.containsKey(motorName))
             motors.put(motorName, hmap.dcMotor.get(motorName));
     }
 
-    public void registerGyro (String name) {
+    public static void registerGyro (String name) {
         gyroName = name;
     }
 
-    public void setPosition(String name, double pos) {
+    public static void setPosition(String name, double pos) {
         servos.get(name).setPosition(pos / 180.0);
     }
 
-    public void setPower(String name, double power) {
+    public static void setPower(String name, double power) {
         motors.get(name).setPower(power);
     }
 
-    public double getExpectedHeading() {
-        return this.expectedHeading;
+    public static double getExpectedHeading() {
+        return expectedHeading;
     }
 
-    public void setExpectedHeading(double expectedHeading) {
-        this.expectedHeading = expectedHeading;
+    public static void setExpectedHeading(double eH) {
+        expectedHeading = eH;
+    }
+
+    public static double getActualHeading() {
+        return state.getSensorReading(gyroName);
     }
 }
