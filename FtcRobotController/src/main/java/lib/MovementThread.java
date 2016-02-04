@@ -55,7 +55,7 @@ public class MovementThread implements Runnable {
     @Override
     public void run() {
         double maxOutput = Math.min(1 - Math.abs(power), Math.abs(power));
-        PID correctionPID = new PID(maxOutput/8, 0.04, 0);
+        PID correctionPID = new PID(maxOutput/4, 0.05, 0.01);
 
         correctionPID.setMaxOutput(maxOutput);
         correctionPID.setMinOutput(-1 * maxOutput);
@@ -70,7 +70,12 @@ public class MovementThread implements Runnable {
         int offset;
 
         while (!Thread.currentThread().isInterrupted() && waiter.opModeIsActive()) {
+            if(power==0){
+                drivetrain.setLeftMotors(0);
+                drivetrain.setRightMotors(0);
 
+                Thread.currentThread().interrupt();
+            }
             Robot.tel.addData("expHead: " + drivetrain.getExpectedHeading() + " active: " + waiter.opModeIsActive(), "");
 
             try {

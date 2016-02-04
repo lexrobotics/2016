@@ -32,17 +32,22 @@ public class RedPath extends LinearOpMode {
                 waitOneFullHardwareCycle();
             }
 
-////             Path
-//            Robot.drivetrain.dumbGyroTurn(0, 1, 45);
-////            Robot.motors.get("noodler").setPower(.75);
-//            Thread.sleep(200);
-//            Robot.drivetrain.moveDistanceWithCorrections(0.25, 30);
-//            Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.8, 0, 1000);
-//            Robot.drivetrain.dumbGyroTurn(0.6, -0.6, 45);
-//            Thread.sleep(200);
+//             Path
+            Robot.drivetrain.dumbGyroTurn(0, 1, 45);
+//            Robot.motors.get("noodler").setPower(.75);
+            Thread.sleep(200);
+            Robot.drivetrain.moveDistanceWithCorrections(0.25, 30);
+            Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.8, 0, 1000);
+            Robot.drivetrain.dumbGyroTurn(0.6, -0.6, 45);
+            Thread.sleep(200);
 
-            boolean dominant = (SensorState.ColorType.RED == Robot.tillWhite(0.2, "ground", "beacon"));
+            boolean dominant = (SensorState.ColorType.RED == Robot.tillWhite(.15, "ground", "beacon"));
+//            Robot.tillWhite(1.5, "ground", "beacon"));
 
+            for(int i=0;i<20;i++){
+                telemetry.addData("finished tillWhite without errors", "");
+                Thread.sleep(100);
+            }
 
 //            Thread.sleep(200);
 //            Robot.tillWhite(-0.2, "ground", "beacon");
@@ -60,8 +65,8 @@ public class RedPath extends LinearOpMode {
 //            }
 //
 //            Robot.scoreEverything("buttonPusher");
-//
-////            Robot.motors.get("noodler").setPower(0);
+
+//            Robot.motors.get("noodler").setPower(0);
 
             while (opModeIsActive()) {
                 telemetry.addData("done", "yes");

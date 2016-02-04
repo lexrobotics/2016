@@ -207,46 +207,24 @@ public class Robot {
     }
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException {
-        File ground_file = new File("ground_output.txt");
-        File beacon_file = new File("beacon_output.txt");
-        PrintWriter ground_out = null;
-        PrintWriter beacon_out = null;
 
-        try {
-            ground_out = new PrintWriter(ground_file);
-            beacon_out = new PrintWriter(beacon_file);
-        } catch (java.io.FileNotFoundException ex) {
-            throw new RuntimeException("could not create file");
-        }
 
-        drivetrain.move(power, waiter);
         ColorSensor ground = hmap.colorSensor.get(groundName);
-        ColorSensor b = hmap.colorSensor.get(beaconName);
         SensorState.ColorType dominant = null;
-        int threshold = 3;
+        int threshold = 6;
+        drivetrain.move(power, waiter);
 
 
         while (!(ground.alpha() >= threshold && ground.red() >= threshold && ground.green() >= threshold && ground.blue() >= threshold) && waiter.opModeIsActive()){
-            beacon_out.println("alpha: " + b.alpha() + "   red: " + b.red() + "   green: " + b.green() + "   blue: " + b.blue());
-            ground_out.println("alpha: " + ground.alpha() + "   red: " + ground.red() + "   green: " + ground.green() + "   blue: " + ground.blue());
 
 
-            Robot.tel.addData("color", ground.argb());
             if(dominant == null && (state.getColorData(beaconName) == SensorState.ColorType.RED || state.getColorData(beaconName) == SensorState.ColorType.BLUE)){
                 dominant = state.getColorData(beaconName);
-            }
-
-            else if(dominant!= null){
-                Robot.tel.addData("color",dominant);
             }
 
             Thread.sleep(10);
         }
         drivetrain.stopMove();
-
-        beacon_out.println("chose " + dominant + " as dominant color");
-        ground_out.close();
-        beacon_out.close();
 
         return dominant;
 
