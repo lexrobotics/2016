@@ -1,6 +1,8 @@
 package lib;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.robocol.Telemetry;
 
@@ -9,14 +11,22 @@ import com.qualcomm.robotcore.robocol.Telemetry;
  */
 public class HelperFunctions {
     public static void bot2SensorPrint(LinearOpMode op){
+        ColorSensor beacon = Robot.hmap.colorSensor.get("beacon");
+        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
+
         while(op.opModeIsActive()){
-//            Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
-//            Robot.tel.addData("ultra", Robot.state.getSensorReading("ultra"));
-//            Robot.tel.addData("color", Robot.state.getSensorReading("color"));
-//            Robot.tel.addData("light", Robot.state.getSensorReading("light"));
             Robot.tel.addData("gyro", Robot.state.getAvgSensorData("hero"));
-            Robot.tel.addData("beacon", Robot.state.getColorData("beacon"));
-            Robot.tel.addData("ground", Robot.state.getColorData("ground"));
+
+            Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
+            Robot.tel.addData("ground r", ground.red() + "  g: " + ground.green() + "  b: " + ground.blue() + "  alpha: " + ground.alpha());
+            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
+            Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
+            Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());
+            Robot.tel.addData("right limit",Robot.hmap.digitalChannel.get("rightLimit").getState());
+
+
+
+            Robot.tel.addData("ground RedVsBlue", Robot.state.redVsBlue("ground"));
 
             try {
                 Thread.sleep(10);

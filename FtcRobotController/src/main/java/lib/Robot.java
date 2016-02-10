@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
@@ -33,7 +34,7 @@ public class Robot {
     public static String gyroName;
 
     // Hardware map pulls device Objects from the robot.
-    private static HardwareMap hmap;
+    public static HardwareMap hmap;
 
     // Drivetrain handles functions specific to our drive type (four-wheel, two-wheel, treads, etc).
     public static DriveTrain drivetrain;
@@ -169,6 +170,59 @@ public class Robot {
         Thread.sleep(500);
     }
 
+    public static void pushButton(String switchName, SensorState.ColorType color) throws InterruptedException{
+        int direction;
+        int colorbinary;
+        SensorState.ColorType dominant;
+        if(color == SensorState.ColorType.RED) {
+            dominant = tillWhite(.15, "ground", "beacon");
+            colorbinary = 1;
+        }
+        else if(color == SensorState.ColorType.BLUE) {
+            dominant = tillWhite(-.15, "ground", "beacon");
+            colorbinary = -1;
+
+        }
+        else{
+            return;
+        }
+        if(dominant == SensorState.ColorType.RED){
+            direction = -1;
+        }
+        else {
+            direction = 1;
+        }
+        DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
+
+        drivetrain.moveDistanceWithCorrections(0.175*colorbinary,1);
+        Robot.servos.get("climberDropper").setPosition(0.3);
+        Thread.sleep(1000);
+        Robot.servos.get("climberDropper").setPosition(0.6);
+        boolean initialContact = false;
+        ElapsedTime presstimer = new ElapsedTime();
+        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+
+        while((presstimer.time() <= 1 || !initialContact) && Robot.waiter.opModeIsActive()) {
+            Robot.tel.addData("timeout", presstimer.time());
+            if(beaconToucher.getState()) { // switch is depressed :(
+                if(!initialContact)
+                    initialContact = true;
+                Robot.drivetrain.move(direction * 0.15, Robot.waiter);
+                Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+                presstimer.reset(); // hold presstimer at 0
+            }
+            else { // switch is open
+                Robot.drivetrain.stopMove();
+                Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+            }
+            Thread.sleep(10);
+
+        }
+
+        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+
+    }
+
     public static void scoreEverything(String servoName) throws InterruptedException{
         scoreEverything(servoName, 2000, 100, 2000);
     }
@@ -218,8 +272,8 @@ public class Robot {
         while (!(ground.alpha() >= threshold && ground.red() >= threshold && ground.green() >= threshold && ground.blue() >= threshold) && waiter.opModeIsActive()){
 
 
-            if(dominant == null && (state.getColorData(beaconName) == SensorState.ColorType.RED || state.getColorData(beaconName) == SensorState.ColorType.BLUE)){
-                dominant = state.getColorData(beaconName);
+            if (dominant == null && (state.redVsBlue(beaconName) == SensorState.ColorType.RED || state.redVsBlue(beaconName) == SensorState.ColorType.BLUE)) {
+                dominant = state.redVsBlue(beaconName);
             }
 
             Thread.sleep(10);

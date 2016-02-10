@@ -396,11 +396,27 @@ public class SensorState implements Runnable{
             return ColorType.RED;
         if ((b > 0) && (r + g == 0))
             return ColorType.BLUE;
-        if ((r == 1) && (b == 1) && (g == 1))
+        if ((r >= 1) && (b >= 1) && (g >= 1))
             return ColorType.WHITE;
         if (r + g + b == 0)
             return ColorType.CLEAR;
         return ColorType.NONE;
+    }
+
+    // Returns red if red is dominant over blue,
+    // blue if blue is dominant over red,
+    // and if they're equal, we return none.
+    public synchronized ColorType redVsBlue(String name) {
+        ColorSensor sen_obj = (ColorSensor) sensorContainers.get(name).sensor;
+        int r = sen_obj.red(), b = sen_obj.blue();
+
+        if (r > b) {
+            return ColorType.RED;
+        } else if (r < b) {
+            return ColorType.BLUE;
+        } else {
+            return ColorType.NONE;
+        }
     }
 
     /**

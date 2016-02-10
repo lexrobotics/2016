@@ -41,7 +41,9 @@ public class BluePath extends LinearOpMode {
                 Thread.sleep(500);
 
 
-            Robot.tillWhite(-0.2,"ground","beacon");
+            Robot.tillWhite(-0.2, "ground", "beacon");
+            Robot.pushButton("beaconToucher", SensorState.ColorType.BLUE);
+
 
 
         } catch(InterruptedException ex) {

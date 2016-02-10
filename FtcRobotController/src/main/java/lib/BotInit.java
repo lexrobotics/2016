@@ -35,7 +35,7 @@ public class BotInit {
         Robot.registerServo("leftZipline", 0.5);
 
         Robot.registerServo("buttonPusher", 0.5);
-        Robot.registerServo("climberDropper", 0.85);
+        Robot.registerServo("climberDropper", 0.75);
 
         Robot.registerServo("redDoor", 1);
         Robot.registerServo("blueDoor", 0);
@@ -46,6 +46,8 @@ public class BotInit {
         Robot.state = new SensorState(hardwareMap, 1, 0);
 
         Robot.state.registerSensor("beacon", SensorState.SensorType.COLOR, false, 12);
+        hardwareMap.colorSensor.get("beacon").setI2cAddress(0x3C);
+
         Robot.state.registerSensor("ground", SensorState.SensorType.COLOR, false, 12);
         hardwareMap.colorSensor.get("ground").setI2cAddress(0x42);
         Robot.state.colorLightToggle("ground", true);
