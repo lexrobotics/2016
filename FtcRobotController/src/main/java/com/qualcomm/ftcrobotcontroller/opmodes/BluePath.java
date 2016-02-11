@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Hardware;
 
@@ -31,21 +32,25 @@ public class BluePath extends LinearOpMode {
 
             Robot.drivetrain.dumbGyroTurn(1, 0, 45);
 
+            DcMotor noodle = hardwareMap.dcMotor.get("noodler");
+            noodle.setPower(-1);
+
             Robot.drivetrain.moveDistanceWithCorrections(0.25, 30);
             Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.2, 0.25, 1, 1000);
 
             Thread.sleep(500);
 
-            Robot.drivetrain.dumbGyroTurn(0.6, -0.4, 135);
+            Robot.drivetrain.dumbGyroTurn(0.6, 135);
 
-                Thread.sleep(500);
+            Thread.sleep(200);
+            noodle.setPower(1);
+            Thread.sleep(1500);
+            noodle.setPower(0);
+            Thread.sleep(200);
 
-
-            Robot.tillWhite(-0.2, "ground", "beacon");
             Robot.pushButton("beaconToucher", SensorState.ColorType.BLUE);
 
-
-
+//            noodle.setPower()
         } catch(InterruptedException ex) {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");
         }
