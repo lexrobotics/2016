@@ -43,6 +43,8 @@ public class BotInit {
         Robot.registerServo("leftLimitServo", 0);
         Robot.registerServo("rightLimitServo", 1);
 
+        Robot.registerServo("armLock", 0.7);
+
         Robot.state = new SensorState(hardwareMap, 1, 0);
 
         Robot.state.registerSensor("beacon", SensorState.SensorType.COLOR, false, 12);

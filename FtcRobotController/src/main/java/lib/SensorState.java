@@ -414,6 +414,11 @@ public class SensorState implements Runnable{
             return ColorType.RED;
         } else if (r < b) {
             return ColorType.BLUE;
+        } else if(r==255 && b==255){
+            while(Robot.waiter.opModeIsActive()) {
+                Robot.tel.addData("COLOR SENSOR NOT CONNECTED", "");
+            }
+            return null;
         } else {
             return ColorType.NONE;
         }

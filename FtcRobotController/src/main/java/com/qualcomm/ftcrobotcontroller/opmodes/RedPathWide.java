@@ -17,7 +17,7 @@ import lib.SensorState;
 /**
  * Created by lhscompsci on 1/11/16.
  */
-public class RedPath extends LinearOpMode {
+public class RedPathWide extends LinearOpMode {
 
     @Override
     public void runOpMode()  {
@@ -34,24 +34,21 @@ public class RedPath extends LinearOpMode {
             }
 
 //             Path
-            Robot.drivetrain.dumbGyroTurn(0, 1, 45);
+            Robot.drivetrain.dumbGyroTurn(0, 1, 47);
             DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-            noodle.setPower(-1);
-            Thread.sleep(200);
-            Robot.drivetrain.moveDistanceWithCorrections(0.6, 55);
+//            noodle.setPower(-1);
+//            Thread.sleep(200);
+            Robot.drivetrain.moveDistanceWithCorrections(0.6, 100);
             Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.8, 0, 1000);
-            noodle.setPower(0);
-            Thread.sleep(500);
-            Robot.drivetrain.dumbGyroTurn(0.6, -0.6, 45);
-            Thread.sleep(200);
-            noodle.setPower(1);
-            Robot.pushButton("beaconToucher", SensorState.ColorType.RED);
-            noodle.setPower(0);
-            Robot.servos.get("buttonPusher").setPosition(0.8);
-            Thread.sleep(2500);
-            Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+            Robot.drivetrain.dumbGyroTurn(0.7, 47);
 
-
+            Robot.pushButton("beaconToucher", SensorState.ColorType.BLUE, true);
+//            noodle.setPower(0);
+//            Robot.servos.get("buttonPusher").setPosition(0.8);
+//            Thread.sleep(2500);
+//            Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+//
+//
 
         } catch(InterruptedException ex) {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");

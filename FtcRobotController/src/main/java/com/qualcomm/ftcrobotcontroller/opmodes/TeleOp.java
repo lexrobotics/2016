@@ -78,7 +78,7 @@ public class TeleOp extends OpMode {
         redDoor.setPosition(1);
         blueDoor.setPosition(0);
         divider.setPosition(0.5);
-        armLock.setPosition(0.3);
+        armLock.setPosition(0.7);
 
         leftLimitServo.setPosition(0);
         rightLimitServo.setPosition(1);
@@ -199,9 +199,9 @@ public class TeleOp extends OpMode {
         }
 
         if (arm_locked) {
-            armLock.setPosition(0);
+            armLock.setPosition(0.4);
         } else {
-            armLock.setPosition(0.3);
+            armLock.setPosition(0.7);
         }
         telemetry.addData("color", ground.argb());
     }
