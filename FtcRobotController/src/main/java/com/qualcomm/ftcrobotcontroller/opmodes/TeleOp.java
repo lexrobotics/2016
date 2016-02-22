@@ -78,7 +78,7 @@ public class TeleOp extends OpMode {
         redDoor.setPosition(1);
         blueDoor.setPosition(0);
         divider.setPosition(0.5);
-        armLock.setPosition(0.7);
+        armLock.setPosition(1);
 
         leftLimitServo.setPosition(0);
         rightLimitServo.setPosition(1);
@@ -115,20 +115,17 @@ public class TeleOp extends OpMode {
             bWasDown = false;
         }
 
-        if (gamepad1.right_trigger >= .1)
-            noodler.setPower(gamepad1.right_trigger);
-        else if (gamepad1.right_bumper)
+        if (gamepad1.right_trigger >= .1) {
+            noodler.setPower(1);
+        }
+        else if (gamepad1.right_bumper) {
             noodler.setPower(-1);
-        else
+        }
+        else {
             noodler.setPower(0);
+        }
 
-
-        if (gamepad2.dpad_up)
-            armTilter.setPower(-0.6);
-        else if (gamepad2.dpad_down)
-            armTilter.setPower(0.6);
-        else
-            armTilter.setPower(0);
+        armTilter.setPower(scaleInput(gamepad2.left_stick_y));
 
 
         if (gamepad2.left_trigger >= .1)
@@ -152,19 +149,19 @@ public class TeleOp extends OpMode {
         else
             divider.setPosition(.5);
 
-        if(gamepad2.left_stick_x > 0.1)
-            leftZipline.setPosition(0);
-        else if(gamepad2.left_stick_x < -0.1)
-            leftZipline.setPosition(1);
-        else
-            leftZipline.setPosition(0.5);
-
-        if(gamepad2.right_stick_x > 0.1)
-            rightZipline.setPosition(0);
-        else if(gamepad2.right_stick_x < -0.1)
+        if(gamepad2.left_stick_x > 0.5)
             rightZipline.setPosition(1);
-        else
+        else if(gamepad2.left_stick_x < -0.5)
+            leftZipline.setPosition(1);
+        else if(gamepad2.a) {
+            leftZipline.setPosition(0);
+            rightZipline.setPosition(0);
+        }
+        else {
+            leftZipline.setPosition(0.5);
             rightZipline.setPosition(0.5);
+        }
+
 
         if (gamepad2.x) {
             redDoor.setPosition(0);
@@ -174,14 +171,14 @@ public class TeleOp extends OpMode {
             blueDoor.setPosition(0);
         }
 
-        if (gamepad2.a) {
-            if (a_was_down){
-                climber_drop = !climber_drop;
-                a_was_down = false;
-            }
-        } else {
-            a_was_down = true;
-        }
+//        if (gamepad2.a) {
+//            if (a_was_down){
+//                climber_drop = !climber_drop;
+//                a_was_down = false;
+//            }
+//        } else {
+//            a_was_down = true;
+//        }
 
         if (gamepad2.b) {
             if (b_was_down){
@@ -199,11 +196,10 @@ public class TeleOp extends OpMode {
         }
 
         if (arm_locked) {
-            armLock.setPosition(0.4);
-        } else {
             armLock.setPosition(0.7);
+        } else {
+            armLock.setPosition(1);
         }
-        telemetry.addData("color", ground.argb());
     }
 
     /**

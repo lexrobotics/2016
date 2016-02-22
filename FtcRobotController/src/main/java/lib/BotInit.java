@@ -51,7 +51,7 @@ public class BotInit {
         hardwareMap.colorSensor.get("beacon").setI2cAddress(0x3C);
 
         Robot.state.registerSensor("ground", SensorState.SensorType.COLOR, false, 12);
-        hardwareMap.colorSensor.get("ground").setI2cAddress(0x42);
+        hardwareMap.colorSensor.get("ground").setI2cAddress(0x70);
         Robot.state.colorLightToggle("ground", true);
 
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);

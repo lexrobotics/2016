@@ -19,14 +19,10 @@ public class HelperFunctions {
 
             Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
             Robot.tel.addData("ground r", ground.red() + "  g: " + ground.green() + "  b: " + ground.blue() + "  alpha: " + ground.alpha());
-            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
+//            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());
             Robot.tel.addData("right limit",Robot.hmap.digitalChannel.get("rightLimit").getState());
-
-
-
-            Robot.tel.addData("ground RedVsBlue", Robot.state.redVsBlue("ground"));
 
             try {
                 Thread.sleep(10);

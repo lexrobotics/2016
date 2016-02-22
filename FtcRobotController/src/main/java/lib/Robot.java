@@ -355,27 +355,17 @@ public class Robot {
         Thread.sleep(induration);
         servos.get(servoName).setPosition(0.5);
     }
-
-    public static SensorState.ColorType tillColor(String colorName, double power, SensorState.ColorType... colors) throws InterruptedException{
-        drivetrain.move(power, waiter);
-        SensorState.ColorType real_color = null;
-
-        main:
-        while (waiter.opModeIsActive()) {
-            real_color = state.getColorData(colorName);
-
-            for (SensorState.ColorType color : colors) {
-                if (real_color == color) {
-                    break main;
-                }
-            }
-
-            waiter.waitOneFullHardwareCycle();
+    public static double delaySet(String potName,String switchName) throws InterruptedException {
+        DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
+        int pot =0;
+        while(!beaconToucher.getState()) {
+            pot = Robot.hmap.analogInput.get(potName).getValue();
+            Robot.tel.addData("time", pot/1023.0 * 15.0);
+            Thread.sleep(10);
         }
-
-        drivetrain.stopMove();
-        return real_color;
+        return (pot/1023.0) * 15.0;
     }
+
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException {
 
