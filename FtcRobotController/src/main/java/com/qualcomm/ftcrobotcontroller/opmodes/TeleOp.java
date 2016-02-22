@@ -117,42 +117,53 @@ public class TeleOp extends OpMode {
 
         if (gamepad1.right_trigger >= .1) {
             noodler.setPower(1);
-        }
-        else if (gamepad1.right_bumper) {
+        } else if (gamepad1.right_bumper) {
             noodler.setPower(-1);
-        }
-        else {
+        } else {
             noodler.setPower(0);
         }
 
         armTilter.setPower(scaleInput(gamepad2.left_stick_y));
 
 
-        if (gamepad2.left_trigger >= .1)
+        if (gamepad2.left_trigger >= .1) {
             liftStageOne.setPower(-gamepad2.left_trigger);
-        else if(gamepad2.left_bumper)
+        }
+        else if (gamepad2.left_bumper) {
             liftStageOne.setPower(1);
-        else
+        }
+        else {
             liftStageOne.setPower(0);
+        }
 
-        if (gamepad2.right_trigger >= .1)
+        if (gamepad2.right_trigger >= .1) {
             liftStageTwo.setPower(gamepad2.right_trigger);
-        else if(gamepad2.right_bumper)
+        }
+        else if (gamepad2.right_bumper) {
             liftStageTwo.setPower(-1);
-        else
+        }
+        else {
             liftStageTwo.setPower(0);
+        }
 
-        if (gamepad2.dpad_left)
+        // dpad
+        if (gamepad2.dpad_left) {
             divider.setPosition(1);
-        else if (gamepad2.dpad_right)
+        }
+        else if (gamepad2.dpad_right) {
             divider.setPosition(0);
-        else
+        }
+        else {
             divider.setPosition(.5);
+        }
 
-        if(gamepad2.left_stick_x > 0.5)
+        
+        if(gamepad2.left_stick_x > 0.5) {
             rightZipline.setPosition(1);
-        else if(gamepad2.left_stick_x < -0.5)
+        }
+        else if(gamepad2.left_stick_x < -0.5) {
             leftZipline.setPosition(1);
+        }
         else if(gamepad2.a) {
             leftZipline.setPosition(0);
             rightZipline.setPosition(0);
