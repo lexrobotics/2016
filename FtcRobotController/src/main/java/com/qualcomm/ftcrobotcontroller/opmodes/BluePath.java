@@ -21,11 +21,91 @@ import lib.SensorState;
 public class BluePath extends LinearOpMode {
 
     public void runOpMode() throws InterruptedException{
-//        Garrett thinks that the dumbGyroTurn changes expectedHeading incorrectly
+//        Garrett thinks that the dumbGyroTurn changes ex0
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+// pectedHeading incorrectly
 //        Changed dumbGyroTurn to stop when the angledistance starts increasing again.
         try {
             BotInit.bot2(hardwareMap, telemetry, this);
+            int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
             waitForStart();
+            Robot.delayWithCountdown(delayTime);
             while (Robot.state.gyroIsCalibrating("hero")) {
                 waitOneFullHardwareCycle();
             }

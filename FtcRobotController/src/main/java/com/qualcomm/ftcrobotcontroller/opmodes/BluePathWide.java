@@ -25,10 +25,10 @@ public class BluePathWide extends LinearOpMode {
 //        Changed dumbGyroTurn to stop when the angledistance starts increasing again.
 
         try {
-
-
             BotInit.bot2(hardwareMap, telemetry, this);
+            int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
             waitForStart();
+            Robot.delayWithCountdown(delayTime);
             while (Robot.state.gyroIsCalibrating("hero")) {
                 waitOneFullHardwareCycle();
             }
@@ -40,7 +40,7 @@ public class BluePathWide extends LinearOpMode {
 //            Thread.sleep(200);
             Robot.drivetrain.moveDistanceWithCorrections(0.6, 100);
             Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.2, 0.25, 1, 1000);
-            Robot.drivetrain.dumbGyroTurn(0.8, 133);
+            Robot.drivetrain.dumbGyroTurn(0.8, 130);
 
             Robot.pushButton("beaconToucher", SensorState.ColorType.RED, true); // for wide path we pass in the opposite color (don't tell Luke)
 //            noodle.setPower(0);

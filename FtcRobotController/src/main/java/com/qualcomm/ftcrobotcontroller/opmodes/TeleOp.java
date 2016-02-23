@@ -157,7 +157,7 @@ public class TeleOp extends OpMode {
             divider.setPosition(.5);
         }
 
-        
+
         if(gamepad2.left_stick_x > 0.5) {
             rightZipline.setPosition(1);
         }
@@ -182,6 +182,13 @@ public class TeleOp extends OpMode {
             blueDoor.setPosition(0);
         }
 
+        if(gamepad2.start) {
+            buttonPusher.setPosition(0.7); // press button pusher
+        }
+        else {
+            buttonPusher.setPosition(0.5); // press button pusher
+        }
+
 //        if (gamepad2.a) {
 //            if (a_was_down){
 //                climber_drop = !climber_drop;
@@ -200,8 +207,8 @@ public class TeleOp extends OpMode {
             b_was_down = true;
         }
 
-        if (climber_drop){
-            climberDropper.setPosition(0);
+        if (arm_locked){
+            climberDropper.setPosition(0.7);
         } else {
             climberDropper.setPosition(0.5);
         }

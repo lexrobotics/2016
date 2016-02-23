@@ -28,7 +28,9 @@ public class RedPath extends LinearOpMode {
 
 
             BotInit.bot2(hardwareMap, telemetry, this);
+            int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
             waitForStart();
+            Robot.delayWithCountdown(delayTime);
             while (Robot.state.gyroIsCalibrating("hero")) {
                 waitOneFullHardwareCycle();
             }

@@ -24,6 +24,9 @@ import java.util.ArrayList;
  */
 
 public class Robot {
+    public static BeaconColorSensor beacon;
+    public static GroundColorSensor ground;
+
     // SensorState to store sensor values. Universal access point.
     public static SensorState state;
 
@@ -258,7 +261,7 @@ public class Robot {
         int colorbinary;
         SensorState.ColorType dominant;
         Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-        Thread.sleep(200);
+        Thread.sleep(750);
         Robot.servos.get("buttonPusher").setPosition(0.5); // press button pusher
 
         if(color == SensorState.ColorType.RED) {
@@ -358,21 +361,29 @@ public class Robot {
     public static double delaySet(String potName,String switchName) throws InterruptedException {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
         int pot =0;
-        while(!beaconToucher.getState()) {
-            pot = Robot.hmap.analogInput.get(potName).getValue();
-            Robot.tel.addData("time", pot/1023.0 * 15.0);
+        while(!beaconToucher.getState() && !waiter.opModeIsActive() ) {
+            pot = (int) Math.floor((1023 - hmap.analogInput.get(potName).getValue())/1023.0 * 15.0);
+            tel.addData("Delay", pot);
             Thread.sleep(10);
         }
-        return (pot/1023.0) * 15.0;
+        tel.addData("Delay (LOCKED)", pot);
+        return pot;
+    }
+
+    public static void delayWithCountdown(int seconds) throws InterruptedException {
+        for(int i=seconds; i>0; i--) {
+            tel.addData("Countdown", i);
+            Thread.sleep(1000);
+        }
     }
 
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException {
 
 
-        ColorSensor ground = hmap.colorSensor.get(groundName);
+        ColorSensor ground = Robot.ground;
         SensorState.ColorType dominant = null;
-        int threshold = 6;
+        int threshold = 8;
         drivetrain.move(power, waiter);
 
 

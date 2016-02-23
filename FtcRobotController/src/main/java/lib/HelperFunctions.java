@@ -11,8 +11,10 @@ import com.qualcomm.robotcore.robocol.Telemetry;
  */
 public class HelperFunctions {
     public static void bot2SensorPrint(LinearOpMode op){
-        ColorSensor beacon = Robot.hmap.colorSensor.get("beacon");
-        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
+//        ColorSensor beacon = Robot.hmap.colorSensor.get("beacon");
+//        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
+        ColorSensor beacon = Robot.beacon;
+        ColorSensor ground = Robot.ground;
 
         while(op.opModeIsActive()){
             Robot.tel.addData("gyro", Robot.state.getAvgSensorData("hero"));

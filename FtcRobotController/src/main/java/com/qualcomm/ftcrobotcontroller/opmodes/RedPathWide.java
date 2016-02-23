@@ -25,10 +25,10 @@ public class RedPathWide extends LinearOpMode {
 //        Changed dumbGyroTurn to stop when the angledistance starts increasing again.
 
         try {
-
-
             BotInit.bot2(hardwareMap, telemetry, this);
+            int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
             waitForStart();
+            Robot.delayWithCountdown(delayTime);
             while (Robot.state.gyroIsCalibrating("hero")) {
                 waitOneFullHardwareCycle();
             }

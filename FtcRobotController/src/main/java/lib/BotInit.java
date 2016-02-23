@@ -1,6 +1,7 @@
 package lib;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -47,12 +48,15 @@ public class BotInit {
 
         Robot.state = new SensorState(hardwareMap, 1, 0);
 
-        Robot.state.registerSensor("beacon", SensorState.SensorType.COLOR, false, 12);
-        hardwareMap.colorSensor.get("beacon").setI2cAddress(0x3C);
+        Robot.ground = new GroundColorSensor(Robot.hmap.deviceInterfaceModule.get("cdim"), 4);
+        Robot.beacon = new BeaconColorSensor(Robot.hmap.deviceInterfaceModule.get("cdim"), 0);
 
-        Robot.state.registerSensor("ground", SensorState.SensorType.COLOR, false, 12);
-        hardwareMap.colorSensor.get("ground").setI2cAddress(0x70);
-        Robot.state.colorLightToggle("ground", true);
+//        Robot.state.registerSensor("beacon", SensorState.SensorType.COLOR, false, 12);
+//        hardwareMap.colorSensor.get("beacon").setI2cAddress(0x3C);
+
+//        Robot.state.registerSensor("ground", SensorState.SensorType.COLOR, false, 12);
+//        hardwareMap.colorSensor.get("ground").setI2cAddress(0x70);
+//        Robot.state.colorLightToggle("ground", true);
 
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
 
