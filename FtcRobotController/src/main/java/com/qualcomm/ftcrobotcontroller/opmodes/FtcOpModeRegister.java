@@ -64,5 +64,9 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("BluePath", BluePath.class);
         manager.register("RedPathWide", RedPathWide.class);
         manager.register("BluePathWide", BluePathWide.class);
+        manager.register("RedPathScoot", RedPathScoot.class);
+        manager.register("BluePathScoot", BluePathScoot.class);
+        manager.register("RedPathWideScoot", RedPathWideScoot.class);
+        manager.register("BluePathWideScoot", BluePathWideScoot.class);
     }
 }

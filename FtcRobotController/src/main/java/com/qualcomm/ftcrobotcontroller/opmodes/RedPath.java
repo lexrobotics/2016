@@ -18,43 +18,47 @@ import lib.SensorState;
  * Created by lhscompsci on 1/11/16.
  */
 public class RedPath extends LinearOpMode {
+    public void path() throws InterruptedException {
+        BotInit.bot2(hardwareMap, telemetry, this);
+        int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
+        waitForStart();
+        Robot.delayWithCountdown(delayTime);
+        while (Robot.state.gyroIsCalibrating("hero")) {
+            waitOneFullHardwareCycle();
+        }
+
+        Robot.drivetrain.dumbGyroTurn(0, 1, 45);
+        DcMotor noodle = hardwareMap.dcMotor.get("noodler");
+        noodle.setPower(-1);
+        Thread.sleep(200);
+        Robot.drivetrain.moveDistanceWithCorrections(0.6, 55);
+        Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.8, 0, 1000);
+        noodle.setPower(0);
+        Thread.sleep(500);
+        Robot.drivetrain.dumbGyroTurn(0.6, -0.6, 45);
+        Thread.sleep(200);
+        noodle.setPower(1);
+        SensorState.ColorType dominant = Robot.tillWhite(0.2, "ground", "beacon");
+        int direction = 0;
+        if(dominant == SensorState.ColorType.BLUE) {
+            direction =  -1;
+        }
+        else if(dominant == SensorState.ColorType.RED) {
+            direction = 1;
+        }
+
+        noodle.setPower(0);
+        Robot.pushButton("beaconToucher", direction);
+
+        Robot.servos.get("buttonPusher").setPosition(0.8);
+        Thread.sleep(2500);
+        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+    }
 
     @Override
     public void runOpMode()  {
-//        Garrett thinks that the dumbGyroTurn changes expectedHeading incorrectly
-//        Changed dumbGyroTurn to stop when the angledistance starts increasing again.
-
         try {
-
-
-            BotInit.bot2(hardwareMap, telemetry, this);
-            int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
-            waitForStart();
-            Robot.delayWithCountdown(delayTime);
-            while (Robot.state.gyroIsCalibrating("hero")) {
-                waitOneFullHardwareCycle();
-            }
-
-//             Path
-            Robot.drivetrain.dumbGyroTurn(0, 1, 45);
-            DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-            noodle.setPower(-1);
-            Thread.sleep(200);
-            Robot.drivetrain.moveDistanceWithCorrections(0.6, 55);
-            Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.8, 0, 1000);
-            noodle.setPower(0);
-            Thread.sleep(500);
-            Robot.drivetrain.dumbGyroTurn(0.6, -0.6, 45);
-            Thread.sleep(200);
-            noodle.setPower(1);
-            Robot.pushButton("beaconToucher", SensorState.ColorType.RED);
-            noodle.setPower(0);
-            Robot.servos.get("buttonPusher").setPosition(0.8);
-            Thread.sleep(2500);
-            Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
-
-
-
+            path();
         } catch(InterruptedException ex) {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");
             Robot.drivetrain.setLeftMotors(0);

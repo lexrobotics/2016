@@ -252,47 +252,12 @@ public class Robot {
 //            }
     }
 
-    public static void pushButton(String switchName, SensorState.ColorType color) throws InterruptedException {
-        pushButton(switchName, color, false);
-    }
+//    public static void pushButton(String switchName, SensorState.ColorType color) throws InterruptedException {
+//        pushButton(switchName, color, false);
+//    }
 
-    public static void pushButton(String switchName, SensorState.ColorType color, boolean reverse) throws InterruptedException{
-        int direction;
-        int colorbinary;
-        SensorState.ColorType dominant;
-        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-        Thread.sleep(750);
-        Robot.servos.get("buttonPusher").setPosition(0.5); // press button pusher
-
-        if(color == SensorState.ColorType.RED) {
-            dominant = tillWhite(.2, "ground", "beacon");
-            colorbinary = 1;
-        }
-        else if(color == SensorState.ColorType.BLUE) {
-            dominant = tillWhite(-.2 , "ground", "beacon");
-            colorbinary = -1;
-
-        }
-        else {
-            return;
-        }
-
-        if(reverse) {
-            if(dominant == SensorState.ColorType.RED) {
-                dominant = SensorState.ColorType.BLUE;
-            }
-            else if(dominant == SensorState.ColorType.BLUE) {
-                dominant = SensorState.ColorType.RED;
-            }
-        }
-
-        if(dominant == SensorState.ColorType.RED){
-            direction = -1;
-        }
-        else if(dominant == SensorState.ColorType.BLUE){
-            direction = 1;
-        }
-        else {
+    public static void pushButton(String switchName, int direction) throws InterruptedException {
+        if(direction == 0){
             Robot.servos.get("climberDropper").setPosition(0.3);
             Thread.sleep(1000);
             Robot.servos.get("climberDropper").setPosition(0.6);
@@ -307,7 +272,7 @@ public class Robot {
             Robot.servos.get("climberDropper").setPosition(0.6);
             drivetrain.moveDistanceWithCorrections(-0.175, 3);
         }
-//
+
         boolean initialContact = false;
         ElapsedTime presstimer = new ElapsedTime();
         Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
@@ -341,7 +306,95 @@ public class Robot {
         Robot.servos.get("buttonPusher").setPosition(0.7); // press button pusher
         Thread.sleep(1500);
         Robot.servos.get("buttonPusher").setPosition(0.5); // stop
+
     }
+
+//    public static void pushButton(String switchName, SensorState.ColorType color, boolean reverse) throws InterruptedException{
+//        int direction;
+//        int colorbinary;
+//        SensorState.ColorType dominant;
+//        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+//        Thread.sleep(750);
+//        Robot.servos.get("buttonPusher").setPosition(0.5); // press button pusher
+//
+//        if(color == SensorState.ColorType.RED) {
+//            dominant = tillWhite(.2, "ground", "beacon");
+//            colorbinary = 1;
+//        }
+//        else if(color == SensorState.ColorType.BLUE) {
+//            dominant = tillWhite(-.2 , "ground", "beacon");
+//            colorbinary = -1;
+//
+//        }
+//        else {
+//            return;
+//        }
+//
+//        if(reverse) {
+//            if(dominant == SensorState.ColorType.RED) {
+//                dominant = SensorState.ColorType.BLUE;
+//            }
+//            else if(dominant == SensorState.ColorType.BLUE) {
+//                dominant = SensorState.ColorType.RED;
+//            }
+//        }
+//
+//        if(dominant == SensorState.ColorType.RED){
+//            direction = -1;
+//        }
+//        else if(dominant == SensorState.ColorType.BLUE){
+//            direction = 1;
+//        }
+//        else {
+//            Robot.servos.get("climberDropper").setPosition(0.3);
+//            Thread.sleep(1000);
+//            Robot.servos.get("climberDropper").setPosition(0.6);
+//            return;
+//        }
+//        DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
+//
+//        if(direction == -1) {
+//            drivetrain.moveDistanceWithCorrections(0.175, 3);
+//            Robot.servos.get("climberDropper").setPosition(0.3);
+//            Thread.sleep(1000);
+//            Robot.servos.get("climberDropper").setPosition(0.6);
+//            drivetrain.moveDistanceWithCorrections(-0.175, 3);
+//        }
+////
+//        boolean initialContact = false;
+//        ElapsedTime presstimer = new ElapsedTime();
+//        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+//
+//        while((presstimer.time() <= 0.9 || !initialContact) && Robot.waiter.opModeIsActive()) {
+//            Robot.tel.addData("timeout", presstimer.time());
+//            if(beaconToucher.getState()) { // switch is depressed :(
+//                if(!initialContact)
+//                    initialContact = true;
+//                Robot.drivetrain.move(direction * 0.15, Robot.waiter);
+//                Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+//                presstimer.reset(); // hold presstimer at 0
+//            }
+//            else { // switch is open
+//                Robot.drivetrain.stopMove();
+//                Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+//            }
+//            Thread.sleep(10);
+//        }
+//
+//        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+//
+//        if(direction == 1) {
+//            Robot.servos.get("climberDropper").setPosition(0.3);
+//            Thread.sleep(1000);
+//            Robot.servos.get("climberDropper").setPosition(0.6);
+//        }
+//        else {
+//            Thread.sleep(250);
+//        }
+//        Robot.servos.get("buttonPusher").setPosition(0.7); // press button pusher
+//        Thread.sleep(1500);
+//        Robot.servos.get("buttonPusher").setPosition(0.5); // stop
+//    }
 
     public static void scoreEverything(String servoName) throws InterruptedException{
         scoreEverything(servoName, 2000, 100, 2000);
@@ -364,6 +417,15 @@ public class Robot {
         while(!beaconToucher.getState() && !waiter.opModeIsActive() ) {
             pot = (int) Math.floor((1023 - hmap.analogInput.get(potName).getValue())/1023.0 * 15.0);
             tel.addData("Delay", pot);
+            Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
+            Robot.tel.addData("ground r", ground.red() + "  g: " + ground.green() + "  b: " + ground.blue() + "  alpha: " + ground.alpha());
+//            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
+            Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
+            Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());
+            Robot.tel.addData("right limit",Robot.hmap.digitalChannel.get("rightLimit").getState());
+
+
+
             Thread.sleep(10);
         }
         tel.addData("Delay (LOCKED)", pot);
@@ -379,6 +441,9 @@ public class Robot {
 
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException {
+        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+        Thread.sleep(750);
+        Robot.servos.get("buttonPusher").setPosition(0.5); // press button pusher
 
 
         ColorSensor ground = Robot.ground;
