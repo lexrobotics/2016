@@ -173,186 +173,46 @@ public class Robot {
         Thread.sleep(500);
     }
 
-    public static void pushButtonBlue(String switchName, SensorState.ColorType color) throws InterruptedException{
-        int direction;
-        int colorbinary;
-        SensorState.ColorType dominant;
-        dominant = tillWhite(-.15, "ground", "beacon");
-        colorbinary = -1;
-
-        if(dominant == SensorState.ColorType.RED){
-            direction = -1;
-        }
-        else {
-            direction = 1;
-        }
-        DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
-
-        if(direction == -1) {
-            drivetrain.moveDistanceWithCorrections(0.175, 3);
-            Robot.servos.get("climberDropper").setPosition(0.3);
-            Thread.sleep(1000);
-            Robot.servos.get("climberDropper").setPosition(0.6);
-            drivetrain.moveDistanceWithCorrections(-0.175, 3);
-        }
-
-        boolean initialContact = false;
-        ElapsedTime presstimer = new ElapsedTime();
-        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-
-        while((presstimer.time() <= 0.75 || !initialContact) && Robot.waiter.opModeIsActive()) {
-            Robot.tel.addData("timeout", presstimer.time());
-            if(beaconToucher.getState()) { // switch is depressed :(
-                if(!initialContact)
-                    initialContact = true;
-                Robot.drivetrain.move(direction * 0.15, Robot.waiter);
-                Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
-                presstimer.reset(); // hold presstimer at 0
-            }
-            else { // switch is open
-                Robot.drivetrain.stopMove();
-                Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-            }
-            Thread.sleep(10);
-        }
-
-        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
-
-        if(direction == 1) {
-            Robot.servos.get("climberDropper").setPosition(0.3);
-            Thread.sleep(1000);
-            Robot.servos.get("climberDropper").setPosition(0.6);
-        }
-
-//        if(direction == 1) {
-//            Robot.servos.get("climberDropper").setPosition(0.3);
-//            Thread.sleep(1000);
-//            Robot.servos.get("climberDropper").setPosition(0.6);
-//        }
-//        else {
-//            Robot.servos.get("buttonPusher").setPosition(0.8);
-//            Thread.sleep(500);
-//            Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
-//
-//            tillWhite(colorbinary * .15, "ground", "beacon");
-//            while((presstimer.time() <= 1 || !initialContact) && Robot.waiter.opModeIsActive()) {
-//                Robot.tel.addData("timeout", presstimer.time());
-//                if(beaconToucher.getState()) { // switch is depressed :(
-//                    if(!initialContact)
-//                        initialContact = true;
-//                    Robot.drivetrain.move(colorbinary * 0.15, Robot.waiter);
-//                    Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
-//                    presstimer.reset(); // hold presstimer at 0
-//                }
-//                else { // switch is open
-//                    Robot.drivetrain.stopMove();
-//                    Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-//                }
-//
-//            }
+    public static void dumpClimbers() throws InterruptedException {
+        Robot.servos.get("climberDropper").setPosition(0.3);
+        Thread.sleep(1000);
+        Robot.servos.get("climberDropper").setPosition(0.6);
     }
 
-//    public static void pushButton(String switchName, SensorState.ColorType color) throws InterruptedException {
-//        pushButton(switchName, color, false);
-//    }
-
-    public static void pushButton(String switchName, int direction) throws InterruptedException {
-        if(direction == 0){
-            Robot.servos.get("climberDropper").setPosition(0.3);
-            Thread.sleep(1000);
-            Robot.servos.get("climberDropper").setPosition(0.6);
+    public static void dumpClimbers(int scootLength) throws InterruptedException {
+        if(scootLength == 0) {
+            dumpClimbers();
             return;
         }
-        DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
 
-        if(direction == -1) {
-            drivetrain.moveDistanceWithCorrections(0.175, 3);
-            Robot.servos.get("climberDropper").setPosition(0.3);
-            Thread.sleep(1000);
-            Robot.servos.get("climberDropper").setPosition(0.6);
-            drivetrain.moveDistanceWithCorrections(-0.175, 3);
-        }
+        int direction = (int) Math.signum(scootLength);
+        scootLength = Math.abs(scootLength);
 
-        boolean initialContact = false;
-        ElapsedTime presstimer = new ElapsedTime();
-        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-
-        while((presstimer.time() <= 0.9 || !initialContact) && Robot.waiter.opModeIsActive()) {
-            Robot.tel.addData("timeout", presstimer.time());
-            if(beaconToucher.getState()) { // switch is depressed :(
-                if(!initialContact)
-                    initialContact = true;
-                Robot.drivetrain.move(direction * 0.15, Robot.waiter);
-                Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
-                presstimer.reset(); // hold presstimer at 0
-            }
-            else { // switch is open
-                Robot.drivetrain.stopMove();
-                Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-            }
-            Thread.sleep(10);
-        }
-
-        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
-
-        if(direction == 1) {
-            Robot.servos.get("climberDropper").setPosition(0.3);
-            Thread.sleep(1000);
-            Robot.servos.get("climberDropper").setPosition(0.6);
-        }
-        else {
-            Thread.sleep(250);
-        }
-        Robot.servos.get("buttonPusher").setPosition(0.7); // press button pusher
-        Thread.sleep(1500);
-        Robot.servos.get("buttonPusher").setPosition(0.5); // stop
-
+        Robot.drivetrain.moveDistanceWithCorrections(direction * 0.2, scootLength);
+        dumpClimbers();
+        Robot.drivetrain.moveDistanceWithCorrections(direction * -0.2, scootLength);
     }
 
-//    public static void pushButton(String switchName, SensorState.ColorType color, boolean reverse) throws InterruptedException{
-//        int direction;
-//        int colorbinary;
-//        SensorState.ColorType dominant;
-//        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-//        Thread.sleep(750);
-//        Robot.servos.get("buttonPusher").setPosition(0.5); // press button pusher
-//
-//        if(color == SensorState.ColorType.RED) {
-//            dominant = tillWhite(.2, "ground", "beacon");
-//            colorbinary = 1;
-//        }
-//        else if(color == SensorState.ColorType.BLUE) {
-//            dominant = tillWhite(-.2 , "ground", "beacon");
-//            colorbinary = -1;
-//
-//        }
-//        else {
-//            return;
-//        }
-//
-//        if(reverse) {
-//            if(dominant == SensorState.ColorType.RED) {
-//                dominant = SensorState.ColorType.BLUE;
-//            }
-//            else if(dominant == SensorState.ColorType.BLUE) {
-//                dominant = SensorState.ColorType.RED;
-//            }
-//        }
-//
-//        if(dominant == SensorState.ColorType.RED){
-//            direction = -1;
-//        }
-//        else if(dominant == SensorState.ColorType.BLUE){
-//            direction = 1;
-//        }
-//        else {
-//            Robot.servos.get("climberDropper").setPosition(0.3);
-//            Thread.sleep(1000);
-//            Robot.servos.get("climberDropper").setPosition(0.6);
-//            return;
-//        }
-//        DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
-//
+    public static void extendTillBeacon(String switchName) throws InterruptedException {
+        DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
+        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+
+        while(!beaconToucher.getState() && Robot.waiter.opModeIsActive()) {
+            Thread.sleep(50);
+        }
+        Robot.servos.get("buttonPusher").setPosition(0.5);
+    }
+
+    public static void retractButtonPusher() throws InterruptedException {
+        Robot.servos.get("buttonPusher").setPosition(0.8);
+        Thread.sleep(2500);
+        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+    }
+
+    public static void pushButton(String switchName, int direction) throws InterruptedException {
+        if(direction == 0)
+            return;
+
 //        if(direction == -1) {
 //            drivetrain.moveDistanceWithCorrections(0.175, 3);
 //            Robot.servos.get("climberDropper").setPosition(0.3);
@@ -360,29 +220,27 @@ public class Robot {
 //            Robot.servos.get("climberDropper").setPosition(0.6);
 //            drivetrain.moveDistanceWithCorrections(-0.175, 3);
 //        }
-////
-//        boolean initialContact = false;
-//        ElapsedTime presstimer = new ElapsedTime();
-//        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-//
-//        while((presstimer.time() <= 0.9 || !initialContact) && Robot.waiter.opModeIsActive()) {
-//            Robot.tel.addData("timeout", presstimer.time());
-//            if(beaconToucher.getState()) { // switch is depressed :(
-//                if(!initialContact)
-//                    initialContact = true;
-//                Robot.drivetrain.move(direction * 0.15, Robot.waiter);
-//                Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
-//                presstimer.reset(); // hold presstimer at 0
-//            }
-//            else { // switch is open
-//                Robot.drivetrain.stopMove();
-//                Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-//            }
-//            Thread.sleep(10);
-//        }
-//
-//        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
-//
+        DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
+
+        ElapsedTime presstimer = new ElapsedTime();
+        extendTillBeacon(switchName);
+
+        while((presstimer.time() <= 0.9) && Robot.waiter.opModeIsActive()) {
+            Robot.tel.addData("timeout", presstimer.time());
+            if(beaconToucher.getState()) { // switch is depressed :(
+                Robot.drivetrain.move(direction * 0.15, Robot.waiter);
+                Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+                presstimer.reset(); // hold presstimer at 0
+            }
+            else { // switch is open
+                Robot.drivetrain.stopMove();
+                Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+            }
+            Thread.sleep(10);
+        }
+
+        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+
 //        if(direction == 1) {
 //            Robot.servos.get("climberDropper").setPosition(0.3);
 //            Thread.sleep(1000);
@@ -391,26 +249,8 @@ public class Robot {
 //        else {
 //            Thread.sleep(250);
 //        }
-//        Robot.servos.get("buttonPusher").setPosition(0.7); // press button pusher
-//        Thread.sleep(1500);
-//        Robot.servos.get("buttonPusher").setPosition(0.5); // stop
-//    }
-
-    public static void scoreEverything(String servoName) throws InterruptedException{
-        scoreEverything(servoName, 2000, 100, 2000);
     }
 
-    public static void scoreEverything(String servoName, int outduration, int pause, int induration) throws InterruptedException{
-        servos.get(servoName).setPosition(0);
-        Robot.servos.get("climberDropper").setPosition(0.3);
-        Thread.sleep(outduration);
-        Robot.servos.get("climberDropper").setPosition(0.6);
-        servos.get(servoName).setPosition(0.5);
-        Thread.sleep(pause);
-        servos.get(servoName).setPosition(1);
-        Thread.sleep(induration);
-        servos.get(servoName).setPosition(0.5);
-    }
     public static double delaySet(String potName,String switchName) throws InterruptedException {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
         int pot =0;

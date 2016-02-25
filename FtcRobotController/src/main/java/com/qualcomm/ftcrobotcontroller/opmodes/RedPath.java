@@ -39,20 +39,23 @@ public class RedPath extends LinearOpMode {
         Thread.sleep(200);
         noodle.setPower(1);
         SensorState.ColorType dominant = Robot.tillWhite(0.2, "ground", "beacon");
-        int direction = 0;
+        noodle.setPower(0);
+
+        Robot.extendTillBeacon("beaconToucher");
         if(dominant == SensorState.ColorType.BLUE) {
-            direction =  -1;
+            Robot.pushButton("beaconToucher", 1);
+            Robot.dumpClimbers();
         }
         else if(dominant == SensorState.ColorType.RED) {
-            direction = 1;
+            Robot.dumpClimbers(3);
+            Robot.pushButton("beaconToucher", -1);
+
+        }
+        else {
+            Robot.dumpClimbers();
         }
 
-        noodle.setPower(0);
-        Robot.pushButton("beaconToucher", direction);
-
-        Robot.servos.get("buttonPusher").setPosition(0.8);
-        Thread.sleep(2500);
-        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+        Robot.retractButtonPusher();
     }
 
     @Override
