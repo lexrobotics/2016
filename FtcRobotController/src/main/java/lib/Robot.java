@@ -188,9 +188,9 @@ public class Robot {
         int direction = (int) Math.signum(scootLength);
         scootLength = Math.abs(scootLength);
 
-        Robot.drivetrain.moveDistanceWithCorrections(direction * 0.2, scootLength);
+        Robot.drivetrain.moveDistanceWithCorrections(direction * 0.15, scootLength);
         dumpClimbers();
-        Robot.drivetrain.moveDistanceWithCorrections(direction * -0.2, scootLength);
+        Robot.drivetrain.moveDistanceWithCorrections(direction * -0.15, scootLength);
     }
 
     public static void extendTillBeacon(String switchName) throws InterruptedException {
