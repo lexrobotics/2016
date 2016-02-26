@@ -18,7 +18,6 @@ public class HelperFunctions {
 
         while(op.opModeIsActive()){
             Robot.tel.addData("gyro", Robot.state.getAvgSensorData("hero"));
-
             Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
             Robot.tel.addData("ground r", ground.red() + "  g: " + ground.green() + "  b: " + ground.blue() + "  alpha: " + ground.alpha());
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));

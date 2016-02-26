@@ -197,7 +197,10 @@ public class Robot {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
         Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
 
-        while(!beaconToucher.getState() && Robot.waiter.opModeIsActive()) {
+        ElapsedTime pressTimer = new ElapsedTime();
+        pressTimer.reset();
+
+        while(!beaconToucher.getState() && Robot.waiter.opModeIsActive() && pressTimer.time() <= 5.0) {
             Thread.sleep(50);
         }
         Robot.servos.get("buttonPusher").setPosition(0.5);
@@ -226,7 +229,6 @@ public class Robot {
         extendTillBeacon(switchName);
 
         while((presstimer.time() <= 0.9) && Robot.waiter.opModeIsActive()) {
-            Robot.tel.addData("timeout", presstimer.time());
             if(beaconToucher.getState()) { // switch is depressed :(
                 Robot.drivetrain.move(direction * 0.15, Robot.waiter);
                 Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
@@ -236,11 +238,9 @@ public class Robot {
                 Robot.drivetrain.stopMove();
                 Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
             }
-            Thread.sleep(10);
+            Thread.sleep(1);
         }
-
-        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
-
+        Robot.drivetrain.stopMove();
 //        if(direction == 1) {
 //            Robot.servos.get("climberDropper").setPosition(0.3);
 //            Thread.sleep(1000);

@@ -41,6 +41,8 @@ public class RedPath extends LinearOpMode {
         SensorState.ColorType dominant = Robot.tillWhite(0.2, "ground", "beacon");
         noodle.setPower(0);
 
+
+
         Robot.extendTillBeacon("beaconToucher");
         if(dominant == SensorState.ColorType.BLUE) {
             Robot.pushButton("beaconToucher", 1);
