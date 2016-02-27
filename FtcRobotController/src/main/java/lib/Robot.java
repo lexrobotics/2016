@@ -216,13 +216,6 @@ public class Robot {
         if(direction == 0)
             return;
 
-//        if(direction == -1) {
-//            drivetrain.moveDistanceWithCorrections(0.175, 3);
-//            Robot.servos.get("climberDropper").setPosition(0.3);
-//            Thread.sleep(1000);
-//            Robot.servos.get("climberDropper").setPosition(0.6);
-//            drivetrain.moveDistanceWithCorrections(-0.175, 3);
-//        }
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
 
         ElapsedTime presstimer = new ElapsedTime();
@@ -241,14 +234,7 @@ public class Robot {
             Thread.sleep(1);
         }
         Robot.drivetrain.stopMove();
-//        if(direction == 1) {
-//            Robot.servos.get("climberDropper").setPosition(0.3);
-//            Thread.sleep(1000);
-//            Robot.servos.get("climberDropper").setPosition(0.6);
-//        }
-//        else {
-//            Thread.sleep(250);
-//        }
+        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
     }
 
     public static double delaySet(String potName,String switchName) throws InterruptedException {
@@ -263,7 +249,6 @@ public class Robot {
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());
             Robot.tel.addData("right limit",Robot.hmap.digitalChannel.get("rightLimit").getState());
-
 
 
             Thread.sleep(10);

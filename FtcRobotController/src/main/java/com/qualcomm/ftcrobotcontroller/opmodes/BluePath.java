@@ -45,9 +45,6 @@ public class BluePath extends LinearOpMode {
         SensorState.ColorType dominant = Robot.tillWhite(-0.2, "ground", "beacon");
         noodle.setPower(0);
 
-        Robot.drivetrain.dumbGyroTurn(-0.75, 0);
-
-
         Robot.drivetrain.moveDistanceWithCorrections(0.2,3);
         Robot.extendTillBeacon("beaconToucher");
         if(dominant == SensorState.ColorType.BLUE) {
