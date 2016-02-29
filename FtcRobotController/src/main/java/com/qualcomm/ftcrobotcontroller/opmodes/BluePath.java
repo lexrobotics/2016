@@ -24,9 +24,12 @@ public class BluePath extends LinearOpMode {
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
         Robot.delayWithCountdown(delayTime);
-        while (Robot.state.gyroIsCalibrating("hero")) {
+        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
+        Thread.sleep(3500);
+        while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
         }
+
 
         Robot.drivetrain.dumbGyroTurn(1, 0, 45);
 
@@ -38,14 +41,14 @@ public class BluePath extends LinearOpMode {
         noodle.setPower(0);
         Thread.sleep(500);
 
-        Robot.drivetrain.dumbGyroTurn(0.75, 135);               //dimitri was here
+        Robot.drivetrain.dumbGyroTurn(0.75, 132);               //dimitri was here
 
         Thread.sleep(200);
         noodle.setPower(1);
         SensorState.ColorType dominant = Robot.tillWhite(-0.2, "ground", "beacon");
         noodle.setPower(0);
 
-        Robot.drivetrain.moveDistanceWithCorrections(0.2,3);
+        Robot.drivetrain.moveDistanceWithCorrections(0.2, 3);
         Robot.extendTillBeacon("beaconToucher");
         if(dominant == SensorState.ColorType.BLUE) {
             Robot.dumpClimbers();
@@ -55,10 +58,8 @@ public class BluePath extends LinearOpMode {
             Robot.dumpClimbers();
             Robot.pushButton("beaconToucher", -1);
         }
+        Robot.retractButtonPusher();
 
-        Robot.servos.get("buttonPusher").setPosition(0.7); // press button pusher
-        Thread.sleep(1500);
-        Robot.servos.get("buttonPusher").setPosition(0.5); // stop
     }
 
     public void runOpMode() throws InterruptedException{

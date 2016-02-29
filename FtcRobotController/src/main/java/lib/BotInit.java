@@ -58,7 +58,6 @@ public class BotInit {
 //        hardwareMap.colorSensor.get("ground").setI2cAddress(0x70);
 //        Robot.state.colorLightToggle("ground", true);
 
-        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
 
         Robot.state_thread = new Thread(Robot.state);
         Robot.state_thread.start();

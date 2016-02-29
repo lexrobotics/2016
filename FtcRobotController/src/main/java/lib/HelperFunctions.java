@@ -24,7 +24,7 @@ public class HelperFunctions {
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());
             Robot.tel.addData("right limit",Robot.hmap.digitalChannel.get("rightLimit").getState());
-
+            ((FourWheelDrive) Robot.drivetrain).outputEncoders();
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {

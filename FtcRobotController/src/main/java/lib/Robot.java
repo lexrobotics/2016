@@ -208,7 +208,7 @@ public class Robot {
 
     public static void retractButtonPusher() throws InterruptedException {
         Robot.servos.get("buttonPusher").setPosition(0.8);
-        Thread.sleep(2500);
+        Thread.sleep(1250);
         Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
     }
 
@@ -245,6 +245,7 @@ public class Robot {
             tel.addData("Delay", pot);
             Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
             Robot.tel.addData("ground r", ground.red() + "  g: " + ground.green() + "  b: " + ground.blue() + "  alpha: " + ground.alpha());
+//            Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());

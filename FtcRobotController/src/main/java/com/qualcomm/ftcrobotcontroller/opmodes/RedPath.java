@@ -23,7 +23,9 @@ public class RedPath extends LinearOpMode {
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
         Robot.delayWithCountdown(delayTime);
-        while (Robot.state.gyroIsCalibrating("hero")) {
+        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
+        Thread.sleep(3500);
+        while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
         }
 
@@ -46,6 +48,7 @@ public class RedPath extends LinearOpMode {
         Robot.extendTillBeacon("beaconToucher");
         if(dominant == SensorState.ColorType.BLUE) {
             Robot.pushButton("beaconToucher", 1);
+            Thread.sleep(100);
             Robot.dumpClimbers();
         }
         else if(dominant == SensorState.ColorType.RED) {

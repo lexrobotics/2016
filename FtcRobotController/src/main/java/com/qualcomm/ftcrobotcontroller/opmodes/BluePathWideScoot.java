@@ -18,7 +18,8 @@ public class BluePathWideScoot extends BluePathWide {
     public void runOpMode()  {
         try {
             path();
-            Robot.drivetrain.moveDistanceWithCorrections(-0.6, 20);
+            Robot.drivetrain.moveDistanceWithCorrections(-0.6, 35);
+            Robot.retractButtonPusher();
         }
         catch(InterruptedException ie) {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");

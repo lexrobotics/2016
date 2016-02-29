@@ -14,6 +14,7 @@ public class RedPathWideScoot extends RedPathWide {
         try {
             path();
             Robot.drivetrain.moveDistanceWithCorrections(0.6, 35);
+            Robot.retractButtonPusher();
         }
         catch(InterruptedException ie) {
             Log.i("InterruptedException", "In LinearOpMode, ending autonomous hopefully");

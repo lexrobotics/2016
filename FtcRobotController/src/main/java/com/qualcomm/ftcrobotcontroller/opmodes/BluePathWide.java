@@ -20,12 +20,15 @@ import lib.SensorState;
 public class BluePathWide extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
-        int delayTime = (int) Robot.delaySet("delayDial", "beaconToucher");
+        int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
         Robot.delayWithCountdown(delayTime);
-        while (Robot.state.gyroIsCalibrating("hero")) {
+        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
+        Thread.sleep(3500);
+        while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
         }
+
 
         Robot.drivetrain.dumbGyroTurn(1, 0, 47);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
@@ -47,6 +50,7 @@ public class BluePathWide extends LinearOpMode {
             Robot.pushButton("beaconToucher", -1);
         } else if (dominant == SensorState.ColorType.RED) {
             Robot.pushButton("beaconToucher", 1);
+            Thread.sleep(100);
             Robot.dumpClimbers();
         }
         else {
