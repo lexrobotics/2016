@@ -198,8 +198,20 @@ public class SensorState implements Runnable{
         // Make a SensorContainer to wrap around the object
         SensorContainer sen = new SensorContainer(sensor_obj, type, name, update, data_length);
 
-        if (type == SensorType.GYRO)
+        if (type == SensorType.GYRO) {
             ((GyroSensor) sensor_obj).calibrate();
+
+            // There is always a gap of a few milliseconds before a gyro starts calibrating.
+            // This needs to be waited out, otherwise a call to isCalibrating() could return a
+            // misleading result.
+            try {
+                while (!((GyroSensor) sensor_obj).isCalibrating()) {
+                    Thread.sleep(1);
+                }
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
 
         if (type == SensorType.COLOR) {
             ((ColorSensor) sensor_obj).enableLed(false);

@@ -3,8 +3,10 @@ package lib;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.robocol.Telemetry;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Created by lhscompsci on 1/11/16.
@@ -42,5 +44,24 @@ public class HelperFunctions {
         while(op.opModeIsActive()) {
             ((FourWheelDrive) Robot.drivetrain).outputEncoders();
         }
+    }
+
+    public static void testGyroCalibration(String name, HardwareMap hmap, Telemetry tel, LinearOpMode op) {
+        GyroSensor g = hmap.gyroSensor.get(name);
+        ElapsedTime timer = new ElapsedTime();
+        boolean calibrated = false;
+
+        g.calibrate();
+
+        while (g.isCalibrating() && op.opModeIsActive()) {
+            tel.addData("Calibrating time", timer.time());
+            calibrated = true;
+        }
+
+        while (op.opModeIsActive()) {
+            tel.addData("Ever calibrated", calibrated);
+            tel.addData("Hero are you with us?", g.getHeading());
+        }
+
     }
 }

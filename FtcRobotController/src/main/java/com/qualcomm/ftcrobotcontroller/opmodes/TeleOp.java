@@ -3,7 +3,8 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-        import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
 
         import com.qualcomm.robotcore.util.Range;
 
@@ -30,6 +31,7 @@ public class TeleOp extends OpMode {
     boolean climber_drop;
     boolean a_was_down;
 
+    DigitalChannel hall1;
     ColorSensor ground;
 
     @Override
@@ -84,6 +86,8 @@ public class TeleOp extends OpMode {
         rightLimitServo.setPosition(1);
 
         ground = hardwareMap.colorSensor.get("ground");
+
+        hall1 = hardwareMap.digitalChannel.get("hall1");
     }
 
     @Override
@@ -258,4 +262,13 @@ public class TeleOp extends OpMode {
 //            return -0.2;
 //        return 0;
     }
+    public void armTilter(double power, DigitalChannel hall) {
+        ElapsedTimer timer
+
+        while (!hall.getState() ) {
+            armTilter.setPower(power);
+        }
+        armTilter.setPower(0);
+    }
+
 }

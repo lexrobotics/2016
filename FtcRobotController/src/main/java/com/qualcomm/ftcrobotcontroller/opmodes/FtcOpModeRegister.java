@@ -46,13 +46,12 @@ public class FtcOpModeRegister implements OpModeRegister {
      */
     public void register(OpModeManager manager) {
 
-    /*
+    /*00
      * register your op modes here.
      * The first parameter is the name of the op mode
      * The second parameter is the op mode class property
      *
      * If two or more op modes are registered with the same name, the app will display an error.
-     */
 
     /*
      * The NullOp op mode
