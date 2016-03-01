@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.HashMap;
 
@@ -200,12 +201,14 @@ public class SensorState implements Runnable{
 
         if (type == SensorType.GYRO) {
             ((GyroSensor) sensor_obj).calibrate();
+            ElapsedTime timer = new ElapsedTime();
+            timer.reset();
 
             // There is always a gap of a few milliseconds before a gyro starts calibrating.
             // This needs to be waited out, otherwise a call to isCalibrating() could return a
             // misleading result.
             try {
-                while (!((GyroSensor) sensor_obj).isCalibrating()) {
+                while (!((GyroSensor) sensor_obj).isCalibrating() && timer.time() < 0.3) {
                     Thread.sleep(1);
                 }
             } catch (InterruptedException ex) {

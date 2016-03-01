@@ -207,9 +207,18 @@ public class Robot {
     }
 
     public static void retractButtonPusher() throws InterruptedException {
-        Robot.servos.get("buttonPusher").setPosition(0.8);
-        Thread.sleep(1250);
-        Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+        DigitalChannel endStop = hmap.digitalChannel.get("buttonPusherEndStop");
+
+        Robot.servos.get("buttonPusher").setPosition(0.7);
+
+        ElapsedTime pressTimer = new ElapsedTime();
+        pressTimer.reset();
+
+        while(!endStop.getState() && Robot.waiter.opModeIsActive() && pressTimer.time() <= 3.0) {
+            Thread.sleep(50);
+        }
+
+        Robot.servos.get("buttonPusher").setPosition(0.5);
     }
 
     public static void pushButton(String switchName, int direction) throws InterruptedException {

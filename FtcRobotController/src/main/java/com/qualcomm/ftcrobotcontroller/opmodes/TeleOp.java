@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
         import com.qualcomm.robotcore.util.Range;
 
+import lib.PID;
+
 /**
  * Created by lhscompsci on 9/28/15.
  */
@@ -20,6 +22,8 @@ public class TeleOp extends OpMode {
     Servo redDoor, blueDoor;
     Servo rightLimitServo, leftLimitServo;
 
+    DigitalChannel armEndStop;
+
     // The arm_locked and climber_drop variables say whether the climber or arm should currently be activated.
     // The toggle is aided by a_was_down and b_was_down.
     Servo armLock;
@@ -28,14 +32,36 @@ public class TeleOp extends OpMode {
 
     boolean driveInverted = false;
     boolean bWasDown = false;
+
+    // Used for toggling buttons
     boolean climber_drop;
     boolean a_was_down;
 
-    DigitalChannel hall1;
+    DigitalChannel hallEnd;
+
+    int armTiltStart, armTiltEnd;
+    boolean requireSecondPress;
+
+    int currentArmPreset = 0;
+    private final int[] ARM_PRESETS = {0, 45, 90};
+    private final int ANGLE_RANGE = 90;
+    private final int ENCODER_RANGE = 600;
+
+    boolean armAutoPilot = false;
+
+    PID tiltPID;
+    private final double PROPORTIONAL = 1;
+    private final double INTEGRAL = 0.01;
+    private final double DERIVATIVE = 0;
+    private final double THRESHOLD = 1.2;
+
+
     ColorSensor ground;
 
     @Override
     public void init() {
+        tiltPID = new PID(PROPORTIONAL, INTEGRAL, DERIVATIVE, false, THRESHOLD);
+
         climber_drop = false;
         arm_locked = false;
         a_was_down = true;
@@ -87,7 +113,7 @@ public class TeleOp extends OpMode {
 
         ground = hardwareMap.colorSensor.get("ground");
 
-        hall1 = hardwareMap.digitalChannel.get("hall1");
+        hallEnd = hardwareMap.digitalChannel.get("hall1");
     }
 
     @Override
@@ -126,9 +152,6 @@ public class TeleOp extends OpMode {
         } else {
             noodler.setPower(0);
         }
-
-        armTilter.setPower(scaleInput(gamepad2.left_stick_y));
-
 
         if (gamepad2.left_trigger >= .1) {
             liftStageOne.setPower(-gamepad2.left_trigger);
@@ -186,22 +209,13 @@ public class TeleOp extends OpMode {
             blueDoor.setPosition(0);
         }
 
+
         if(gamepad2.start) {
             buttonPusher.setPosition(0.7); // press button pusher
         }
         else {
             buttonPusher.setPosition(0.5); // press button pusher
         }
-
-//        if (gamepad2.a) {
-//            if (a_was_down){
-//                climber_drop = !climber_drop;
-//                a_was_down = false;
-//            }
-//        } else {
-//            a_was_down = true;
-//        }
-
         if (gamepad2.b) {
             if (b_was_down){
                 arm_locked = !arm_locked;
@@ -210,7 +224,6 @@ public class TeleOp extends OpMode {
         } else {
             b_was_down = true;
         }
-
         if (arm_locked){
             climberDropper.setPosition(0.7);
         } else {
@@ -221,6 +234,30 @@ public class TeleOp extends OpMode {
             armLock.setPosition(0.7);
         } else {
             armLock.setPosition(1);
+        }
+
+        if (Math.abs(gamepad2.left_stick_y) > 0.3) {
+            armAutoPilot = false;
+            armTilt(-gamepad2.left_stick_y, gamepad2.a);
+        }
+        else if(gamepad2.dpad_up) {
+            while(gamepad2.dpad_up);
+            currentArmPreset++;
+            if(currentArmPreset >= ARM_PRESETS.length)
+                currentArmPreset = 0;
+
+            tiltToAngle(ARM_PRESETS[currentArmPreset]);
+        }
+        else if(gamepad2.dpad_down) {
+            while(gamepad2.dpad_down);
+            currentArmPreset--;
+            if(currentArmPreset < 0)
+                currentArmPreset = ARM_PRESETS.length - 1;
+
+            tiltToAngle(ARM_PRESETS[currentArmPreset]);
+        }
+        else if(armAutoPilot) {
+            updateTilter();
         }
     }
 
@@ -261,14 +298,52 @@ public class TeleOp extends OpMode {
 //        if(dVal < -0.1)
 //            return -0.2;
 //        return 0;
+//        Anthony Wiryaman
     }
-    public void armTilter(double power, DigitalChannel hall) {
-        ElapsedTimer timer
 
-        while (!hall.getState() ) {
-            armTilter.setPower(power);
+    public boolean armTilt(double power, boolean override) {
+        if (hallEnd.getState() && !override && power > 0){
+            armTilter.setPower(0);
+            return true;
         }
-        armTilter.setPower(0);
+        else {
+            armTilter.setPower(power);
+            return false;
+        }
     }
+
+    public void armEncoderReset() {
+        armTiltStart = armTilter.getCurrentPosition();
+    }
+
+    public void tiltToAngle(double angle) {
+        int steps = (int) angle * (ENCODER_RANGE / ANGLE_RANGE) + armTiltStart;
+        tiltPID.setTarget(steps);
+        tiltPID.reset();
+        armAutoPilot = true;
+
+        updateTilter();
+    }
+
+    public void updateTilter() {
+        double output = tiltPID.update(armTilter.getCurrentPosition());
+        if(!tiltPID.isAtTarget()) {
+            armTilt(output, false);
+        }
+        else {
+            armTilt(0, false);
+        }
+    }
+
+//    go to a set angle,
+//
+//    go till a hall effect sensor is triggered, IF THE OVERRIDING BUTTON ISNT HELD
+//
+//    IF THE OVERRIDING BUTTON IS HELD, go as far as you want
+//
+//    make conversion table (x values, divide 90 by x, find passed value bucket, go to that bucket value in table)
+
+//    you would divide the passed angle by the max range divided by steps
+
 
 }
