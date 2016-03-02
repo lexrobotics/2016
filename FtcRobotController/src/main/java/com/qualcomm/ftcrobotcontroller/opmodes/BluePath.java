@@ -23,9 +23,7 @@ public class BluePath extends LinearOpMode {
         BotInit.bot2(hardwareMap, telemetry, this);
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
-        Robot.delayWithCountdown(delayTime);
-        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
-        Thread.sleep(3500);
+
         while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
         }
@@ -50,12 +48,11 @@ public class BluePath extends LinearOpMode {
 
         Robot.drivetrain.moveDistanceWithCorrections(0.2, 3);
         Robot.extendTillBeacon("beaconToucher");
+        Robot.dumpClimbers();
         if(dominant == SensorState.ColorType.BLUE) {
-            Robot.dumpClimbers();
             Robot.pushButton("beaconToucher", 1);
         }
         else if(dominant == SensorState.ColorType.RED) {
-            Robot.dumpClimbers();
             Robot.pushButton("beaconToucher", -1);
         }
         Robot.retractButtonPusher();

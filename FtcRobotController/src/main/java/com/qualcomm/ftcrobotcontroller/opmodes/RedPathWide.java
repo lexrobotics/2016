@@ -22,9 +22,7 @@ public class RedPathWide extends LinearOpMode {
         BotInit.bot2(hardwareMap, telemetry, this);
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
-        Robot.delayWithCountdown(delayTime);
-        Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
-        Thread.sleep(3500);
+
         while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
         }
@@ -42,13 +40,14 @@ public class RedPathWide extends LinearOpMode {
         SensorState.ColorType dominant = Robot.tillWhite(-0.2, "ground", "beacon");
         noodle.setPower(0);
 
+        Robot.extendTillBeacon("beaconToucher");
+        Robot.dumpClimbers();
+
         if(dominant == SensorState.ColorType.BLUE) {
-            Robot.dumpClimbers(2);
             Robot.pushButton("beaconToucher", -1);
         }
         else if(dominant == SensorState.ColorType.RED) {
             Robot.pushButton("beaconToucher", 1);
-            Robot.dumpClimbers();
         }
 
         Robot.retractButtonPusher();

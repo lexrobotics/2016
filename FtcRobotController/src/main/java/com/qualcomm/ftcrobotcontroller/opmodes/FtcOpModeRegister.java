@@ -57,7 +57,7 @@ public class FtcOpModeRegister implements OpModeRegister {
      * The NullOp op mode
      */
         manager.register("NullOp", NullOp.class);
-        manager.register("TestOpmode", TestOpMode.class);
+        manager.register("SensorPrint", SensorPrint.class);
         manager.register("TeleOp", TeleOp.class);
         manager.register("RedPath", RedPath.class);
         manager.register("BluePath", BluePath.class);
@@ -67,5 +67,6 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("BluePathScoot", BluePathScoot.class);
         manager.register("RedPathWideScoot", RedPathWideScoot.class);
         manager.register("BluePathWideScoot", BluePathWideScoot.class);
+        manager.register("ClimberDropper", climberDropper.class);
     }
 }

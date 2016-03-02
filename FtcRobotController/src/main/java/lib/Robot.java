@@ -174,9 +174,9 @@ public class Robot {
     }
 
     public static void dumpClimbers() throws InterruptedException {
-        Robot.servos.get("climberDropper").setPosition(0.3);
+        Robot.servos.get("climberDropper").setPosition(0);
         Thread.sleep(1000);
-        Robot.servos.get("climberDropper").setPosition(0.6);
+        Robot.servos.get("climberDropper").setPosition(1);
     }
 
     public static void dumpClimbers(int scootLength) throws InterruptedException {
@@ -195,12 +195,12 @@ public class Robot {
 
     public static void extendTillBeacon(String switchName) throws InterruptedException {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
-        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+        Robot.servos.get("buttonPusher").setPosition(0); // press button pusher
 
         ElapsedTime pressTimer = new ElapsedTime();
         pressTimer.reset();
 
-        while(!beaconToucher.getState() && Robot.waiter.opModeIsActive() && pressTimer.time() <= 5.0) {
+        while(beaconToucher.getState() && Robot.waiter.opModeIsActive() && pressTimer.time() <= 5.0) {
             Thread.sleep(50);
         }
         Robot.servos.get("buttonPusher").setPosition(0.5);
@@ -209,36 +209,35 @@ public class Robot {
     public static void retractButtonPusher() throws InterruptedException {
         DigitalChannel endStop = hmap.digitalChannel.get("buttonPusherEndStop");
 
-        Robot.servos.get("buttonPusher").setPosition(0.7);
+        Robot.servos.get("buttonPusher").setPosition(1);
 
         ElapsedTime pressTimer = new ElapsedTime();
         pressTimer.reset();
 
-        while(!endStop.getState() && Robot.waiter.opModeIsActive() && pressTimer.time() <= 3.0) {
-            Thread.sleep(50);
+        while(!endStop.getState() && Robot.waiter.opModeIsActive() && pressTimer.time() <= 7) {
+            Thread.sleep(1);
         }
 
         Robot.servos.get("buttonPusher").setPosition(0.5);
     }
 
-    public static void pushButton(String switchName, int direction) throws InterruptedException {
+    public static void pushButton(String switchName, int direction ) throws InterruptedException {
         if(direction == 0)
             return;
 
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
 
         ElapsedTime presstimer = new ElapsedTime();
-        extendTillBeacon(switchName);
 
-        while((presstimer.time() <= 0.9) && Robot.waiter.opModeIsActive()) {
-            if(beaconToucher.getState()) { // switch is depressed :(
+        while((presstimer.time() <= 0.15) && Robot.waiter.opModeIsActive()) {
+            if(beaconToucher.getState() == false) { // switch is depressed :(
                 Robot.drivetrain.move(direction * 0.15, Robot.waiter);
-                Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+                Robot.servos.get("buttonPusher").setPosition(0.3); // gently push
                 presstimer.reset(); // hold presstimer at 0
             }
             else { // switch is open
                 Robot.drivetrain.stopMove();
-                Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+                Robot.servos.get("buttonPusher").setPosition(0); // press button pusher
             }
             Thread.sleep(1);
         }
@@ -249,12 +248,12 @@ public class Robot {
     public static double delaySet(String potName,String switchName) throws InterruptedException {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
         int pot =0;
-        while(!beaconToucher.getState() && !waiter.opModeIsActive() ) {
+        while(beaconToucher.getState() && !waiter.opModeIsActive() ) {
             pot = (int) Math.floor((1023 - hmap.analogInput.get(potName).getValue())/1023.0 * 15.0);
             tel.addData("Delay", pot);
             Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
             Robot.tel.addData("ground r", ground.red() + "  g: " + ground.green() + "  b: " + ground.blue() + "  alpha: " + ground.alpha());
-//            Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
+            Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());
