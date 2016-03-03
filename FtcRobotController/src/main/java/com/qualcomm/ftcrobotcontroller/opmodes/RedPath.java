@@ -30,7 +30,7 @@ public class RedPath extends LinearOpMode {
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
         noodle.setPower(-1);
         Thread.sleep(200);
-        Robot.drivetrain.moveDistanceWithCorrections(0.6, 55);
+        Robot.drivetrain.moveDistanceWithCorrections(0.6, 55,false);
         Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.8, 0, 1000);
         noodle.setPower(0);
         Thread.sleep(500);

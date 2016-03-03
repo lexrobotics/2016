@@ -31,7 +31,7 @@ public class BluePathWide extends LinearOpMode {
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
         noodle.setPower(-1);
         Thread.sleep(200);
-        Robot.drivetrain.moveDistanceWithCorrections(0.6, 100);
+        Robot.drivetrain.moveDistanceWithCorrections(0.6, 100, false);
         Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.2, 0.25, 1, 1000);
         Robot.drivetrain.dumbGyroTurn(0.8, 130);
 

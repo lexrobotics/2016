@@ -44,23 +44,26 @@ public class TeleOp extends OpMode {
 
     int currentArmPreset = 0;
     private final int[] ARM_PRESETS = {0, 45, 90};
-    private final int ANGLE_RANGE = 90;
-    private final int ENCODER_RANGE = 600;
+    private final double ANGLE_RANGE = 140;
+    private final double ENCODER_RANGE = 4100;
 
     boolean armAutoPilot = false;
 
     PID tiltPID;
-    private final double PROPORTIONAL = 1;
-    private final double INTEGRAL = 0.01;
+    private final double PROPORTIONAL = 0.0025;
+    private final double INTEGRAL = 0.0000;
     private final double DERIVATIVE = 0;
-    private final double THRESHOLD = 1.2;
+    private final double THRESHOLD = 75;
 
+    int target;
 
     ColorSensor ground;
 
     @Override
     public void init() {
         tiltPID = new PID(PROPORTIONAL, INTEGRAL, DERIVATIVE, false, THRESHOLD);
+        tiltPID.setMinOutput(-1);
+        tiltPID.setMaxOutput(1);
 
         climber_drop = false;
         arm_locked = false;
@@ -72,8 +75,8 @@ public class TeleOp extends OpMode {
         rightFrontDrive = hardwareMap.dcMotor.get("rightFrontDrive");
         rightRearDrive = hardwareMap.dcMotor.get("rightRearDrive");
 //        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
 
         noodler = hardwareMap.dcMotor.get("noodler");
         armTilter = hardwareMap.dcMotor.get("armTilter");
@@ -114,6 +117,7 @@ public class TeleOp extends OpMode {
         ground = hardwareMap.colorSensor.get("ground");
 
         hallEnd = hardwareMap.digitalChannel.get("hall1");
+        armEncoderReset();
     }
 
     @Override
@@ -246,7 +250,7 @@ public class TeleOp extends OpMode {
             if(currentArmPreset >= ARM_PRESETS.length)
                 currentArmPreset = 0;
 
-            tiltToAngle(ARM_PRESETS[currentArmPreset]);
+            target = tiltToAngle(ARM_PRESETS[currentArmPreset]);
         }
         else if(gamepad2.dpad_down) {
             while(gamepad2.dpad_down);
@@ -254,11 +258,19 @@ public class TeleOp extends OpMode {
             if(currentArmPreset < 0)
                 currentArmPreset = ARM_PRESETS.length - 1;
 
-            tiltToAngle(ARM_PRESETS[currentArmPreset]);
+            target = tiltToAngle(ARM_PRESETS[currentArmPreset]);
         }
         else if(armAutoPilot) {
             updateTilter();
         }
+        else {
+            armTilt(0, false);
+        }
+        telemetry.addData("arm tilt", armTilter.getCurrentPosition());
+        telemetry.addData("zero position", armTiltStart);
+        telemetry.addData("autopilot", armAutoPilot);
+        telemetry.addData("currentArmPreset", currentArmPreset);
+        telemetry.addData("target", target);
     }
 
     /**
@@ -316,18 +328,20 @@ public class TeleOp extends OpMode {
         armTiltStart = armTilter.getCurrentPosition();
     }
 
-    public void tiltToAngle(double angle) {
-        int steps = (int) angle * (ENCODER_RANGE / ANGLE_RANGE) + armTiltStart;
+    public int tiltToAngle(double angle) {
+        int steps = (int) (angle * (ENCODER_RANGE / ANGLE_RANGE) + armTiltStart);
         tiltPID.setTarget(steps);
         tiltPID.reset();
         armAutoPilot = true;
-
         updateTilter();
+
+        return steps;
     }
 
     public void updateTilter() {
         double output = tiltPID.update(armTilter.getCurrentPosition());
         if(!tiltPID.isAtTarget()) {
+            telemetry.addData("output", output);
             armTilt(output, false);
         }
         else {
