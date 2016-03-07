@@ -48,17 +48,12 @@ public class BotInit {
 
         Robot.state = new SensorState(hardwareMap, 1, 0);
 
-        Robot.ground = new GroundColorSensor(Robot.hmap.deviceInterfaceModule.get("cdim"), 4);
-        Robot.beacon = new BeaconColorSensor(Robot.hmap.deviceInterfaceModule.get("cdim"), 0);
         Robot.state.registerSensor("hero", SensorState.SensorType.GYRO, true, 12);
 
         Robot.state.registerSensor("beacon", SensorState.SensorType.COLOR, false, 12);
         hardwareMap.colorSensor.get("beacon").setI2cAddress(0x3C);
 
         Robot.state.registerSensor("ground", SensorState.SensorType.COLOR, false, 12);
-        hardwareMap.colorSensor.get("ground").setI2cAddress(0x70);
-        Robot.state.colorLightToggle("ground", true);
-
 
         Robot.state_thread = new Thread(Robot.state);
         Robot.state_thread.start();

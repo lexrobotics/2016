@@ -22,7 +22,7 @@ public class TeleOp extends OpMode {
     Servo redDoor, blueDoor;
     Servo rightLimitServo, leftLimitServo;
 
-    DigitalChannel armEndStop;
+    DigitalChannel compressLimit;
 
     // The arm_locked and climber_drop variables say whether the climber or arm should currently be activated.
     // The toggle is aided by a_was_down and b_was_down.
@@ -39,11 +39,10 @@ public class TeleOp extends OpMode {
 
     DigitalChannel hallEnd;
 
-    int armTiltStart, armTiltEnd;
-    boolean requireSecondPress;
+    int armTiltStart;
 
     int currentArmPreset = 0;
-    private final int[] ARM_PRESETS = {0, 45, 90};
+    private final int[] ARM_PRESETS = {0, 135};
     private final double ANGLE_RANGE = 140;
     private final double ENCODER_RANGE = 4100;
 
@@ -74,7 +73,7 @@ public class TeleOp extends OpMode {
         leftRearDrive = hardwareMap.dcMotor.get("leftRearDrive");
         rightFrontDrive = hardwareMap.dcMotor.get("rightFrontDrive");
         rightRearDrive = hardwareMap.dcMotor.get("rightRearDrive");
-//        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
 
@@ -117,6 +116,7 @@ public class TeleOp extends OpMode {
         ground = hardwareMap.colorSensor.get("ground");
 
         hallEnd = hardwareMap.digitalChannel.get("hall1");
+        compressLimit = hardwareMap.digitalChannel.get("compressLimit");
         armEncoderReset();
     }
 
@@ -189,19 +189,17 @@ public class TeleOp extends OpMode {
         }
 
 
-        if(gamepad2.right_stick_x > 0.5) {
-            leftZipline.setPosition(1);
-        }
-        else if(gamepad2.right_stick_x < -0.5) {
+        if(gamepad2.right_stick_x > 0.7) {
             rightZipline.setPosition(1);
         }
-        else if(gamepad2.a) {
-            leftZipline.setPosition(0);
+        else if(gamepad2.right_stick_x < -0.7) {
             rightZipline.setPosition(0);
         }
-        else {
-            leftZipline.setPosition(0.5);
-            rightZipline.setPosition(0.5);
+        if(gamepad2.left_stick_x > 0.7) {
+            leftZipline.setPosition(1);
+        }
+        else if(gamepad2.left_stick_x < -0.7) {
+            leftZipline.setPosition(0);
         }
 
 
@@ -242,13 +240,13 @@ public class TeleOp extends OpMode {
 
         if (Math.abs(gamepad2.left_stick_y) > 0.3) {
             armAutoPilot = false;
-            armTilt(-gamepad2.left_stick_y, gamepad2.a);
+            armTilt(gamepad2.left_stick_y, gamepad2.a);
         }
         else if(gamepad2.dpad_up) {
             while(gamepad2.dpad_up);
             currentArmPreset++;
             if(currentArmPreset >= ARM_PRESETS.length)
-                currentArmPreset = 0;
+                currentArmPreset = ARM_PRESETS.length-1;
 
             target = tiltToAngle(ARM_PRESETS[currentArmPreset]);
         }
@@ -256,7 +254,7 @@ public class TeleOp extends OpMode {
             while(gamepad2.dpad_down);
             currentArmPreset--;
             if(currentArmPreset < 0)
-                currentArmPreset = ARM_PRESETS.length - 1;
+                currentArmPreset = 0;
 
             target = tiltToAngle(ARM_PRESETS[currentArmPreset]);
         }
@@ -266,6 +264,12 @@ public class TeleOp extends OpMode {
         else {
             armTilt(0, false);
         }
+
+        if (compressLimit.getState()) {
+            armEncoderReset();
+        }
+
+
         telemetry.addData("arm tilt", armTilter.getCurrentPosition());
         telemetry.addData("zero position", armTiltStart);
         telemetry.addData("autopilot", armAutoPilot);
@@ -314,12 +318,18 @@ public class TeleOp extends OpMode {
     }
 
     public boolean armTilt(double power, boolean override) {
-        if (hallEnd.getState() && !override && power > 0){
-            armTilter.setPower(0);
-            return true;
+
+        if (!compressLimit.getState() || power < 0) {
+            if (hallEnd.getState() && !override && power > 0) {
+                armTilter.setPower(0);
+                return true;
+            } else {
+                armTilter.setPower(power);
+                return false;
+            }
         }
+
         else {
-            armTilter.setPower(power);
             return false;
         }
     }
@@ -348,6 +358,8 @@ public class TeleOp extends OpMode {
             armTilt(0, false);
         }
     }
+
+
 
 //    go to a set angle,
 //

@@ -24,9 +24,6 @@ import java.util.ArrayList;
  */
 
 public class Robot {
-    public static BeaconColorSensor beacon;
-    public static GroundColorSensor ground;
-
     // SensorState to store sensor values. Universal access point.
     public static SensorState state;
 
@@ -247,6 +244,9 @@ public class Robot {
 
     public static double delaySet(String potName,String switchName) throws InterruptedException {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
+        ColorSensor beacon = Robot.hmap.colorSensor.get("beacon");
+        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
+
         int pot =0;
         while(beaconToucher.getState() && !waiter.opModeIsActive() ) {
             pot = (int) Math.floor((1023 - hmap.analogInput.get(potName).getValue())/1023.0 * 15.0);
@@ -275,25 +275,40 @@ public class Robot {
 
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException {
+        final int RED_THRESH = 800;
+        final int GREEN_THRESH = 800;
+        final int BLUE_THRESH = 800;
+        int maxRed = 0;
+        int maxGreen = 0;
+        int maxBlue = 0;
+
         Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
         Thread.sleep(750);
         Robot.servos.get("buttonPusher").setPosition(0.5); // press button pusher
 
 
-        ColorSensor ground = Robot.ground;
+        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
         SensorState.ColorType dominant = null;
-        int threshold = 8;
         drivetrain.move(power, waiter);
 
 
-        while (!(ground.alpha() >= threshold && ground.red() >= threshold && ground.green() >= threshold && ground.blue() >= threshold) && waiter.opModeIsActive()){
+        while (!(ground.red() >= RED_THRESH && ground.green() >= GREEN_THRESH && ground.blue() >= BLUE_THRESH) && waiter.opModeIsActive()){
 
+            if(ground.red() > maxRed)
+                maxRed = ground.red();
+            if(ground.green() > maxGreen)
+                maxGreen = ground.green();
+            if(ground.blue() > maxBlue)
+                maxBlue = ground.blue();
 
+            tel.addData("max red", maxRed);
+            tel.addData("max green", maxGreen);
+            tel.addData("max blue", maxBlue);
             if (dominant == null && (state.redVsBlue(beaconName) == SensorState.ColorType.RED || state.redVsBlue(beaconName) == SensorState.ColorType.BLUE)) {
                 dominant = state.redVsBlue(beaconName);
             }
 
-            Thread.sleep(10);
+            Thread.sleep(1);
         }
         drivetrain.stopMove();
 

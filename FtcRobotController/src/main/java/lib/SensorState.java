@@ -216,10 +216,6 @@ public class SensorState implements Runnable{
             }
         }
 
-        if (type == SensorType.COLOR) {
-            ((ColorSensor) sensor_obj).enableLed(false);
-        }
-
         sensorContainers.put(name, sen);
         updateTypesInv(sen);
     }
@@ -323,19 +319,10 @@ public class SensorState implements Runnable{
      * Allows us to access by name only in the public functions, and be more efficient by accessing with SensorContainers privately.
      */
     public synchronized ColorType getColorData(String name){
-//        if(!sensorContainers.keySet().contains(name)){
-//            throw new RuntimeException("SensorState.getColorData: color sensor " + name + " not registered.");
-//        }
-        if(name.equals("beacon")) {
-          return getDominantColor(Robot.beacon);
+        if(!sensorContainers.keySet().contains(name)){
+            throw new RuntimeException("SensorState.getColorData: color sensor " + name + " not registered.");
         }
-        else if(name.equals("ground")) {
-          return getDominantColor(Robot.ground);
-        }
-        else {
-            throw new RuntimeException("SensorState.getColorData: color sensor " + name + " not an actual thing.");
-        }
-//        return getDominantColor(sensorContainers.get(name));
+        return getDominantColor(sensorContainers.get(name));
     }
 
     /**
@@ -450,18 +437,7 @@ public class SensorState implements Runnable{
     // blue if blue is dominant over red,
     // and if they're equal, we return none.
     public synchronized ColorType redVsBlue(String name) {
-        ColorSensor sen_obj;
-        if(name.equals("beacon")) {
-            sen_obj = Robot.beacon;
-        }
-        else if(name.equals("ground")) {
-            sen_obj = Robot.ground;
-        }
-        else {
-            throw new RuntimeException("SensorState.getColorData: color sensor " + name + " not an actual thing.");
-        }
-
-//        ColorSensor sen_obj = (ColorSensor) sensorContainers.get(name).sensor;
+        ColorSensor sen_obj = (ColorSensor) sensorContainers.get(name).sensor;
         int r = sen_obj.red(), b = sen_obj.blue();
 
         if (r > b) {

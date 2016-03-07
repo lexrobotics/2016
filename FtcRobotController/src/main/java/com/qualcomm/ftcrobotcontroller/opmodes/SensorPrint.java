@@ -24,7 +24,8 @@ public class SensorPrint extends LinearOpMode{
         while (Robot.state.gyroIsCalibrating("hero")) {
             waitOneFullHardwareCycle();
         }
-        HelperFunctions.bot2SensorPrint(this);
+        Robot.tillWhite(0.2, "ground", "beacon");
+//        HelperFunctions.bot2SensorPrint(this);
 
 //        GyroSensor g = hardwareMap.gyroSensor.get("hero");
 //        ElapsedTime timer = new ElapsedTime();
