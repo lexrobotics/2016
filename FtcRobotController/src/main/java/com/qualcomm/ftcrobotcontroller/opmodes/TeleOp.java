@@ -124,10 +124,17 @@ public class TeleOp extends OpMode {
     public void loop() {
         gamepad1.setJoystickDeadzone(0.1f);
         gamepad2.setJoystickDeadzone(0.1f);
+        double leftPower;
+        double rightPower;
 
-        double leftPower = scaleInput(-gamepad1.left_stick_y);
-        double rightPower = scaleInput(-gamepad1.right_stick_y);
-
+        if(gamepad1.left_trigger >= .1) {
+            leftPower = scaleInput(-gamepad1.left_stick_y) / 2.125;
+            rightPower = scaleInput(-gamepad1.right_stick_y) / 2.125;
+        }
+        else{
+            leftPower = scaleInput(-gamepad1.left_stick_y);
+            rightPower = scaleInput(-gamepad1.right_stick_y);
+        }
         if (driveInverted) {
             double temp = -leftPower;
             leftPower = -rightPower;

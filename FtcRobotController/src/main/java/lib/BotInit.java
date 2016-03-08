@@ -32,8 +32,8 @@ public class BotInit {
         Robot.registerMotor("liftStageTwo");
 
         Robot.registerServo("divider", 0.5);
-        Robot.registerServo("rightZipline", 0.5);
-        Robot.registerServo("leftZipline", 0.5);
+        Robot.registerServo("rightZipline", 0);
+        Robot.registerServo("leftZipline", 1);
 
         Robot.registerServo("buttonPusher", 0.5);
         Robot.registerServo("climberDropper", 1);
@@ -56,7 +56,7 @@ public class BotInit {
         Robot.state.registerSensor("ground", SensorState.SensorType.COLOR, false, 12);
 
         Robot.state_thread = new Thread(Robot.state);
-        Robot.state_thread.start();
+//        Robot.state_thread.start();
 
     }
 }

@@ -57,6 +57,7 @@ public class FtcOpModeRegister implements OpModeRegister {
      * The NullOp op mode
      */
         manager.register("NullOp", NullOp.class);
+        manager.register("Ollie is my god", WireColorSensorTest.class);
         manager.register("SensorPrint", SensorPrint.class);
         manager.register("TeleOp", TeleOp.class);
         manager.register("RedPath", RedPath.class);

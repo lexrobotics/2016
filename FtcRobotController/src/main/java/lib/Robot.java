@@ -6,7 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DigitalChannelController;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
@@ -275,43 +277,43 @@ public class Robot {
 
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException {
-        final int RED_THRESH = 800;
-        final int GREEN_THRESH = 800;
-        final int BLUE_THRESH = 800;
+        final int RED_THRESH = 700;
+        final int GREEN_THRESH = 450;
+        final int BLUE_THRESH = 0;
         int maxRed = 0;
         int maxGreen = 0;
         int maxBlue = 0;
 
-        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
-        Thread.sleep(750);
-        Robot.servos.get("buttonPusher").setPosition(0.5); // press button pusher
 
 
         ColorSensor ground = Robot.hmap.colorSensor.get("ground");
         SensorState.ColorType dominant = null;
-        drivetrain.move(power, waiter);
+        DeviceInterfaceModule cdim = Robot.hmap.deviceInterfaceModule.get("cdim");
+
+        cdim.setDigitalChannelMode(5, DigitalChannelController.Mode.OUTPUT);
+        cdim.setDigitalChannelState(5, true);
+        waiter.waitOneFullHardwareCycle();
+        Thread.sleep(10);
+        drivetrain.move(power);
 
 
-        while (!(ground.red() >= RED_THRESH && ground.green() >= GREEN_THRESH && ground.blue() >= BLUE_THRESH) && waiter.opModeIsActive()){
+        while ((ground.green() <= GREEN_THRESH || ground.blue() <= BLUE_THRESH)) {
 
-            if(ground.red() > maxRed)
-                maxRed = ground.red();
-            if(ground.green() > maxGreen)
-                maxGreen = ground.green();
-            if(ground.blue() > maxBlue)
-                maxBlue = ground.blue();
-
-            tel.addData("max red", maxRed);
-            tel.addData("max green", maxGreen);
-            tel.addData("max blue", maxBlue);
-            if (dominant == null && (state.redVsBlue(beaconName) == SensorState.ColorType.RED || state.redVsBlue(beaconName) == SensorState.ColorType.BLUE)) {
-                dominant = state.redVsBlue(beaconName);
-            }
-
-            Thread.sleep(1);
+////            if(ground.red() > maxRed)
+////                maxRed = ground.red();
+////            if(ground.green() > maxGreen)
+////                maxGreen = ground.green();
+////            if(ground.blue() > maxBlue)
+////                maxBlue = ground.blue();
+//////
+////            if (dominant == null && (state.redVsBlue(beaconName) == SensorState.ColorType.RED || state.redVsBlue(beaconName) == SensorState.ColorType.BLUE)) {
+////                dominant = state.redVsBlue(beaconName);
+////            }
+            Thread.sleep(100);
         }
-        drivetrain.stopMove();
+        cdim.setDigitalChannelState(5, false);
 
+        drivetrain.move(0);
         return dominant;
 
     }
