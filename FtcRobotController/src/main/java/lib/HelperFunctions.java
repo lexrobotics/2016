@@ -14,12 +14,18 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class HelperFunctions {
     public static void bot2SensorPrint(LinearOpMode op){
         ColorSensor beacon = Robot.hmap.colorSensor.get("beacon");
-        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
-
+        AdafruitColorSensor ground = new AdafruitColorSensor(Robot.hmap,"ground","cdim",5);
+        try {
+            op.waitOneFullHardwareCycle();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        ground.setLed(true);
         while(op.opModeIsActive()){
             Robot.tel.addData("gyro", Robot.state.getAvgSensorData("hero"));
             Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
-            Robot.tel.addData("ground r", ground.red() + "  g: " + ground.green() + "  b: " + ground.blue() + "  alpha: " + ground.alpha());
+            if (ground.isColorUpdate())
+                Robot.tel.addData("ground r", ground.getRed() + "  g: " + ground.getGreen() + "  b: " + ground.getBlue() + "  alpha: " + ground.getClear());
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("hall",Robot.hmap.digitalChannel.get("hall1").getState());

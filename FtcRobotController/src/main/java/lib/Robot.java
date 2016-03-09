@@ -193,6 +193,8 @@ public class Robot {
     }
 
     public static void extendTillBeacon(String switchName) throws InterruptedException {
+        Robot.drivetrain.stopMove();
+
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
         Robot.servos.get("buttonPusher").setPosition(0); // press button pusher
 
@@ -231,11 +233,10 @@ public class Robot {
         while((presstimer.time() <= 0.15) && Robot.waiter.opModeIsActive()) {
             if(beaconToucher.getState() == false) { // switch is depressed :(
                 Robot.drivetrain.move(direction * 0.15, Robot.waiter);
-                Robot.servos.get("buttonPusher").setPosition(0.3); // gently push
+                Robot.servos.get("buttonPusher").setPosition(0.45); // gently push
                 presstimer.reset(); // hold presstimer at 0
             }
             else { // switch is open
-                Robot.drivetrain.stopMove();
                 Robot.servos.get("buttonPusher").setPosition(0); // press button pusher
             }
             Thread.sleep(1);
@@ -244,17 +245,18 @@ public class Robot {
         Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
     }
 
+
     public static double delaySet(String potName,String switchName) throws InterruptedException {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
         ColorSensor beacon = Robot.hmap.colorSensor.get("beacon");
-        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
+//        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
 
         int pot =0;
         while(beaconToucher.getState() && !waiter.opModeIsActive() ) {
             pot = (int) Math.floor((1023 - hmap.analogInput.get(potName).getValue())/1023.0 * 15.0);
             tel.addData("Delay", pot);
             Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
-            Robot.tel.addData("ground r", ground.red() + "  g: " + ground.green() + "  b: " + ground.blue() + "  alpha: " + ground.alpha());
+//            Robot.tel.addData("ground r", ground.red() + "  g: " + ground.green() + "  b: " + ground.blue() + "  alpha: " + ground.alpha());
             Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
@@ -277,43 +279,39 @@ public class Robot {
 
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException {
-        final int RED_THRESH = 700;
-        final int GREEN_THRESH = 450;
-        final int BLUE_THRESH = 0;
+        final int RED_THRESH = 600;
+        final int GREEN_THRESH = 900;
+        final int BLUE_THRESH = 900;
         int maxRed = 0;
         int maxGreen = 0;
         int maxBlue = 0;
 
 
 
-        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
+        AdafruitColorSensor ground = new AdafruitColorSensor(Robot.hmap, groundName, "cdim", 5);
         SensorState.ColorType dominant = null;
-        DeviceInterfaceModule cdim = Robot.hmap.deviceInterfaceModule.get("cdim");
 
-        cdim.setDigitalChannelMode(5, DigitalChannelController.Mode.OUTPUT);
-        cdim.setDigitalChannelState(5, true);
         waiter.waitOneFullHardwareCycle();
+        //
         Thread.sleep(10);
-        drivetrain.move(power);
-
-
-        while ((ground.green() <= GREEN_THRESH || ground.blue() <= BLUE_THRESH)) {
-
-////            if(ground.red() > maxRed)
+        drivetrain.move(power,waiter);
+        do {
+                while(!ground.isColorUpdate());
+///            if(ground.red() > maxRed)
 ////                maxRed = ground.red();
 ////            if(ground.green() > maxGreen)
 ////                maxGreen = ground.green();
 ////            if(ground.blue() > maxBlue)
 ////                maxBlue = ground.blue();
 //////
-////            if (dominant == null && (state.redVsBlue(beaconName) == SensorState.ColorType.RED || state.redVsBlue(beaconName) == SensorState.ColorType.BLUE)) {
-////                dominant = state.redVsBlue(beaconName);
-////            }
-            Thread.sleep(100);
-        }
-        cdim.setDigitalChannelState(5, false);
+            if (dominant == null && (state.redVsBlue(beaconName) == SensorState.ColorType.RED || state.redVsBlue(beaconName) == SensorState.ColorType.BLUE)) {
+                dominant = state.redVsBlue(beaconName);
+            }
+            Thread.sleep(1);
+        } while ((ground.getGreen() <= GREEN_THRESH || ground.getBlue() <= BLUE_THRESH));
 
-        drivetrain.move(0);
+        drivetrain.stopMove();
+        Thread.sleep(20);
         return dominant;
 
     }

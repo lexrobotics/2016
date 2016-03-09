@@ -51,6 +51,7 @@ public class FourWheelDrive extends DriveTrain{
         this.frontRightMotor.setPower(power);
     }
 
+
     @Override
     public void resetEncoders() {
         frontRightEncoder = frontRightMotor.getCurrentPosition();
@@ -74,4 +75,14 @@ public class FourWheelDrive extends DriveTrain{
         Robot.tel.addData("backLeft", backLeftMotor.getCurrentPosition());
         Robot.tel.addData("backRight", backRightMotor.getCurrentPosition());
     }
+
+    public boolean isAMotorZero() {
+        return (
+                frontLeftMotor.getPower() == 0 ||
+                frontRightMotor.getPower() == 0 ||
+                backLeftMotor.getPower() == 0 ||
+                backRightMotor.getPower() == 0
+        );
+    }
+
 }

@@ -55,7 +55,7 @@ public class MovementThread implements Runnable {
     @Override
     public void run() {
         double maxOutput = Math.min(1 - Math.abs(power), Math.abs(power));
-        PID correctionPID = new PID(maxOutput/4, 0.05, 0.01);
+        PID correctionPID = new PID(maxOutput/3.6, 0.05, 0.01);
 
         correctionPID.setMaxOutput(maxOutput);
         correctionPID.setMinOutput(-1 * maxOutput);
@@ -83,7 +83,7 @@ public class MovementThread implements Runnable {
                 offset = angleDist((int)drivetrain.getActualHeading(gyro_name), (int)drivetrain.getExpectedHeading());
                 Robot.tel.addData("offset",offset);
 
-                if (Math.abs(offset) > minthresh && Math.abs(offset) < turnthresh) {
+                if (Math.abs(offset) > minthresh && Math.abs(offset) < turnthresh && !drivetrain.isAMotorZero()) {
                     double correction = correctionPID.updateWithError(offset);
                     drivetrain.setLeftMotors(power + correction);
                     drivetrain.setRightMotors(power - correction);
@@ -94,9 +94,10 @@ public class MovementThread implements Runnable {
 
                     drivetrain.setLeftMotors(0);
                     drivetrain.setRightMotors(0);
-                    Thread.sleep(200);
+                    if(Thread.currentThread().isInterrupted()){ break;}
+                        Thread.sleep(200);
 
-                    while (Math.abs(offset) > turnthresh && waiter.opModeIsActive()) {
+                    while (Math.abs(offset) > turnthresh && waiter.opModeIsActive() && !Thread.currentThread().isInterrupted() && !drivetrain.isAMotorZero()) {
                         Robot.tel.addData("offset",offset);
                         offset = angleDist((int)drivetrain.getActualHeading(gyro_name), (int)drivetrain.getExpectedHeading());
                         drivetrain.setRightMotors(0.3 * Math.signum(offset) * -1);
@@ -107,6 +108,7 @@ public class MovementThread implements Runnable {
 
                     drivetrain.setLeftMotors(0);
                     drivetrain.setRightMotors(0);
+                    if(Thread.currentThread().isInterrupted()){ break;}
                     Thread.sleep(200);
                 }
 

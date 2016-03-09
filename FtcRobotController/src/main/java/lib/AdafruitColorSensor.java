@@ -20,7 +20,6 @@ public class AdafruitColorSensor {
         led = ledChannel;
         cdim = hmap.deviceInterfaceModule.get(cdimName);
         cdim.setDigitalChannelMode(led, DigitalChannelController.Mode.OUTPUT);
-        setLed(true);
 
         cs = new Wire(hmap, colorName, 2*0x29);
 
@@ -38,7 +37,7 @@ public class AdafruitColorSensor {
         this.cdim.setDigitalChannelState(led, on);
     }
 
-    private boolean isColorUpdate() {
+    public boolean isColorUpdate() {
         boolean isNew = false;
         if (cs.responseCount() > 0) {
             cs.getResponse();

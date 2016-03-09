@@ -16,7 +16,16 @@ public class DriveTrain {
     public void setRightMotors(double power) {
         throw new RuntimeException("Bad function called from Drivetrain");
     }
+    public void setLeftMotors(double power, boolean thread) {
+        throw new RuntimeException("Bad function called from Drivetrain");
+    }
+    public void setRightMotors(double power,boolean thread) {
+        throw new RuntimeException("Bad function called from Drivetrain");
+    }
     public void resetEncoders() {
+        throw new RuntimeException("Bad function called from Drivetrain");
+    }
+    public boolean isAMotorZero() {
         throw new RuntimeException("Bad function called from Drivetrain");
     }
     public int getEncoders() {
@@ -28,7 +37,7 @@ public class DriveTrain {
 
     protected Thread move_thread;
     protected MovementThread mover;
-    protected boolean thread_running;
+    protected volatile boolean thread_running;
 
     protected double expectedHeading;
     protected final double TURN_SCALAR = 0.23;
@@ -112,17 +121,15 @@ public class DriveTrain {
     }
 
     public void stopMove() throws InterruptedException {
-        mover.setPower(0);
-
-        setLeftMotors(0);
-        setRightMotors(0);
-
+        thread_running = false;
         if (thread_running){
             move_thread.interrupt();
-            thread_running = false;
-
-            Thread.sleep(200);
         }
+        if(mover != null) {
+            mover.setPower(0);
+        }
+        setLeftMotors(0);
+        setRightMotors(0);
 
         setLeftMotors(0);
         setRightMotors(0);
@@ -218,7 +225,7 @@ public class DriveTrain {
         setLeftMotors(power);
         setRightMotors(-power);
 
-        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 6 && Robot.waiter.opModeIsActive()){
+        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 4 && Robot.waiter.opModeIsActive()){
             Robot.waiter.waitOneFullHardwareCycle();
         }
 

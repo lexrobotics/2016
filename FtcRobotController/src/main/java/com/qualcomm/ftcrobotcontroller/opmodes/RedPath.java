@@ -21,28 +21,31 @@ public class RedPath extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
+//        Robot.retractButtonPusher();
+
         waitForStart();
         while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
         }
 //
-        Robot.drivetrain.dumbGyroTurn(0, 1, 45);
-        DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-        noodle.setPower(-1);
+        Robot.drivetrain.dumbGyroTurn(0, .7, 45);
+//        DcMotor noodle = hardwareMap.dcMotor.get("noodler");
+//        noodle.setPower(-1);
         Thread.sleep(200);
-        Robot.drivetrain.moveDistanceWithCorrections(0.6, 55,false);
-        Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.8, 0, 1000);
-        noodle.setPower(0);
+        Robot.drivetrain.moveDistanceWithCorrections(0.6, 55, false);
+        Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.75, 0, 1000);
+//
+//        noodle.setPower(0);
         Thread.sleep(500);
-        Robot.drivetrain.dumbGyroTurn(0.6, -0.6, 45);
+        Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
         Thread.sleep(200);
-        noodle.setPower(1);
+//        noodle.setPower(1);
         SensorState.ColorType dominant = Robot.tillWhite(0.2, "ground", "beacon");
-        noodle.setPower(0);
+//        noodle.setPower(0);
 
         Robot.extendTillBeacon("beaconToucher");
         Robot.dumpClimbers();
-
+        telemetry.addData("Color detected", dominant);
         if(dominant == SensorState.ColorType.BLUE) {
             Robot.pushButton("beaconToucher", 1);
         }

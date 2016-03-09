@@ -16,7 +16,7 @@ import lib.SensorState;
  * Created by lhscompsci on 1/11/16.
  */
 public class BotInit {
-    public static void bot2 (HardwareMap hardwareMap, Telemetry telemetry, LinearOpMode op) {
+    public static void bot2 (HardwareMap hardwareMap, Telemetry telemetry, LinearOpMode op) throws InterruptedException{
         DriveTrain dave_train = new FourWheelDrive(
                 hardwareMap.dcMotor.get("leftFrontDrive"), true,
                 hardwareMap.dcMotor.get("rightFrontDrive"), false,
@@ -53,10 +53,9 @@ public class BotInit {
         Robot.state.registerSensor("beacon", SensorState.SensorType.COLOR, false, 12);
         hardwareMap.colorSensor.get("beacon").setI2cAddress(0x3C);
 
-        Robot.state.registerSensor("ground", SensorState.SensorType.COLOR, false, 12);
-
         Robot.state_thread = new Thread(Robot.state);
-//        Robot.state_thread.start();
+        Robot.state_thread.start();
+
 
     }
 }

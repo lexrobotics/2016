@@ -113,7 +113,7 @@ public class TeleOp extends OpMode {
         leftLimitServo.setPosition(0);
         rightLimitServo.setPosition(1);
 
-        ground = hardwareMap.colorSensor.get("ground");
+//        ground = hardwareMap.colorSensor.get("ground");
 
         hallEnd = hardwareMap.digitalChannel.get("hall1");
         compressLimit = hardwareMap.digitalChannel.get("compressLimit");
@@ -220,10 +220,10 @@ public class TeleOp extends OpMode {
 
 
         if(gamepad2.start) {
-            buttonPusher.setPosition(0.7); // press button pusher
+            buttonPusher.setPosition(0.7); // retract button pusher
         }
         else {
-            buttonPusher.setPosition(0.5); // press button pusher
+            buttonPusher.setPosition(0.5); // stop button pusher
         }
         if (gamepad2.b) {
             if (b_was_down){
