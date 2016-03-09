@@ -62,9 +62,9 @@ public class FourWheelDrive extends DriveTrain{
     @Override
     public int getEncoders() {
         return (Math.abs(
-            (backRightMotor.getCurrentPosition() - backRightEncoder) +
+            (backLeftMotor.getCurrentPosition() - backLeftEncoder) +
 //            (backLeftMotor.getCurrentPosition() - backLeftEncoder) +
-            (frontLeftMotor.getCurrentPosition() - frontLeftEncoder)
+            (frontRightMotor.getCurrentPosition() - frontRightEncoder)
         ) / 2);
     }
 

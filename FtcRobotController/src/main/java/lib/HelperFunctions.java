@@ -45,6 +45,13 @@ public class HelperFunctions {
             ((FourWheelDrive) Robot.drivetrain).outputEncoders();
         }
     }
+    public static void movementThreadCalibration(LinearOpMode op) throws InterruptedException {
+        while(op.opModeIsActive()) {
+            Robot.drivetrain.moveDistanceWithCorrections(0.6,36);
+            Robot.drivetrain.moveDistanceWithCorrections(-0.6,36);
+
+        }
+    }
 
     public static void testGyroCalibration(String name, HardwareMap hmap, Telemetry tel, LinearOpMode op) {
         GyroSensor g = hmap.gyroSensor.get(name);

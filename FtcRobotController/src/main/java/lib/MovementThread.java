@@ -99,8 +99,8 @@ public class MovementThread implements Runnable {
                     while (Math.abs(offset) > turnthresh && waiter.opModeIsActive()) {
                         Robot.tel.addData("offset",offset);
                         offset = angleDist((int)drivetrain.getActualHeading(gyro_name), (int)drivetrain.getExpectedHeading());
-                        drivetrain.setRightMotors(0.4 * Math.signum(offset) * -1);
-                        drivetrain.setLeftMotors(0.4 * Math.signum(offset));
+                        drivetrain.setRightMotors(0.3 * Math.signum(offset) * -1);
+                        drivetrain.setLeftMotors(0.3 * Math.signum(offset));
 
                         Thread.sleep(1);
                     }

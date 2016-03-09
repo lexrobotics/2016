@@ -4,12 +4,13 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import lib.BotInit;
+import lib.HelperFunctions;
 import lib.Robot;
 
 /**
  * Created by lhscompsci on 3/2/16.
  */
-public class climberDropper extends LinearOpMode {
+public class pidCalibration extends LinearOpMode {
     @Override
 
     public void runOpMode() throws InterruptedException {
@@ -22,6 +23,6 @@ public class climberDropper extends LinearOpMode {
             waitOneFullHardwareCycle();
         }
 
-        Robot.dumpClimbers();
+        HelperFunctions.movementThreadCalibration(this);
     }
 }
