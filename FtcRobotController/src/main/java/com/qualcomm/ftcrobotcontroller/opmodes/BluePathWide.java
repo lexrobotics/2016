@@ -36,7 +36,7 @@ public class BluePathWide extends LinearOpMode {
         Robot.drivetrain.dumbGyroTurn(0.8, 130);
 
         noodle.setPower(1);
-        SensorState.ColorType dominant = Robot.tillWhite(0.2, "ground", "beacon");
+        SensorState.ColorType dominant = Robot.tillWhite(0.2, "ground", "beacon", "blue");
         noodle.setPower(0);
 
 

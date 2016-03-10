@@ -121,6 +121,9 @@ public class DriveTrain {
     }
 
     public void stopMove() throws InterruptedException {
+        setLeftMotors(0);
+        setRightMotors(0);
+
         thread_running = false;
         if (thread_running){
             move_thread.interrupt();
@@ -128,8 +131,6 @@ public class DriveTrain {
         if(mover != null) {
             mover.setPower(0);
         }
-        setLeftMotors(0);
-        setRightMotors(0);
 
         setLeftMotors(0);
         setRightMotors(0);

@@ -233,13 +233,13 @@ public class Robot {
         while((presstimer.time() <= 0.15) && Robot.waiter.opModeIsActive()) {
             if(beaconToucher.getState() == false) { // switch is depressed :(
                 Robot.drivetrain.move(direction * 0.15, Robot.waiter);
-                Robot.servos.get("buttonPusher").setPosition(0.45); // gently push
+                Robot.servos.get("buttonPusher").setPosition(0.3); // less gently push, but still kinda gently
                 presstimer.reset(); // hold presstimer at 0
             }
             else { // switch is open
                 Robot.servos.get("buttonPusher").setPosition(0); // press button pusher
             }
-            Thread.sleep(1);
+            Thread.sleep(50);
         }
         Robot.drivetrain.stopMove();
         Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
@@ -277,8 +277,11 @@ public class Robot {
         }
     }
 
-
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName) throws InterruptedException {
+        return tillWhite(power, groundName, beaconName, "");
+    }
+
+    public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName, String colorToIgnore) throws InterruptedException {
         final int RED_THRESH = 600;
         final int GREEN_THRESH = 900;
         final int BLUE_THRESH = 900;
@@ -308,7 +311,9 @@ public class Robot {
                 dominant = state.redVsBlue(beaconName);
             }
             Thread.sleep(1);
-        } while ((ground.getGreen() <= GREEN_THRESH || ground.getBlue() <= BLUE_THRESH));
+        } while ((ground.getRed() <= RED_THRESH && !colorToIgnore.equals("red")) ||
+                (ground.getGreen() <= GREEN_THRESH && !colorToIgnore.equals("green")) ||
+                (ground.getBlue() <= BLUE_THRESH && !colorToIgnore.equals("blue")));
 
         drivetrain.stopMove();
         Thread.sleep(20);
