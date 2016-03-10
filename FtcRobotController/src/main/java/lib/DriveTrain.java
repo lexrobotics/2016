@@ -124,8 +124,8 @@ public class DriveTrain {
         setLeftMotors(0);
         setRightMotors(0);
 
-        thread_running = false;
         if (thread_running){
+            thread_running = false;
             move_thread.interrupt();
         }
         if(mover != null) {

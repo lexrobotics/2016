@@ -156,10 +156,11 @@ public class Robot {
                                          double positionInactive,
                                          int killTime // Time until the function is ended
                                         ) throws InterruptedException {
-        drivetrain.move(power, waiter);
+
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         hmap.servo.get(servoName).setPosition(positionActive);
-        Thread.sleep(500);
+        Thread.sleep(100);
+        drivetrain.move(power, waiter);
 
         timer.reset();
 
@@ -169,7 +170,7 @@ public class Robot {
 
         hmap.servo.get(servoName).setPosition(positionInactive);
         drivetrain.stopMove();
-        Thread.sleep(500);
+        Thread.sleep(100);
     }
 
     public static void dumpClimbers() throws InterruptedException {
@@ -216,6 +217,7 @@ public class Robot {
         pressTimer.reset();
 
         while(!endStop.getState() && Robot.waiter.opModeIsActive() && pressTimer.time() <= 7) {
+            Robot.servos.get("buttonPusher").setPosition(1);
             Thread.sleep(1);
         }
 
@@ -229,20 +231,21 @@ public class Robot {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
 
         ElapsedTime presstimer = new ElapsedTime();
-
+        Robot.drivetrain.move(direction * 0.15, Robot.waiter);
         while((presstimer.time() <= 0.15) && Robot.waiter.opModeIsActive()) {
+            Robot.tel.addData("timer", presstimer.time());
             if(beaconToucher.getState() == false) { // switch is depressed :(
-                Robot.drivetrain.move(direction * 0.15, Robot.waiter);
-                Robot.servos.get("buttonPusher").setPosition(0.3); // less gently push, but still kinda gently
+                Robot.servos.get("buttonPusher").setPosition(0.25); // less gently push, but still kinda gently
                 presstimer.reset(); // hold presstimer at 0
             }
             else { // switch is open
                 Robot.servos.get("buttonPusher").setPosition(0); // press button pusher
             }
-            Thread.sleep(50);
+            Thread.sleep(10);
         }
         Robot.drivetrain.stopMove();
         Robot.servos.get("buttonPusher").setPosition(0.5); // stop button pusher
+        Thread.sleep(10);
     }
 
 
@@ -270,6 +273,26 @@ public class Robot {
         return pot;
     }
 
+    public static SensorState.ColorType dominantColorFusion(SensorState.ColorType runUp, SensorState.ColorType atBeacon){
+        if(runUp == SensorState.ColorType.NONE){
+            return atBeacon;
+        }
+        if(atBeacon == SensorState.ColorType.NONE){
+            if(runUp == SensorState.ColorType.RED) {
+                return SensorState.ColorType.BLUE;
+            }
+            else if(runUp == SensorState.ColorType.BLUE)  {
+                return SensorState.ColorType.RED;
+            }
+            else{
+                return SensorState.ColorType.NONE;
+            }
+        }
+        else{
+            return atBeacon;
+        }
+    }
+
     public static void delayWithCountdown(int seconds) throws InterruptedException {
         for(int i=seconds; i>0; i--) {
             tel.addData("Countdown", i);
@@ -283,8 +306,8 @@ public class Robot {
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName, String colorToIgnore) throws InterruptedException {
         final int RED_THRESH = 600;
-        final int GREEN_THRESH = 900;
-        final int BLUE_THRESH = 900;
+        final int GREEN_THRESH = 850;
+        final int BLUE_THRESH = 850;
         int maxRed = 0;
         int maxGreen = 0;
         int maxBlue = 0;

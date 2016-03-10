@@ -5,6 +5,7 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import lib.BotInit;
@@ -20,35 +21,48 @@ import lib.SensorState;
 public class BluePathWide extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
+        Servo blueDoor;
+        blueDoor = hardwareMap.servo.get("blueDoor");
+
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
         while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
         }
 
-
-        Robot.drivetrain.dumbGyroTurn(1, 0, 47);
+        //initial turn
+        Robot.drivetrain.dumbGyroTurn(0.7, 0, 46);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
         noodle.setPower(-1);
-        Thread.sleep(200);
+        blueDoor.setPosition(1);
+        Thread.sleep(20);
+
+        //Initial Move
         Robot.drivetrain.moveDistanceWithCorrections(0.6, 100, false);
-        Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.2, 0.25, 1, 1000);
-        Robot.drivetrain.dumbGyroTurn(0.8, 130);
+        Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.2, 0.25, 1, 4);
+        blueDoor.setPosition(0);
 
+        //Big Turn
+        Robot.drivetrain.dumbGyroTurn(0.4, 134);
+        Thread.sleep(200);
         noodle.setPower(1);
-        SensorState.ColorType dominant = Robot.tillWhite(0.2, "ground", "beacon", "blue");
+
+        //TillWhite
+        SensorState.ColorType dominant = Robot.tillWhite(0.175, "ground", "beacon", "blue");
         noodle.setPower(0);
-
-
-
         Robot.extendTillBeacon("beaconToucher");
+        dominant = Robot.dominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
         Robot.dumpClimbers();
+
+        //PushButton
         if (dominant == SensorState.ColorType.BLUE) {
-            Robot.pushButton("beaconToucher", -1);
-        } else if (dominant == SensorState.ColorType.RED) {
             Robot.pushButton("beaconToucher", 1);
+        } else if (dominant == SensorState.ColorType.RED) {
+            Robot.pushButton("beaconToucher", -1);
         }
 
+        Robot.drivetrain.move(0);
+        Robot.drivetrain.stopMove();
         Robot.retractButtonPusher();
     }
 

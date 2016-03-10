@@ -5,6 +5,7 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import lib.BotInit;
@@ -20,41 +21,51 @@ import lib.SensorState;
 public class RedPath extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
+        Servo redDoor;
+        redDoor = hardwareMap.servo.get("redDoor");
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
-//        Robot.retractButtonPusher();
-
         waitForStart();
         while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
         }
-//
+        //initial turn
         Robot.drivetrain.dumbGyroTurn(0, .7, 45);
-//        DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-//        noodle.setPower(-1);
-        Thread.sleep(200);
-        Robot.drivetrain.moveDistanceWithCorrections(0.6, 55, false);
-        Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.75, 0, 1000);
-//
-//        noodle.setPower(0);
-        Thread.sleep(500);
-        Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
-        Thread.sleep(200);
-//        noodle.setPower(1);
-        SensorState.ColorType dominant = Robot.tillWhite(0.2, "ground", "beacon");
-//        noodle.setPower(0);
+        DcMotor noodle = hardwareMap.dcMotor.get("noodler");
+        noodle.setPower(-1);
+        redDoor.setPosition(0);
+        Thread.sleep(20);
 
+        //first movement
+        Robot.drivetrain.moveDistanceWithCorrections(0.6, 55);
+        Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.75, 0, 4);
+        redDoor.setPosition(1);
+        Thread.sleep(10);
+
+        //turn to parallel
+        Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
+        noodle.setPower(1);
+        Thread.sleep(100);
+
+        //turn to tillWhite
+        SensorState.ColorType dominant;
+        dominant = Robot.tillWhite(0.175, "ground", "beacon", "red");
+        noodle.setPower(0);
+
+        //PushButton STuff
         Robot.extendTillBeacon("beaconToucher");
+        dominant = Robot.dominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
         Robot.dumpClimbers();
         telemetry.addData("Color detected", dominant);
         if(dominant == SensorState.ColorType.BLUE) {
-            Robot.pushButton("beaconToucher", 1);
+            Robot.pushButton("beaconToucher", -1);
         }
         else if(dominant == SensorState.ColorType.RED) {
-            Robot.pushButton("beaconToucher", -1);
+            Robot.pushButton("beaconToucher", 1);
         }
         else {
         }
-
+        Robot.drivetrain.move(0);
+        Robot.drivetrain.stopMove();
         Robot.retractButtonPusher();
     }
 

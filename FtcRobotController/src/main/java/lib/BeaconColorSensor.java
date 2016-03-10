@@ -24,7 +24,7 @@ import java.util.concurrent.locks.Lock;
  * @author TEAM 9915 on 10/12/2015.
  *
  */
-public class BeaconColorSensor extends ColorSensor implements I2cController.I2cPortReadyCallback {
+public class BeaconColorSensor implements I2cController.I2cPortReadyCallback {
     public static volatile int ADDRESS_I2C = 0x3c;
     public static final int ADDRESS_COMMAND = 0x03;
     public static final int ADDRESS_COLOR_NUMBER = 4;
@@ -47,12 +47,10 @@ public class BeaconColorSensor extends ColorSensor implements I2cController.I2cP
     private volatile int g;
     private final int h;
 
-    @Override
     public int getI2cAddress(){
         return ADDRESS_I2C;
     }
 
-    @Override
     public void setI2cAddress(int a){
 
     }
