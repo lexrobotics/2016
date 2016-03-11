@@ -224,6 +224,18 @@ public class Robot {
         Robot.servos.get("buttonPusher").setPosition(0.5);
     }
 
+    public static SensorState.ColorType tillColor(String sensorName, int direction) throws InterruptedException{
+        drivetrain.move(direction * .175, waiter);
+        SensorState.ColorType dominant;
+        do {
+            dominant = state.redVsBlue(sensorName);
+            Thread.sleep(10);
+        } while(dominant != SensorState.ColorType.RED && dominant != SensorState.ColorType.BLUE);
+        drivetrain.stopMove();
+        return dominant;
+
+    }
+
     public static void pushButton(String switchName, int direction ) throws InterruptedException {
         if(direction == 0)
             return;
@@ -273,7 +285,7 @@ public class Robot {
         return pot;
     }
 
-    public static SensorState.ColorType dominantColorFusion(SensorState.ColorType runUp, SensorState.ColorType atBeacon){
+    public static SensorState.ColorType oppositeDominantColorFusion(SensorState.ColorType runUp, SensorState.ColorType atBeacon){
         if(runUp == SensorState.ColorType.NONE){
             return atBeacon;
         }
@@ -287,6 +299,17 @@ public class Robot {
             else{
                 return SensorState.ColorType.NONE;
             }
+        }
+        else{
+            return atBeacon;
+        }
+    }
+    public static SensorState.ColorType sameDominantColorFusion(SensorState.ColorType runUp, SensorState.ColorType atBeacon){
+        if(runUp == SensorState.ColorType.NONE){
+            return atBeacon;
+        }
+        if(atBeacon == SensorState.ColorType.NONE){
+            return runUp;
         }
         else{
             return atBeacon;

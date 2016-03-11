@@ -35,7 +35,7 @@ public class BluePath extends LinearOpMode {
         Robot.drivetrain.dumbGyroTurn(0.7, 0, 45);
 
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-        noodle.setPower(-1);
+        noodle.setPower(1);
         blueDoor.setPosition(1);
         Thread.sleep(20);
 
@@ -57,7 +57,7 @@ public class BluePath extends LinearOpMode {
         SensorState.ColorType dominant = Robot.tillWhite(-0.175, "ground", "beacon", "blue");
         noodle.setPower(0);
         Robot.extendTillBeacon("beaconToucher");
-        dominant = Robot.dominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
+        dominant = Robot.sameDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
         Robot.dumpClimbers();
 
         //PushButton

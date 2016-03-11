@@ -30,14 +30,11 @@ public class RedPathWide extends LinearOpMode {
             waitOneFullHardwareCycle();
         }
 
-
         Robot.drivetrain.dumbGyroTurn(0, 0.7, 46);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
         noodle.setPower(-1);
-        Thread.sleep(200);
         redDoor.setPosition(0);
-        Thread.sleep(20);
-        Robot.drivetrain.moveDistanceWithCorrections(0.6, 100, false);
+        Robot.drivetrain.moveDistanceWithCorrections(0.6, 100);
         Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.8, 0, 4);
         redDoor.setPosition(1);
         Thread.sleep(10);
@@ -50,13 +47,16 @@ public class RedPathWide extends LinearOpMode {
         noodle.setPower(0);
 
         Robot.extendTillBeacon("beaconToucher");
-        dominant = Robot.dominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
+        dominant = Robot.sameDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
         Robot.dumpClimbers();
-
-        if(dominant == SensorState.ColorType.BLUE) {
+        if(dominant != SensorState.ColorType.RED && dominant != SensorState.ColorType.BLUE){
+            dominant = Robot.tillColor("beacon",-1);
+        }
+        Robot.tel.addData("color", dominant);
+        if(dominant == SensorState.ColorType.RED) {
             Robot.pushButton("beaconToucher", 1);
         }
-        else if(dominant == SensorState.ColorType.RED) {
+        else if(dominant == SensorState.ColorType.BLUE) {
             Robot.pushButton("beaconToucher", -1);
         }
         Robot.drivetrain.move(0);

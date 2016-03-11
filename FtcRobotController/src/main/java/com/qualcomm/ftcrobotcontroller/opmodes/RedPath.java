@@ -53,7 +53,7 @@ public class RedPath extends LinearOpMode {
 
         //PushButton STuff
         Robot.extendTillBeacon("beaconToucher");
-        dominant = Robot.dominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
+        dominant = Robot.oppositeDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
         Robot.dumpClimbers();
         telemetry.addData("Color detected", dominant);
         if(dominant == SensorState.ColorType.BLUE) {

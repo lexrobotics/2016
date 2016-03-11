@@ -31,27 +31,26 @@ public class BluePathWide extends LinearOpMode {
         }
 
         //initial turn
-        Robot.drivetrain.dumbGyroTurn(0.7, 0, 46);
+        Robot.drivetrain.dumbGyroTurn(0.7, 0, 47);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-        noodle.setPower(-1);
-        blueDoor.setPosition(1);
+        noodle.setPower(1);
+
         Thread.sleep(20);
 
         //Initial Move
-        Robot.drivetrain.moveDistanceWithCorrections(0.6, 100, false);
+        Robot.drivetrain.moveDistanceWithCorrections(0.6, 100);
         Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.2, 0.25, 1, 4);
         blueDoor.setPosition(0);
 
         //Big Turn
-        Robot.drivetrain.dumbGyroTurn(0.4, 134);
-        Thread.sleep(200);
-        noodle.setPower(1);
+        Robot.drivetrain.dumbGyroTurn(0.4, 130);
+//        Thread.sleep(100);
 
         //TillWhite
-        SensorState.ColorType dominant = Robot.tillWhite(0.175, "ground", "beacon", "blue");
+        SensorState.ColorType dominant = Robot.tillWhite(0.185, "ground", "beacon", "blue");
         noodle.setPower(0);
         Robot.extendTillBeacon("beaconToucher");
-        dominant = Robot.dominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
+        dominant = Robot.oppositeDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
         Robot.dumpClimbers();
 
         //PushButton

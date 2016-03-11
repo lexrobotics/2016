@@ -92,10 +92,9 @@ public class MovementThread implements Runnable {
                 // The offset is too great, so we have to stop and do a controlled turn back to the right value.
                 else if (Math.abs(offset) > turnthresh) {
 
-                    drivetrain.setLeftMotors(0);
-                    drivetrain.setRightMotors(0);
+
                     if(Thread.currentThread().isInterrupted()){ break;}
-                        Thread.sleep(200);
+                        Thread.sleep(100);
 
                     while (Math.abs(offset) > turnthresh && waiter.opModeIsActive() && !Thread.currentThread().isInterrupted() && !drivetrain.isAMotorZero()) {
                         Robot.tel.addData("offset",offset);
@@ -105,11 +104,8 @@ public class MovementThread implements Runnable {
 
                         Thread.sleep(1);
                     }
-
-                    drivetrain.setLeftMotors(0);
-                    drivetrain.setRightMotors(0);
                     if(Thread.currentThread().isInterrupted()){ break;}
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                 }
 
                 // Nothing's wrong, so we drive normally
