@@ -28,7 +28,7 @@ public class TeleOp extends OpMode {
     // The toggle is aided by a_was_down and b_was_down.
     Servo armLock;
     boolean arm_locked;
-    boolean b_was_down;
+    boolean oneY_was_down;
 
     boolean driveInverted = false;
     boolean bWasDown = false;
@@ -36,17 +36,23 @@ public class TeleOp extends OpMode {
     // Used for toggling buttons
     boolean climber_drop;
     boolean a_was_down;
+    boolean tiltOverride;
+    boolean twoAWasDown;
+
+    boolean rightZiplineActivated = false;
+    boolean leftZiplineActivated = false;
 
     DigitalChannel hallEnd;
 
     int armTiltStart;
 
     int currentArmPreset = 0;
-    private final int[] ARM_PRESETS = {0, 135};
+    private final int[] ARM_PRESETS = {0, 117};
     private final double ANGLE_RANGE = 140;
     private final double ENCODER_RANGE = 4100;
 
     boolean armAutoPilot = false;
+    boolean climbersDumped = false;
 
     PID tiltPID;
     private final double PROPORTIONAL = 0.0025;
@@ -56,18 +62,18 @@ public class TeleOp extends OpMode {
 
     int target;
 
-    ColorSensor ground;
-
     @Override
     public void init() {
         tiltPID = new PID(PROPORTIONAL, INTEGRAL, DERIVATIVE, false, THRESHOLD);
         tiltPID.setMinOutput(-1);
         tiltPID.setMaxOutput(1);
 
+        tiltOverride = false;
         climber_drop = false;
         arm_locked = false;
         a_was_down = true;
-        b_was_down = true;
+        twoAWasDown = true;
+        oneY_was_down = true;
 
         leftFrontDrive = hardwareMap.dcMotor.get("leftFrontDrive");
         leftRearDrive = hardwareMap.dcMotor.get("leftRearDrive");
@@ -101,10 +107,10 @@ public class TeleOp extends OpMode {
         armTilter.setPower(0);
         liftStageOne.setPower(0);
         liftStageTwo.setPower(0);
-        leftZipline.setPosition(0.5);
-        rightZipline.setPosition(0.5);
+        leftZipline.setPosition(1);
+        rightZipline.setPosition(0);
         buttonPusher.setPosition(0.5);
-        climberDropper.setPosition(0.5);
+        climberDropper.setPosition(1);
         redDoor.setPosition(1);
         blueDoor.setPosition(0);
         divider.setPosition(0.5);
@@ -146,8 +152,6 @@ public class TeleOp extends OpMode {
         rightFrontDrive.setPower(rightPower);
         rightRearDrive.setPower(rightPower);
 
-        telemetry.addData("rightPower", rightPower);
-        telemetry.addData("leftPower", leftPower);
 
         if (gamepad1.b && !bWasDown) {
             driveInverted = !driveInverted;
@@ -164,13 +168,27 @@ public class TeleOp extends OpMode {
             noodler.setPower(0);
         }
 
+        if(gamepad2.back){
+            climberDropper.setPosition(0);
+            climbersDumped = true;
+        }
+        else if(climbersDumped) {
+            if (arm_locked){
+                climberDropper.setPosition(0.7);
+            } else if(climbersDumped){
+                climberDropper.setPosition(0.5);
+            }
+        }
+        else {
+            climberDropper.setPosition(1);
+        }
+
         if (gamepad2.left_trigger >= .1) {
             liftStageOne.setPower(-gamepad2.left_trigger);
         }
         else if (gamepad2.left_bumper) {
             liftStageOne.setPower(1);
-        }
-        else {
+        } else {
             liftStageOne.setPower(0);
         }
 
@@ -197,16 +215,20 @@ public class TeleOp extends OpMode {
 
 
         if(gamepad2.right_stick_x > 0.7) {
-            rightZipline.setPosition(1);
+            rightZipline.setPosition(0.95);
+            rightZiplineActivated = false;
         }
         else if(gamepad2.right_stick_x < -0.7) {
             rightZipline.setPosition(0);
+            rightZiplineActivated = true;
         }
         if(gamepad2.left_stick_x > 0.7) {
             leftZipline.setPosition(1);
+            leftZiplineActivated = false;
         }
         else if(gamepad2.left_stick_x < -0.7) {
-            leftZipline.setPosition(0);
+            leftZipline.setPosition(0.05);
+            rightZiplineActivated = false;
         }
 
 
@@ -225,18 +247,23 @@ public class TeleOp extends OpMode {
         else {
             buttonPusher.setPosition(0.5); // stop button pusher
         }
-        if (gamepad2.b) {
-            if (b_was_down){
+
+        if (gamepad1.y) {
+            if (oneY_was_down){
                 arm_locked = !arm_locked;
-                b_was_down = false;
+                oneY_was_down = false;
             }
         } else {
-            b_was_down = true;
+            oneY_was_down = true;
         }
-        if (arm_locked){
-            climberDropper.setPosition(0.7);
+
+        if (gamepad2.a) {
+            if (twoAWasDown){
+                tiltOverride = !tiltOverride;
+                twoAWasDown = false;
+            }
         } else {
-            climberDropper.setPosition(0.5);
+            twoAWasDown = true;
         }
 
         if (arm_locked) {
@@ -247,18 +274,18 @@ public class TeleOp extends OpMode {
 
         if (Math.abs(gamepad2.left_stick_y) > 0.3) {
             armAutoPilot = false;
-            armTilt(gamepad2.left_stick_y, gamepad2.a);
+            armTilt(gamepad2.left_stick_y, tiltOverride);
         }
-        else if(gamepad2.dpad_up) {
-            while(gamepad2.dpad_up);
+        else if(gamepad2.dpad_down) {
+            while(gamepad2.dpad_down);
             currentArmPreset++;
             if(currentArmPreset >= ARM_PRESETS.length)
                 currentArmPreset = ARM_PRESETS.length-1;
 
             target = tiltToAngle(ARM_PRESETS[currentArmPreset]);
         }
-        else if(gamepad2.dpad_down) {
-            while(gamepad2.dpad_down);
+        else if(gamepad2.dpad_up) {
+            while(gamepad2.dpad_up);
             currentArmPreset--;
             if(currentArmPreset < 0)
                 currentArmPreset = 0;
@@ -276,12 +303,13 @@ public class TeleOp extends OpMode {
             armEncoderReset();
         }
 
-
-        telemetry.addData("arm tilt", armTilter.getCurrentPosition());
-        telemetry.addData("zero position", armTiltStart);
+        telemetry.addData("rightPower, leftPower", Double.toString(rightPower).concat(Double.toString(leftPower)));
         telemetry.addData("autopilot", armAutoPilot);
-        telemetry.addData("currentArmPreset", currentArmPreset);
-        telemetry.addData("target", target);
+        telemetry.addData("locked", arm_locked);
+        telemetry.addData("override", tiltOverride);
+        telemetry.addData("Right Zipline activated", rightZiplineActivated);
+        telemetry.addData("Left Zipline activated", leftZiplineActivated);
+
     }
 
     /**
@@ -325,8 +353,7 @@ public class TeleOp extends OpMode {
     }
 
     public boolean armTilt(double power, boolean override) {
-
-        if (!compressLimit.getState() || power < 0) {
+        if (!compressLimit.getState() || power > 0) {
             if (hallEnd.getState() && !override && power > 0) {
                 armTilter.setPower(0);
                 return true;
@@ -335,8 +362,8 @@ public class TeleOp extends OpMode {
                 return false;
             }
         }
-
         else {
+            armTilter.setPower(0);
             return false;
         }
     }
@@ -358,25 +385,10 @@ public class TeleOp extends OpMode {
     public void updateTilter() {
         double output = tiltPID.update(armTilter.getCurrentPosition());
         if(!tiltPID.isAtTarget()) {
-            telemetry.addData("output", output);
             armTilt(output, false);
         }
         else {
             armTilt(0, false);
         }
     }
-
-
-
-//    go to a set angle,
-//
-//    go till a hall effect sensor is triggered, IF THE OVERRIDING BUTTON ISNT HELD
-//
-//    IF THE OVERRIDING BUTTON IS HELD, go as far as you want
-//
-//    make conversion table (x values, divide 90 by x, find passed value bucket, go to that bucket value in table)
-
-//    you would divide the passed angle by the max range divided by steps
-
-
 }

@@ -282,7 +282,7 @@ public class Robot {
             Thread.sleep(10);
         }
         tel.addData("Delay (LOCKED)", pot);
-        return pot;
+        return pot * 1000;
     }
 
     public static SensorState.ColorType oppositeDominantColorFusion(SensorState.ColorType runUp, SensorState.ColorType atBeacon){
@@ -328,7 +328,7 @@ public class Robot {
     }
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName, String colorToIgnore) throws InterruptedException {
-        final int RED_THRESH = 600;
+        final int RED_THRESH = 850;
         final int GREEN_THRESH = 850;
         final int BLUE_THRESH = 850;
         int maxRed = 0;

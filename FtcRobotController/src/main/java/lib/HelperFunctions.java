@@ -29,6 +29,7 @@ public class HelperFunctions {
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("hall",Robot.hmap.digitalChannel.get("hall1").getState());
+            Robot.tel.addData("armBackStop",Robot.hmap.digitalChannel.get("compressLimit").getState());
 
             Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());
             Robot.tel.addData("right limit",Robot.hmap.digitalChannel.get("rightLimit").getState());

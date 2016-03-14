@@ -26,6 +26,7 @@ public class BluePathWide extends LinearOpMode {
 
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
+        Thread.sleep(delayTime);
         while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
         }

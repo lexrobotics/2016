@@ -26,6 +26,8 @@ public class BluePath extends LinearOpMode {
         blueDoor = hardwareMap.servo.get("blueDoor");
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
+        Thread.sleep(delayTime);
+
 
         while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
@@ -35,7 +37,7 @@ public class BluePath extends LinearOpMode {
         Robot.drivetrain.dumbGyroTurn(0.7, 0, 45);
 
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-        noodle.setPower(1);
+        noodle.setPower(-1);
         blueDoor.setPosition(1);
         Thread.sleep(20);
 
