@@ -20,12 +20,13 @@ import lib.SensorState;
  */
 public class RedPath extends LinearOpMode {
     public void path() throws InterruptedException {
+        boolean armTimeOut;
         BotInit.bot2(hardwareMap, telemetry, this);
         Servo redDoor;
         redDoor = hardwareMap.servo.get("redDoor");
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
-        Thread.sleep(delayTime);
+        Robot.delayWithCountdown(delayTime);
 
         while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
@@ -54,9 +55,15 @@ public class RedPath extends LinearOpMode {
         noodle.setPower(0);
 
         //PushButton STuff
-        Robot.extendTillBeacon("beaconToucher");
+        armTimeOut = Robot.extendTillBeacon("beaconToucher");
+
+        if(armTimeOut){
+            Robot.retractButtonPusher();
+            return;
+        }
+
         dominant = Robot.oppositeDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
-        Robot.dumpClimbers();
+            Robot.dumpClimbers();
         telemetry.addData("Color detected", dominant);
         if(dominant == SensorState.ColorType.BLUE) {
             Robot.pushButton("beaconToucher", -1);
@@ -64,7 +71,7 @@ public class RedPath extends LinearOpMode {
         else if(dominant == SensorState.ColorType.RED) {
             Robot.pushButton("beaconToucher", 1);
         }
-        else {
+        else{
         }
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();

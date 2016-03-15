@@ -22,11 +22,14 @@ import lib.SensorState;
 public class BluePath extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
+
+        boolean armTimeOut;
+
         Servo blueDoor;
         blueDoor = hardwareMap.servo.get("blueDoor");
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
-        Thread.sleep(delayTime);
+        Robot.delayWithCountdown(delayTime);
 
 
         while (Robot.state.gyroIsCalibrating("hero") == true) {
@@ -58,7 +61,15 @@ public class BluePath extends LinearOpMode {
         //TillWhite
         SensorState.ColorType dominant = Robot.tillWhite(-0.175, "ground", "beacon", "blue");
         noodle.setPower(0);
-        Robot.extendTillBeacon("beaconToucher");
+        armTimeOut = Robot.extendTillBeacon("beaconToucher");
+
+        if(armTimeOut){
+            Robot.retractButtonPusher();
+            return;
+        }
+
+
+
         dominant = Robot.sameDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
         Robot.dumpClimbers();
 

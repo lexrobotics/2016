@@ -21,11 +21,12 @@ import lib.SensorState;
 public class RedPathWide extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
+        boolean armTimeOut;
 //        Servo redDoor;
 //        redDoor = hardwareMap.servo.get("redDoor");
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
-        Thread.sleep(delayTime);
+        Robot.delayWithCountdown(delayTime);
 
         while (Robot.state.gyroIsCalibrating("hero") == true) {
             waitOneFullHardwareCycle();
@@ -44,18 +45,29 @@ public class RedPathWide extends LinearOpMode {
         SensorState.ColorType dominant = Robot.tillWhite(-0.175, "ground", "beacon","red");
         noodle.setPower(0);
 
-        Robot.extendTillBeacon("beaconToucher");
+        armTimeOut = Robot.extendTillBeacon("beaconToucher");
+
+        if(armTimeOut){
+            Robot.retractButtonPusher();
+            return;
+        }
+
         dominant = Robot.sameDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
         Robot.dumpClimbers();
-        if(dominant != SensorState.ColorType.RED && dominant != SensorState.ColorType.BLUE){
+        if(dominant == SensorState.ColorType.NONE){
             dominant = Robot.tillColor("beacon",1);
         }
-        Robot.tel.addData("color", dominant);
+        if(dominant != null) {
+            Robot.tel.addData("color", dominant);
+        }
         if(dominant == SensorState.ColorType.RED) {
             Robot.pushButton("beaconToucher", 1);
         }
         else if(dominant == SensorState.ColorType.BLUE) {
             Robot.pushButton("beaconToucher", -1);
+        }
+        else{
+
         }
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();

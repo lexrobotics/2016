@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
         import com.qualcomm.robotcore.util.Range;
@@ -68,7 +69,7 @@ public class TeleOp extends OpMode {
         tiltPID.setMinOutput(-1);
         tiltPID.setMaxOutput(1);
 
-        tiltOverride = false;
+        tiltOverride = true;
         climber_drop = false;
         arm_locked = false;
         a_was_down = true;
@@ -133,6 +134,7 @@ public class TeleOp extends OpMode {
         double leftPower;
         double rightPower;
 
+//
         if(gamepad1.left_trigger >= .1) {
             leftPower = scaleInput(-gamepad1.left_stick_y) / 2.125;
             rightPower = scaleInput(-gamepad1.right_stick_y) / 2.125;
@@ -267,7 +269,7 @@ public class TeleOp extends OpMode {
         }
 
         if (arm_locked) {
-            armLock.setPosition(0.7);
+            armLock.setPosition(0.6);
         } else {
             armLock.setPosition(1);
         }

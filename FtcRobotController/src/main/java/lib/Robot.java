@@ -193,7 +193,9 @@ public class Robot {
         Robot.drivetrain.moveDistanceWithCorrections(direction * -0.15, scootLength);
     }
 
-    public static void extendTillBeacon(String switchName) throws InterruptedException {
+    public static boolean extendTillBeacon(String switchName) throws InterruptedException {
+        boolean timeOutReached = false;
+
         Robot.drivetrain.stopMove();
 
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
@@ -202,10 +204,14 @@ public class Robot {
         ElapsedTime pressTimer = new ElapsedTime();
         pressTimer.reset();
 
-        while(beaconToucher.getState() && Robot.waiter.opModeIsActive() && pressTimer.time() <= 5.0) {
+        while(beaconToucher.getState() && Robot.waiter.opModeIsActive() && !timeOutReached) {
             Thread.sleep(50);
+            timeOutReached = pressTimer.time() > 4.0;
         }
+
         Robot.servos.get("buttonPusher").setPosition(0.5);
+
+        return timeOutReached;
     }
 
     public static void retractButtonPusher() throws InterruptedException {
@@ -266,7 +272,7 @@ public class Robot {
         ColorSensor beacon = Robot.hmap.colorSensor.get("beacon");
 //        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
 
-        int pot =0;
+        int pot = 0;
         while(beaconToucher.getState() && !waiter.opModeIsActive() ) {
             pot = (int) Math.floor((1023 - hmap.analogInput.get(potName).getValue())/1023.0 * 15.0);
             tel.addData("Delay", pot);
@@ -282,7 +288,7 @@ public class Robot {
             Thread.sleep(10);
         }
         tel.addData("Delay (LOCKED)", pot);
-        return pot * 1000;
+        return pot;
     }
 
     public static SensorState.ColorType oppositeDominantColorFusion(SensorState.ColorType runUp, SensorState.ColorType atBeacon){

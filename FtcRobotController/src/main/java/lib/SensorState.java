@@ -98,7 +98,7 @@ public class SensorState implements Runnable{
 
     // Names of colors. Can also convert back and forth from the names to their index in this enum, for
     // single values or arrays of values.
-    public enum ColorType{ RED, BLUE, WHITE, CLEAR, NONE;
+    public enum ColorType{ RED, BLUE, WHITE, CLEAR, NONE, NOTCONNECTED;
         public static int toInt(ColorType c){
             return c.ordinal();
         }
@@ -438,17 +438,15 @@ public class SensorState implements Runnable{
     // and if they're equal, we return none.
     public synchronized ColorType redVsBlue(String name) {
         ColorSensor sen_obj = (ColorSensor) sensorContainers.get(name).sensor;
-        int r = sen_obj.red(), b = sen_obj.blue();
+        int r = sen_obj.red(), b = sen_obj.blue(), g = sen_obj.green();
 
         if (r > b) {
             return ColorType.RED;
         } else if (r < b) {
             return ColorType.BLUE;
-        } else if(r==255 && b==255){
-            while(Robot.waiter.opModeIsActive()) {
-                Robot.tel.addData("COLOR SENSOR NOT CONNECTED", "");
-            }
-            return null;
+        } else if(r==255 && b==255 && g==255){
+
+            return ColorType.NOTCONNECTED;
         } else {
             return ColorType.NONE;
         }
