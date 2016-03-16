@@ -48,7 +48,7 @@ public class TeleOp extends OpMode {
     int armTiltStart;
 
     int currentArmPreset = 0;
-    private final int[] ARM_PRESETS = {0, 117};
+    private final int[] ARM_PRESETS = {-10, 123};
     private final double ANGLE_RANGE = 140;
     private final double ENCODER_RANGE = 4100;
 
@@ -280,17 +280,19 @@ public class TeleOp extends OpMode {
         }
         else if(gamepad2.dpad_down) {
             while(gamepad2.dpad_down);
-            currentArmPreset++;
-            if(currentArmPreset >= ARM_PRESETS.length)
-                currentArmPreset = ARM_PRESETS.length-1;
+            currentArmPreset = 1;
+//            currentArmPreset++;
+//            if(currentArmPreset >= ARM_PRESETS.length)
+//                currentArmPreset = ARM_PRESETS.length-1;
 
             target = tiltToAngle(ARM_PRESETS[currentArmPreset]);
         }
         else if(gamepad2.dpad_up) {
             while(gamepad2.dpad_up);
-            currentArmPreset--;
-            if(currentArmPreset < 0)
-                currentArmPreset = 0;
+            currentArmPreset = 0;
+//            currentArmPreset--;
+//            if(currentArmPreset < 0)
+//                currentArmPreset = 0;
 
             target = tiltToAngle(ARM_PRESETS[currentArmPreset]);
         }
@@ -376,6 +378,7 @@ public class TeleOp extends OpMode {
 
     public int tiltToAngle(double angle) {
         int steps = (int) (angle * (ENCODER_RANGE / ANGLE_RANGE) + armTiltStart);
+
         tiltPID.setTarget(steps);
         tiltPID.reset();
         armAutoPilot = true;

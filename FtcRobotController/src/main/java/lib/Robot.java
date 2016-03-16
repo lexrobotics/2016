@@ -334,13 +334,18 @@ public class Robot {
     }
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName, String colorToIgnore) throws InterruptedException {
-        final int RED_THRESH = 850;
-        final int GREEN_THRESH = 850;
-        final int BLUE_THRESH = 850;
+        int RED_THRESH = 600;
+        int GREEN_THRESH = 600;
+        int BLUE_THRESH = 600;
         int maxRed = 0;
         int maxGreen = 0;
         int maxBlue = 0;
-
+        if(!colorToIgnore.equals("red")){
+            RED_THRESH = -1;
+        }
+        if(!colorToIgnore.equals("blue")){
+            BLUE_THRESH = -1;
+        }
 
 
         AdafruitColorSensor ground = new AdafruitColorSensor(Robot.hmap, groundName, "cdim", 5);
@@ -349,23 +354,17 @@ public class Robot {
         waiter.waitOneFullHardwareCycle();
         //
         Thread.sleep(10);
-        drivetrain.move(power,waiter);
+        drivetrain.move(power, waiter);
         do {
-                while(!ground.isColorUpdate());
-///            if(ground.red() > maxRed)
-////                maxRed = ground.red();
-////            if(ground.green() > maxGreen)
-////                maxGreen = ground.green();
-////            if(ground.blue() > maxBlue)
-////                maxBlue = ground.blue();
-//////
+            while(!ground.isColorUpdate());
+
             if (dominant == null && (state.redVsBlue(beaconName) == SensorState.ColorType.RED || state.redVsBlue(beaconName) == SensorState.ColorType.BLUE)) {
                 dominant = state.redVsBlue(beaconName);
             }
             Thread.sleep(1);
-        } while ((ground.getRed() <= RED_THRESH && !colorToIgnore.equals("red")) ||
-                (ground.getGreen() <= GREEN_THRESH && !colorToIgnore.equals("green")) ||
-                (ground.getBlue() <= BLUE_THRESH && !colorToIgnore.equals("blue")));
+        } while ((ground.getRed() <= RED_THRESH ) ||
+                (ground.getGreen() <= GREEN_THRESH) ||
+                (ground.getBlue() <= BLUE_THRESH));
 
         drivetrain.stopMove();
         Thread.sleep(20);
