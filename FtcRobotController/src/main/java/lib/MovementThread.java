@@ -3,128 +3,156 @@ package lib;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 
+
+
+
+
+
+
+/*
+IF THIS HAS A PROBLEM, MAKE SURE THAT THE STATIC VARIABLES IN ROBOT ARE ACTUALLY INSTANTIATED
+ALSO, I REMOVED SOME THREAD INTERRUPT CHECKS IN TURN, BECAUSE THEY SEEMED UNNECESSARY. THEY MIGHT NOT BE
+ALSO CHANGED PID TO BE ABLE TO RECREATE ITSELF
+
+KpDivisor, Ki, and Kd were 3.6, 0.05, 0.01 in the old system
+ */
+
+
+
+
+
+
+
+
+
 /**
  * Created by luke on 10/28/15.
  */
 public class MovementThread implements Runnable {
 
-    private DriveTrain drivetrain;
-    private String gyro_name;
     private double power;
-    private double minthresh;
-    private double turnthresh;
-    private LinearOpMode waiter;
-    private double scalar;
+    private double minThresh;
+    private double turnThresh;
+    private PID pid;
+    private double KpDivisor, Ki, Kd;
 
-    // Must always be less than 1
-    private double scalingfactor;
-
-
-    public MovementThread (DriveTrain drivetrain, String gyro_name, LinearOpMode waiter, double power) {
-        this.drivetrain = drivetrain;
-        this.gyro_name = gyro_name;
+    public MovementThread (double power, int min, int turn, double KpDivisor, double Ki, double Kd) {
         this.power = power;
-        this.waiter = waiter;
-        this.scalar = 0.1;
-        minthresh = 1;
-        turnthresh = 10;
+
+        minThresh = min;
+        turnThresh = turn;
+
+        this.KpDivisor = KpDivisor;
+        this.Ki = Ki;
+        this.Kd = Kd;
+
+        pid = new PID(0, 0, 0);
     }
 
-    public void setPower(double power){
+    public synchronized void setPower(double power){
         this.power = power;
     }
 
-    public int distToZero(int angle1){
-        if(angle1>180){
-            return 360 - angle1;
-        }
-        else{
-            return angle1;
-        }
-    }
-
-    public int angleDist(int deg1, int deg2)
-    {
+    public int angleDist(int deg1, int deg2) {
         int absDist = (360 + deg2 - deg1) % 360;
         if (absDist > 180)
             absDist -= 360;
         return absDist;
     }
 
+    private int getOffset() {
+        return angleDist(   (int) Robot.drivetrain.getActualHeading(Robot.gyroName),
+                            (int) Robot.drivetrain.getExpectedHeading()           );
+    }
+
+    private void stopBothMotors() {
+        Robot.drivetrain.setLeftMotors(0);
+        Robot.drivetrain.setRightMotors(0);
+    }
+
+    private void turn() throws InterruptedException {
+        int offset;
+
+        do {
+            offset = getOffset();
+            Robot.tel.addData("offset", offset);
+            Robot.drivetrain.setRightMotors(0.3 * Math.signum(offset) * -1);
+            Robot.drivetrain.setLeftMotors(0.3 * Math.signum(offset));
+            Thread.sleep(1);
+
+        } while (Math.abs(offset) > turnThresh && Robot.waiter.opModeIsActive() && !Thread.currentThread().isInterrupted() && !Robot.drivetrain.isAMotorZero());
+    }
+
 
     @Override
     public void run() {
-        double maxOutput = Math.min(1 - Math.abs(power), Math.abs(power));
-        PID correctionPID = new PID(maxOutput/3.6, 0.05, 0.01);
-
-        correctionPID.setMaxOutput(maxOutput);
-        correctionPID.setMinOutput(-1 * maxOutput);
-        // All of the scaling stuff in here scales down distance towards a particular value, 0, or 1
-        // This means that they can never scale past 0 or past 1.
-
-//        synchronized (this)
-
-        drivetrain.setLeftMotors(power);
-        drivetrain.setRightMotors(power);
-
+        // Distance from goal angle
         int offset;
 
-        while (!Thread.currentThread().isInterrupted() && waiter.opModeIsActive()) {
-            if(power==0){
-                drivetrain.setLeftMotors(0);
-                drivetrain.setRightMotors(0);
+        // Prevents power from changing halfway through a loop
+        double currentPower;
 
+        // Determines how much to alter power for each motor to put the robot back on track
+        double correction;
+
+        synchronized (this){
+            currentPower = power;
+        }
+
+        double maxOutput = Math.min(1 - Math.abs(currentPower), Math.abs(currentPower));
+//        PID correctionPID = new PID(maxOutput/3.6, 0.05, 0.01);
+        pid.recreate(maxOutput / KpDivisor, Ki, Kd);
+
+        pid.setMaxOutput(maxOutput);
+        pid.setMinOutput(-1 * maxOutput);
+
+        Robot.drivetrain.setLeftMotors(currentPower);
+        Robot.drivetrain.setRightMotors(currentPower);
+
+        while (!Thread.currentThread().isInterrupted() && Robot.waiter.opModeIsActive()) {
+            synchronized (this) {
+                currentPower = power;
+            }
+
+            if(currentPower == 0){
+                stopBothMotors();
                 Thread.currentThread().interrupt();
             }
-            Robot.tel.addData("expHead: " + drivetrain.getExpectedHeading() + " active: " + waiter.opModeIsActive(), "");
+
+            Robot.tel.addData("expHead: " + Robot.drivetrain.getExpectedHeading() + " active: " + Robot.waiter.opModeIsActive(), "");
 
             try {
+                offset = getOffset();
+                Robot.tel.addData("offset", offset);
 
-                offset = angleDist((int)drivetrain.getActualHeading(gyro_name), (int)drivetrain.getExpectedHeading());
-                Robot.tel.addData("offset",offset);
-
-                if (Math.abs(offset) > minthresh && Math.abs(offset) < turnthresh && !drivetrain.isAMotorZero()) {
-                    double correction = correctionPID.updateWithError(offset);
-                    drivetrain.setLeftMotors(power + correction);
-                    drivetrain.setRightMotors(power - correction);
+                if (Math.abs(offset) > minThresh && Math.abs(offset) < turnThresh && !Robot.drivetrain.isAMotorZero()) {
+                    correction = pid.updateWithError(offset);
+                    Robot.drivetrain.setLeftMotors(currentPower + correction);
+                    Robot.drivetrain.setRightMotors(currentPower - correction);
                 }
 
                 // The offset is too great, so we have to stop and do a controlled turn back to the right value.
-                else if (Math.abs(offset) > turnthresh) {
-
-
-                    if(Thread.currentThread().isInterrupted()){ break;}
-                        Thread.sleep(100);
-
-                    while (Math.abs(offset) > turnthresh && waiter.opModeIsActive() && !Thread.currentThread().isInterrupted() && !drivetrain.isAMotorZero()) {
-                        Robot.tel.addData("offset",offset);
-                        offset = angleDist((int)drivetrain.getActualHeading(gyro_name), (int)drivetrain.getExpectedHeading());
-                        drivetrain.setRightMotors(0.3 * Math.signum(offset) * -1);
-                        drivetrain.setLeftMotors(0.3 * Math.signum(offset));
-
-                        Thread.sleep(1);
-                    }
-                    if(Thread.currentThread().isInterrupted()){ break;}
+                else if (Math.abs(offset) > turnThresh) {
+                    Thread.sleep(100);
+                    turn();
                     Thread.sleep(100);
                 }
 
-                // Nothing's wrong, so we drive normally
-
+                // Nothing is wrong, so we drive normally
                 else {
-                    drivetrain.setLeftMotors(power);
-                    drivetrain.setRightMotors(power);
+                    Robot.drivetrain.setLeftMotors(currentPower);
+                    Robot.drivetrain.setRightMotors(currentPower);
                 }
 
                 Thread.sleep(50);
+
             } catch (InterruptedException ex) {
-                drivetrain.setLeftMotors(0);
-                drivetrain.setRightMotors(0);
+                stopBothMotors();
                 Thread.currentThread().interrupt();
                 break;
             }
         }
 
-        drivetrain.setLeftMotors(0);
-        drivetrain.setRightMotors(0);
+        stopBothMotors();
     }
 }
