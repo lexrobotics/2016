@@ -7,9 +7,9 @@ import com.qualcomm.robotcore.util.Range;
  * Created by noah on 11/30/15.
  */
 public class PID {
-    private final double Kp;
-    private final double Ki;
-    private final double Kd;
+    private double Kp;
+    private double Ki;
+    private double Kd;
     private final boolean reversed;
     private final double iCap;
     private final double targetThresh;
@@ -120,6 +120,12 @@ public class PID {
         iTerm = 0;
         prevError = -1;
         timer.reset();
+        atTarget = 0;
+    }
+
+    public void recreate(double Kp, double Ki, double Kd){
+        reset();
+        this.Kp = Kp;
     }
 
     public boolean setMinOutput(double minOutput) {
