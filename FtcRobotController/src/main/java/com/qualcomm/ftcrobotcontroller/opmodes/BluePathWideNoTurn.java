@@ -1,10 +1,8 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
-import android.hardware.Sensor;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
@@ -21,12 +19,13 @@ import lib.SensorState;
 /**
  * Created by lhscompsci on 1/11/16.
  */
-public class RedPath extends LinearOpMode {
+public class BluePathWideNoTurn extends LinearOpMode {
     public void path() throws InterruptedException {
-        boolean armTimeOut;
         BotInit.bot2(hardwareMap, telemetry, this);
-        Servo redDoor;
-        redDoor = hardwareMap.servo.get("redDoor");
+        boolean armTimeOut;
+        Servo blueDoor;
+        blueDoor = hardwareMap.servo.get("blueDoor");
+
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
         Robot.delayWithCountdown(delayTime);
@@ -45,50 +44,45 @@ public class RedPath extends LinearOpMode {
 //        while (Robot.state.gyroIsCalibrating("hero") == true) {
 //            waitOneFullHardwareCycle();
 //        }
+
         //initial turn
-        Robot.drivetrain.dumbGyroTurn(0, .7, 45);
+//        Robot.drivetrain.dumbGyroTurn(0.7, 0, 47);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-        noodle.setPower(-1);
-        redDoor.setPosition(0);
+        noodle.setPower(1);
+
         Thread.sleep(20);
 
-        //first movement
-        Robot.drivetrain.moveDistanceWithCorrections(0.6, 55);
-        Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.75, 0, 4);
-        redDoor.setPosition(1);
-        Thread.sleep(10);
+        //Initial Move
+        Robot.drivetrain.moveDistanceWithCorrections(1, 100);
+        Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.2, 0.25, 1, 4);
+        blueDoor.setPosition(0);
 
-        //turn to parallel
-        Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
-        noodle.setPower(1);
-        Thread.sleep(100);
+        //Big Turn
+        Robot.drivetrain.dumbGyroTurn(0.4, 130);
+//        Thread.sleep(100);
 
-        //turn to tillWhite
-        SensorState.ColorType dominant;
-        dominant = Robot.tillWhiteJumpThresh(0.175, "ground", "beacon", "red");
+        //TillWhite
+        SensorState.ColorType dominant = Robot.tillWhiteJumpThresh(0.175, "ground", "beacon", "blue");
         noodle.setPower(0);
-
-        //PushButton STuff
         armTimeOut = Robot.extendTillBeacon("beaconToucher");
 
         if(armTimeOut){
             Robot.retractButtonPusher();
             Thread.sleep(10);
-            Robot.tillWhiteJumpThresh(0.175, "ground", "beacon", "red");
+            Robot.tillWhiteJumpThresh(0.175, "ground", "beacon", "blue");
             Robot.extendTillBeacon("beaconToucher");
         }
 
         dominant = Robot.oppositeDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
-            Robot.dumpClimbers();
-        telemetry.addData("Color detected", dominant);
-        if(dominant == SensorState.ColorType.BLUE) {
+        Robot.dumpClimbers();
+
+        //PushButton
+        if (dominant == SensorState.ColorType.BLUE) {
+            Robot.pushButton("beaconToucher", 1);
+        } else if (dominant == SensorState.ColorType.RED) {
             Robot.pushButton("beaconToucher", -1);
         }
-        else if(dominant == SensorState.ColorType.RED) {
-            Robot.pushButton("beaconToucher", 1);
-        }
-        else{
-        }
+
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();
         Robot.retractButtonPusher();

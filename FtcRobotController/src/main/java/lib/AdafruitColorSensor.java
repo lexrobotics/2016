@@ -11,18 +11,26 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
  */
 public class AdafruitColorSensor {
     int led;
+    int i2cMuxChannel;
     DeviceInterfaceModule cdim;
-    Wire cs;
+    Wire cs, mux;
 
     private int clear, red, green, blue;
 
     public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel) {
+        this(hmap, colorName, cdimName, ledChannel, -1, "");
+    }
+
+    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel, int i2cMuxChannel, String muxName) {
         led = ledChannel;
         cdim = hmap.deviceInterfaceModule.get(cdimName);
         cdim.setDigitalChannelMode(led, DigitalChannelController.Mode.OUTPUT);
 
-        cs = new Wire(hmap, colorName, 2*0x29);
+        cs = new Wire(hmap, colorName, i2cMuxChannel);
+        if (i2cMuxChannel != -1)
+            mux = new Wire(hmap, muxName, 0x70);
 
+        selectSensor();
         cs.write(0x80, 0x03);                // R[00] = 3    to enable power
         cs.requestFrom(0x92, 1);            // R[12]        is the device ID
         cs.write(0x8F, 0x02);                // R[0F] = 2    to set gain 16
@@ -38,6 +46,7 @@ public class AdafruitColorSensor {
     }
 
     public boolean isColorUpdate() {
+        selectSensor();
         boolean isNew = false;
         if (cs.responseCount() > 0) {
             cs.getResponse();
@@ -77,6 +86,11 @@ public class AdafruitColorSensor {
             }
         }
         return isNew;
+    }
+
+    private void selectSensor() {
+        if(i2cMuxChannel != -1)
+            mux.write(i2cMuxChannel);
     }
 
     public int getClear() {

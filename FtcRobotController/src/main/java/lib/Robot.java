@@ -206,7 +206,7 @@ public class Robot {
 
         while(beaconToucher.getState() && Robot.waiter.opModeIsActive() && !timeOutReached) {
             Thread.sleep(50);
-            timeOutReached = pressTimer.time() > 4.0;
+            timeOutReached = pressTimer.time() > 5.0;
         }
 
         Robot.servos.get("buttonPusher").setPosition(0.5);
@@ -334,25 +334,24 @@ public class Robot {
     }
 
     public static SensorState.ColorType tillWhite(double power, String groundName, String beaconName, String colorToIgnore) throws InterruptedException {
-        int RED_THRESH = 600;
-        int GREEN_THRESH = 600;
-        int BLUE_THRESH = 600;
+        //At home with sensoqr print we saw peaks at about 1000-1100
+        //we tuned it to about 600 in the code
+        //At meadow room with sensor print 1400-1500
+        //and in code tuned to 725
+
+        int RED_THRESH = 750;
+        int GREEN_THRESH = 750;
+        int BLUE_THRESH = 750 ;
         int maxRed = 0;
         int maxGreen = 0;
         int maxBlue = 0;
-        if(!colorToIgnore.equals("red")){
-            RED_THRESH = -1;
-        }
-        if(!colorToIgnore.equals("blue")){
-            BLUE_THRESH = -1;
-        }
 
 
         AdafruitColorSensor ground = new AdafruitColorSensor(Robot.hmap, groundName, "cdim", 5);
         SensorState.ColorType dominant = null;
 
         waiter.waitOneFullHardwareCycle();
-        //
+
         Thread.sleep(10);
         drivetrain.move(power, waiter);
         do {
@@ -372,6 +371,68 @@ public class Robot {
 
     }
 
+    public static SensorState.ColorType tillWhiteJumpThresh(double power, String groundName, String beaconName, String colorToIgnore) throws InterruptedException {
+        //At home with sensoqr print we saw peaks at about 1000-1100
+        //we tuned it to about 600 in the code
+        //At meadow room with sensor print 1400-1500
+        //and in code tuned to 725
+        AdafruitColorSensor ground = new AdafruitColorSensor(Robot.hmap, groundName, "cdim", 5);
+        SensorState.ColorType dominant = null;
+
+
+        int RED_THRESH = 300;
+        int GREEN_THRESH = 300;
+        int BLUE_THRESH = 300;
+        while(!ground.isColorUpdate());
+        int prevRed = 0;
+        int prevGreen = 0;
+        int prevBlue = 0;
+        int redDiff;
+        int greenDiff;
+        int blueDiff;
+
+        for (int i = 0; i < 10; i++){
+            while (!ground.isColorUpdate());
+            prevRed += ground.getRed();
+            prevGreen += ground.getGreen();
+            prevBlue += ground.getBlue();
+        }
+
+        prevRed /= 10;
+        prevGreen /= 10;
+        prevBlue /= 10;
+
+        SensorState.ColorType tempdominant;
+        waiter.waitOneFullHardwareCycle();
+        //
+        Thread.sleep(10);
+        drivetrain.move(power, waiter);
+        do {
+            while(!ground.isColorUpdate());
+
+            if(dominant == null){
+                tempdominant = state.redVsBlue(beaconName);
+                if ((tempdominant == SensorState.ColorType.RED || tempdominant == SensorState.ColorType.BLUE)) {
+                    dominant = state.redVsBlue(beaconName);
+                }
+            }
+
+            redDiff = ground.getRed() - prevRed;
+            greenDiff = ground.getGreen() - prevGreen;
+            blueDiff = ground.getBlue() - prevBlue;
+
+            prevRed = ground.getRed();
+            prevGreen = ground.getGreen();
+            prevBlue = ground.getBlue();
+            Thread.sleep(20);
+        } while ((redDiff <= RED_THRESH ) ||
+                (greenDiff <= GREEN_THRESH) ||
+                (blueDiff <= BLUE_THRESH));
+
+        drivetrain.stopMove();
+        Thread.sleep(20);
+        return dominant;
+    }
 
     public static void tillSense(String sensorName, double servoPosition, double power, int distance, int filterlength, boolean overshootExit) throws InterruptedException{
 

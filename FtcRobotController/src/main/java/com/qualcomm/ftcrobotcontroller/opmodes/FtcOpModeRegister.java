@@ -63,13 +63,17 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("RedPathScoot", RedPathScoot.class);
         manager.register("RedPathWide", RedPathWide.class);
         manager.register("RedPathWideScoot", RedPathWideScoot.class);
+        manager.register("tillWhiteTest", tillWhiteTest.class);
 
         manager.register("BluePath", BluePath.class);
         manager.register("BluePathScoot", BluePathScoot.class);
         manager.register("BluePathWide", BluePathWide.class);
+        manager.register("BluePathWideNoTurn", BluePathWideNoTurn.class);
         manager.register("BluePathWideScoot", BluePathWideScoot.class);
 
         manager.register("SensorPrint", SensorPrint.class);
-       // manager.register("pidCalibration", pidCalibration.class);
+        manager.register("I2CMuxTest", I2CMuxTest.class);
+
+        // manager.register("pidCalibration", pidCalibration.class);
     }
 }

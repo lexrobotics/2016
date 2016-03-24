@@ -5,8 +5,10 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Hardware;
 
 import lib.BotInit;
@@ -31,10 +33,20 @@ public class BluePath extends LinearOpMode {
         waitForStart();
         Robot.delayWithCountdown(delayTime);
 
-
-        while (Robot.state.gyroIsCalibrating("hero") == true) {
-            waitOneFullHardwareCycle();
+        GyroSensor hero = hardwareMap.gyroSensor.get("hero");
+        ElapsedTime timer = new ElapsedTime();
+        hero.calibrate();
+        timer.reset();
+        while (!hero.isCalibrating() && opModeIsActive() && timer.time() < 0.5){
+            Thread.sleep(1);
         }
+        while(hero.isCalibrating() && opModeIsActive()){
+            Thread.sleep(1);
+        }
+
+//        while (Robot.state.gyroIsCalibrating("hero") == true) {
+//            waitOneFullHardwareCycle();
+//        }
 
         //initial turn
         Robot.drivetrain.dumbGyroTurn(0.7, 0, 45);
@@ -55,17 +67,18 @@ public class BluePath extends LinearOpMode {
         //Big Turn
         Robot.drivetrain.dumbGyroTurn(0.4, 135);               //dimitri was here
 
-        Thread.sleep(200);
         noodle.setPower(1);
 
         //TillWhite
-        SensorState.ColorType dominant = Robot.tillWhite(-0.175, "ground", "beacon", "blue");
+        SensorState.ColorType dominant = Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "blue");
         noodle.setPower(0);
         armTimeOut = Robot.extendTillBeacon("beaconToucher");
 
         if(armTimeOut){
             Robot.retractButtonPusher();
-            return;
+            Thread.sleep(10);
+            Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "blue");
+            Robot.extendTillBeacon("beaconToucher");
         }
 
 

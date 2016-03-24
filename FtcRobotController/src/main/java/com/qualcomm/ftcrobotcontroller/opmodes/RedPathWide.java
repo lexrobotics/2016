@@ -5,6 +5,7 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -28,9 +29,20 @@ public class RedPathWide extends LinearOpMode {
         waitForStart();
         Robot.delayWithCountdown(delayTime);
 
-        while (Robot.state.gyroIsCalibrating("hero") == true) {
-            waitOneFullHardwareCycle();
+        GyroSensor hero = hardwareMap.gyroSensor.get("hero");
+        ElapsedTime timer = new ElapsedTime();
+        hero.calibrate();
+        timer.reset();
+        while (!hero.isCalibrating() && opModeIsActive() && timer.time() < 0.5){
+            Thread.sleep(1);
         }
+        while(hero.isCalibrating() && opModeIsActive()){
+            Thread.sleep(1);
+        }
+
+//        while (Robot.state.gyroIsCalibrating("hero") == true) {
+//            waitOneFullHardwareCycle();
+//        }
 
         Robot.drivetrain.dumbGyroTurn(0, 0.7, 46);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
@@ -42,14 +54,16 @@ public class RedPathWide extends LinearOpMode {
         Thread.sleep(10);
         Robot.drivetrain.dumbGyroTurn(0.4, 44);
 
-        SensorState.ColorType dominant = Robot.tillWhite(-0.175, "ground", "beacon","red");
+        SensorState.ColorType dominant = Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "red");
         noodle.setPower(0);
 
         armTimeOut = Robot.extendTillBeacon("beaconToucher");
 
         if(armTimeOut){
             Robot.retractButtonPusher();
-            return;
+            Thread.sleep(10);
+            Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "red");
+            Robot.extendTillBeacon("beaconToucher");
         }
 
         dominant = Robot.sameDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
