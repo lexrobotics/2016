@@ -1,6 +1,7 @@
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.robocol.Telemetry;
 
 import lib.AdafruitColorSensor;
 
@@ -13,7 +14,8 @@ public class I2CMuxTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         color1 = new AdafruitColorSensor(hardwareMap, "color1", "cdim", 0, 0, "mux");
-        color2 = new AdafruitColorSensor(hardwareMap, "color1", "cdim", 0, 1, "mux");
+        color2 = new AdafruitColorSensor(hardwareMap, "color2", "cdim", 0, 1, "mux");
+
 
         while(opModeIsActive()) {
             if(color1.isColorUpdate()) {

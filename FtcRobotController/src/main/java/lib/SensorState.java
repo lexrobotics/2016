@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import lib.Bno055;
+
 
 import java.util.HashMap;
 
@@ -195,25 +197,30 @@ public class SensorState implements Runnable{
     public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length){
         // Get underlying sensor object for the sensor
         Object sensor_obj = maps.get(type).get(name);
+        Bno055 bonbon;
 
         // Make a SensorContainer to wrap around the object
         SensorContainer sen = new SensorContainer(sensor_obj, type, name, update, data_length);
 
         if (type == SensorType.GYRO) {
-            ((GyroSensor) sensor_obj).calibrate();
-            ElapsedTime timer = new ElapsedTime();
-            timer.reset();
+            bonbon = (Bno055) sensor_obj;
 
-            // There is always a gap of a few milliseconds before a gyro starts calibrating.
-            // This needs to be waited out, otherwise a call to isCalibrating() could return a
-            // misleading result.
             try {
-                while (!((GyroSensor) sensor_obj).isCalibrating() && timer.time() < 0.3) {
-                    Thread.sleep(1);
+                bonbon.init();
+
+                while(bonbon.isInitActive()){
+                    bonbon.init_loop();
+                    Robot.tel.addData("initting","yay");
                 }
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
+
+            bonbon.startSchedule(Bno055.BnoPolling.SENSOR, 100);     // 10 Hz
+            bonbon.startSchedule(Bno055.BnoPolling.FUSION, 33);      // 30 Hz
+            bonbon.startSchedule(Bno055.BnoPolling.TEMP, 200);       // 5 Hz
+            bonbon.startSchedule(Bno055.BnoPolling.CALIB, 250);      // 4 H
+            bonbon.startSchedule(Bno055.BnoPolling.EULER, 15);
         }
 
         sensorContainers.put(name, sen);
@@ -458,11 +465,14 @@ public class SensorState implements Runnable{
      */
     private double getSensorReading(SensorContainer sen){
         double value;
+        Bno055 bonbon;
 
         synchronized (this) {
             switch (sen.type) {
                 case GYRO:
-                    return ((GyroSensor) sen.sensor).getHeading();
+                    bonbon = (Bno055) sen.sensor;
+                    bonbon.loop();
+                    return (bonbon).eulerZ() / 16.0;
 
                 case ENCODER:
                     return ((DcMotor) sen.sensor).getCurrentPosition();
@@ -522,6 +532,7 @@ public class SensorState implements Runnable{
                 for (SensorContainer sen : sensorContainers.values()) {
                     synchronized (this) {
                         sen.filter.update(getSensorReading(sen));
+                        //loop the B NPo
                     }
                 }
 

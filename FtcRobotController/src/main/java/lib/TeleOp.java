@@ -1,4 +1,4 @@
-package com.qualcomm.ftcrobotcontroller.opmodes;
+package lib;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -20,7 +20,7 @@ public class TeleOp extends OpMode {
     DcMotor rightFrontDrive, rightRearDrive;
     DcMotor noodler, armTilter, liftStageOne, liftStageTwo;
     Servo divider, rightZipline, leftZipline, buttonPusher, climberDropper;
-    Servo redDoor, blueDoor;
+    public Servo redDoor, blueDoor;
     Servo rightLimitServo, leftLimitServo;
 
     DigitalChannel compressLimit;
@@ -134,7 +134,7 @@ public class TeleOp extends OpMode {
         double leftPower;
         double rightPower;
 
-//
+
         if(gamepad1.left_trigger >= .1) {
             leftPower = scaleInput(-gamepad1.left_stick_y) / 2.125;
             rightPower = scaleInput(-gamepad1.right_stick_y) / 2.125;
@@ -232,16 +232,6 @@ public class TeleOp extends OpMode {
             leftZipline.setPosition(0.05);
             rightZiplineActivated = false;
         }
-
-
-        if (gamepad2.x) {
-            redDoor.setPosition(0);
-            blueDoor.setPosition(1);
-        } else {
-            redDoor.setPosition(1);
-            blueDoor.setPosition(0);
-        }
-
 
         if(gamepad2.start) {
             buttonPusher.setPosition(0.7); // retract button pusher

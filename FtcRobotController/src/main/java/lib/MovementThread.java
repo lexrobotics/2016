@@ -31,7 +31,6 @@ KpDivisor, Ki, and Kd were 3.6, 0.05, 0.01 in the old system
 public class MovementThread implements Runnable {
 
     private double power;
-    private double minThresh;
     private double turnThresh;
     private PID pid;
     private double KpDivisor, Ki, Kd;
@@ -39,7 +38,6 @@ public class MovementThread implements Runnable {
     public MovementThread (double power, int min, int turn, double KpDivisor, double Ki, double Kd) {
         this.power = power;
 
-        minThresh = min;
         turnThresh = turn;
 
         this.KpDivisor = KpDivisor;
@@ -125,7 +123,7 @@ public class MovementThread implements Runnable {
                 offset = getOffset();
                 Robot.tel.addData("offset", offset);
 
-                if (Math.abs(offset) > minThresh && Math.abs(offset) < turnThresh && !Robot.drivetrain.isAMotorZero()) {
+                if (Math.abs(offset) < turnThresh && !Robot.drivetrain.isAMotorZero()) {
                     correction = pid.updateWithError(offset);
                     Robot.drivetrain.setLeftMotors(currentPower + correction);
                     Robot.drivetrain.setRightMotors(currentPower - correction);
@@ -136,12 +134,6 @@ public class MovementThread implements Runnable {
                     Thread.sleep(100);
                     turn();
                     Thread.sleep(100);
-                }
-
-                // Nothing is wrong, so we drive normally
-                else {
-                    Robot.drivetrain.setLeftMotors(currentPower);
-                    Robot.drivetrain.setRightMotors(currentPower);
                 }
 
                 Thread.sleep(50);

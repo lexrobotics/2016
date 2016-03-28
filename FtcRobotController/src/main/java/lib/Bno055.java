@@ -193,7 +193,7 @@ public class Bno055 {
 
     private InitStates  initState;              // Multistep initialization
     private boolean     stateIsStarting;        // Local state during initialization
-    private long        startTime;              // Timeout control for init_loop
+    private long        startTime;              // Timeout control for init_gs
     private long        delayStart;             // Delay starting time
     private int         readCount;              // Count of completed read operations
     private int         writeCount;             // Count of completed write operations
