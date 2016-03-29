@@ -29,22 +29,8 @@ public class RedPathWide extends LinearOpMode {
         waitForStart();
         Robot.delayWithCountdown(delayTime);
 
-        GyroSensor hero = hardwareMap.gyroSensor.get("hero");
-        ElapsedTime timer = new ElapsedTime();
-        hero.calibrate();
-        timer.reset();
-        while (!hero.isCalibrating() && opModeIsActive() && timer.time() < 0.5){
-            Thread.sleep(1);
-        }
-        while(hero.isCalibrating() && opModeIsActive()){
-            Thread.sleep(1);
-        }
 
-//        while (Robot.state.gyroIsCalibrating("hero") == true) {
-//            waitOneFullHardwareCycle();
-//        }
-
-        Robot.drivetrain.dumbGyroTurn(0, 0.7, 46);
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
         noodle.setPower(1);
         Robot.drivetrain.moveDistanceWithCorrections(0.6, 100);
@@ -52,7 +38,7 @@ public class RedPathWide extends LinearOpMode {
         Thread.sleep(10);
         Robot.drivetrain.moveDistance(-0.6, 1, this);
         Thread.sleep(10);
-        Robot.drivetrain.dumbGyroTurn(0.4, 44);
+        Robot.drivetrain.dumbGyroTurn(0.4, 45);
 
         SensorState.ColorType dominant = Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "red");
         noodle.setPower(0);

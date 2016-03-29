@@ -217,7 +217,7 @@ public class TeleOp extends OpMode {
 
 
         if(gamepad2.right_stick_x > 0.7) {
-            rightZipline.setPosition(0.95);
+            rightZipline.setPosition(0.4);
             rightZiplineActivated = false;
         }
         else if(gamepad2.right_stick_x < -0.7) {
@@ -225,7 +225,7 @@ public class TeleOp extends OpMode {
             rightZiplineActivated = true;
         }
         if(gamepad2.left_stick_x > 0.7) {
-            leftZipline.setPosition(1);
+            leftZipline.setPosition(.4);
             leftZiplineActivated = false;
         }
         else if(gamepad2.left_stick_x < -0.7) {

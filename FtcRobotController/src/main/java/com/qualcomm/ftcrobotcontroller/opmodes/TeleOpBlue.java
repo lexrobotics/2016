@@ -24,7 +24,7 @@ public class TeleOpBlue extends TeleOp {
         } else if (gamepad2.b) {
             redDoor.setPosition(0);
         } else if (gamepad2.y) {
-            redDoor.setPosition(.5);
+            redDoor.setPosition(.45);
         } else {
             redDoor.setPosition(1);
             blueDoor.setPosition(0);

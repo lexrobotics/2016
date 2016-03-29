@@ -30,35 +30,20 @@ public class BluePathWide extends LinearOpMode {
         waitForStart();
         Robot.delayWithCountdown(delayTime);
 
-        GyroSensor hero = hardwareMap.gyroSensor.get("hero");
-        ElapsedTime timer = new ElapsedTime();
-        hero.calibrate();
-        timer.reset();
-        while (!hero.isCalibrating() && opModeIsActive() && timer.time() < 0.5){
-            Thread.sleep(1);
-        }
-        while(hero.isCalibrating() && opModeIsActive()){
-            Thread.sleep(1);
-        }
-
-//        while (Robot.state.gyroIsCalibrating("hero") == true) {
-//            waitOneFullHardwareCycle();
-//        }
-
         //initial turn
-        Robot.drivetrain.dumbGyroTurn(0.7, 0, 47);
+        Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
         noodle.setPower(1);
 
         Thread.sleep(20);
 
         //Initial Move
-        Robot.drivetrain.moveDistanceWithCorrections(0.8, 100);
-        Robot.tillLimitSwitch("rightLimit", "rightLimitServo", 0.35, 0.25, 1, 4);
+        Robot.drivetrain.moveDistanceWithCorrections(-0.8, 100);
+        Robot.tillLimitSwitch("rightLimit", "rightLimitServo", -0.35, 0.25, 1, 4);
         blueDoor.setPosition(0);
 
         //Big Turn
-        Robot.drivetrain.dumbGyroTurn(0.4, 130);
+        Robot.drivetrain.dumbGyroTurn(-0.4, 45);
 //        Thread.sleep(100);
 
         //TillWhite

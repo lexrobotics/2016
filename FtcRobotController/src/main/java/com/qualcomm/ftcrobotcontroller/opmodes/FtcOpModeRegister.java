@@ -70,7 +70,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("BluePath", BluePath.class);
         manager.register("BluePathScoot", BluePathScoot.class);
         manager.register("BluePathWide", BluePathWide.class);
-        manager.register("BluePathWideNoTurn", BluePathWideNoTurn.class);
+        //manager.register("BluePathWideNoTurn", BluePathWideNoTurn.class);
         manager.register("BluePathWideScoot", BluePathWideScoot.class);
         manager.register("IMUTest", IMUTest.class);
 
