@@ -108,7 +108,7 @@ public class TeleOp extends OpMode {
         armTilter.setPower(0);
         liftStageOne.setPower(0);
         liftStageTwo.setPower(0);
-        leftZipline.setPosition(1);
+        leftZipline.setPosition(0.4);
         rightZipline.setPosition(0);
         buttonPusher.setPosition(0.5);
         climberDropper.setPosition(1);
@@ -216,22 +216,22 @@ public class TeleOp extends OpMode {
         }
 
 
-        if(gamepad2.right_stick_x > 0.7) {
-            rightZipline.setPosition(0.4);
-            rightZiplineActivated = false;
-        }
-        else if(gamepad2.right_stick_x < -0.7) {
-            rightZipline.setPosition(0);
-            rightZiplineActivated = true;
-        }
-        if(gamepad2.left_stick_x > 0.7) {
-            leftZipline.setPosition(.4);
-            leftZiplineActivated = false;
-        }
-        else if(gamepad2.left_stick_x < -0.7) {
-            leftZipline.setPosition(0.05);
-            rightZiplineActivated = false;
-        }
+//        if(gamepad2.right_stick_x > 0.7) {
+//            rightZipline.setPosition(0.4);
+//            rightZiplineActivated = false;
+//        }
+//        else if(gamepad2.right_stick_x < -0.7) {
+//            rightZipline.setPosition(0);
+//            rightZiplineActivated = true;
+//        }
+//        if(gamepad2.left_stick_x > 0.7) {
+//            leftZipline.setPosition(.4);
+//            leftZiplineActivated = false;
+//        }
+//        else if(gamepad2.left_stick_x < -0.7) {
+//            leftZipline.setPosition(0.05);
+//            leftZiplineActivated = false;
+//        }
 
         if(gamepad2.start) {
             buttonPusher.setPosition(0.7); // retract button pusher
@@ -295,6 +295,12 @@ public class TeleOp extends OpMode {
 
         if (compressLimit.getState()) {
             armEncoderReset();
+            rightZipline.setPosition(0.05);
+            leftZipline.setPosition(0.35);
+        }
+        else{
+            rightZipline.setPosition(0.4);
+            leftZipline.setPosition(0);
         }
 
         telemetry.addData("rightPower, leftPower", Double.toString(rightPower).concat(Double.toString(leftPower)));

@@ -3,8 +3,10 @@ package lib;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -55,7 +57,7 @@ public class HelperFunctions {
     public static void movementThreadCalibration(LinearOpMode op) throws InterruptedException {
         while(op.opModeIsActive()) {
             Robot.drivetrain.moveDistanceWithCorrections(0.6,36);
-            Robot.drivetrain.moveDistanceWithCorrections(-0.6,36);
+            Robot.drivetrain.moveDistanceWithCorrections(-0.6, 36);
 
         }
     }
@@ -77,5 +79,26 @@ public class HelperFunctions {
             tel.addData("Hero are you with us?", g.getHeading());
         }
 
+    }
+
+    public static void calibrateServo(String name, double safeStart, HardwareMap hmap, Gamepad gamepad) throws InterruptedException{
+        Servo s = hmap.servo.get(name);
+        s.setPosition(safeStart);
+        double position = safeStart;
+
+        while (true) {
+            if (gamepad.dpad_left){
+                position -= 0.01;
+            }
+
+            if (gamepad.dpad_right){
+                position += 0.01;
+            }
+
+            s.setPosition(position);
+            Robot.tel.addData("Position", position);
+
+            Thread.sleep(1);
+        }
     }
 }

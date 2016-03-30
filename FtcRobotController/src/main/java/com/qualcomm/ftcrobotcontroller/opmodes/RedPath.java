@@ -74,6 +74,7 @@ public class RedPath extends LinearOpMode {
         else if(dominant == SensorState.ColorType.RED) {
             Robot.pushButton("beaconToucher", 1);
         }
+        
 
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();
