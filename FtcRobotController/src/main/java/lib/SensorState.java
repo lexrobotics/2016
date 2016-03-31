@@ -96,7 +96,7 @@ public class SensorState implements Runnable{
     }
 
     // Types of sensors
-    public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER }
+    public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER, I2C_DEVICE }
 
     // Names of colors. Can also convert back and forth from the names to their index in this enum, for
     // single values or arrays of values.
@@ -161,12 +161,16 @@ public class SensorState implements Runnable{
         maps.put(SensorType.GYRO, hmap.gyroSensor);
         maps.put(SensorType.COLOR, hmap.colorSensor);
         maps.put(SensorType.ENCODER, hmap.dcMotor);
+        maps.put(SensorType.I2C_DEVICE, hmap.i2cDevice);
+
 
         types_inv.put(SensorType.ULTRASONIC, new SensorContainer[0]);
         types_inv.put(SensorType.LIGHT, new SensorContainer[0]);
         types_inv.put(SensorType.GYRO, new SensorContainer[0]);
         types_inv.put(SensorType.COLOR, new SensorContainer[0]);
         types_inv.put(SensorType.ENCODER, new SensorContainer[0]);
+        types_inv.put(SensorType.I2C_DEVICE, new SensorContainer[0]);
+
 
         usPinWasSet = false;
     }
@@ -197,12 +201,13 @@ public class SensorState implements Runnable{
     public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length){
         // Get underlying sensor object for the sensor
         Object sensor_obj = maps.get(type).get(name);
-        Bno055 bonbon;
 
         // Make a SensorContainer to wrap around the object
         SensorContainer sen = new SensorContainer(sensor_obj, type, name, update, data_length);
 
         if (type == SensorType.GYRO) {
+            Bno055 bonbon;
+
             bonbon = (Bno055) sensor_obj;
 
             try {

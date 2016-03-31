@@ -24,7 +24,7 @@ public class HelperFunctions {
         }
         ground.setLed(true);
         while(op.opModeIsActive()){
-            Robot.tel.addData("gyro", Robot.state.getAvgSensorData("hero"));
+            Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
             Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
             if (ground.isColorUpdate())
                 Robot.tel.addData("ground r", ground.getRed() + "  g: " + ground.getGreen() + "  b: " + ground.getBlue() + "  alpha: " + ground.getClear());
