@@ -36,18 +36,13 @@ public class IMUTest extends LinearOpMode {
         fusionData = bno.startSchedule(Bno055.BnoPolling.FUSION, 33);      // 30 Hz
         tempData = bno.startSchedule(Bno055.BnoPolling.TEMP, 200);       // 5 Hz
         calibData = bno.startSchedule(Bno055.BnoPolling.CALIB, 250);      // 4 H
-        eulerData
-
-                = bno.startSchedule(Bno055.BnoPolling.EULER, 15);
+        eulerData = bno.startSchedule(Bno055.BnoPolling.EULER, 15);
         while(opModeIsActive()){
             bno.loop();
-            telemetry.addData("Z heading", bno.eulerZ()/16.0);
-            telemetry.addData("Y heading", bno.eulerY()/16.0);
-            telemetry.addData("X heading", bno.eulerX()/16.0);
+            telemetry.addData("Z heading", bno.eulerZ());
+            telemetry.addData("Y heading", bno.eulerY());
+            telemetry.addData("X heading", bno.eulerX());
             telemetry.addData("temperature", bno.temperature());
-
-
-
         }
     }
 }

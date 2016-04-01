@@ -48,7 +48,7 @@ public class BotInit {
 
         Robot.state = new SensorState(hardwareMap, 1, 0);
 
-        Robot.state.registerSensor("hero", SensorState.SensorType.I2C_DEVICE, true, 12);
+        Robot.state.registerSensor("hero", SensorState.SensorType.IMU, true, 12);
 
         Robot.state.registerSensor("beacon", SensorState.SensorType.COLOR, false, 12);
         hardwareMap.colorSensor.get("beacon").setI2cAddress(0x3C);

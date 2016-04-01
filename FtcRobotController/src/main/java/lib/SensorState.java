@@ -96,7 +96,7 @@ public class SensorState implements Runnable{
     }
 
     // Types of sensors
-    public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER, I2C_DEVICE }
+    public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER, I2C_DEVICE, IMU }
 
     // Names of colors. Can also convert back and forth from the names to their index in this enum, for
     // single values or arrays of values.
@@ -135,6 +135,7 @@ public class SensorState implements Runnable{
     // Allows recovery of all sensors of a certain type.
     private HashMap<SensorType, SensorContainer[]> types_inv;
     private HardwareMap hmap;
+    private HashMap<String, Bno055> imus;
 
     private DigitalChannel usPin;
     private boolean usPinWasSet;
@@ -149,6 +150,7 @@ public class SensorState implements Runnable{
     public SensorState(HardwareMap hmap, int milli_interval, int nano_interval) {
         this.hmap = hmap;
         maps = new HashMap<SensorType, HardwareMap.DeviceMapping>();
+        imus = new HashMap<String, Bno055>();
         sensorContainers = new HashMap<String, SensorContainer>();
         types_inv = new HashMap<SensorType, SensorContainer[]>();
 
@@ -199,16 +201,9 @@ public class SensorState implements Runnable{
      * @param data_length   The number of sensor readings to store for the sensor
      */
     public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length){
-        // Get underlying sensor object for the sensor
-        Object sensor_obj = maps.get(type).get(name);
 
-        // Make a SensorContainer to wrap around the object
-        SensorContainer sen = new SensorContainer(sensor_obj, type, name, update, data_length);
-
-        if (type == SensorType.GYRO) {
-            Bno055 bonbon;
-
-            bonbon = (Bno055) sensor_obj;
+        if (type == SensorType.IMU) {
+            Bno055 bonbon = new Bno055(Robot.hmap, name);
 
             try {
                 bonbon.init();
@@ -226,10 +221,17 @@ public class SensorState implements Runnable{
             bonbon.startSchedule(Bno055.BnoPolling.TEMP, 200);       // 5 Hz
             bonbon.startSchedule(Bno055.BnoPolling.CALIB, 250);      // 4 H
             bonbon.startSchedule(Bno055.BnoPolling.EULER, 15);
+            imus.put(name,bonbon);
         }
+        else {      // Get underlying sensor object for the sensor
+            Object sensor_obj = maps.get(type).get(name);
 
-        sensorContainers.put(name, sen);
-        updateTypesInv(sen);
+            // Make a SensorContainer to wrap around the object
+            SensorContainer sen = new SensorContainer(sensor_obj, type, name, update, data_length);
+
+            sensorContainers.put(name, sen);
+            updateTypesInv(sen);
+        }
     }
 
     /**
@@ -341,6 +343,11 @@ public class SensorState implements Runnable{
      * Immediately return a value for the given sensor, without waiting for another run().
      */
     public synchronized double getSensorReading(String name){
+        if(imus.get(name) != null ){
+            Bno055 bonbon = imus.get(name);
+            bonbon.loop();
+            return bonbon.eulerX();
+        }
         if(!sensorContainers.keySet().contains(name)){
             throw new RuntimeException("SensorState.getSensorReading: sensor " + name + " not registered.");
         }

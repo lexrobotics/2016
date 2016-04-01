@@ -18,17 +18,16 @@ public class AdafruitColorSensor {
     private int clear, red, green, blue;
 
     public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel) {
-        this(hmap, colorName, cdimName, ledChannel, -1, "");
+        this(hmap, colorName, cdimName, ledChannel, -1, null);
     }
 
-    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel, int i2cMuxChannel, String muxName) {
+    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel, int i2cMuxChannel, Wire mux) {
+        this.mux = mux;
         led = ledChannel;
         cdim = hmap.deviceInterfaceModule.get(cdimName);
         cdim.setDigitalChannelMode(led, DigitalChannelController.Mode.OUTPUT);
 
-        cs = new Wire(hmap, colorName, i2cMuxChannel);
-        if (i2cMuxChannel != -1)
-            mux = new Wire(hmap, muxName, 0x70);
+        cs = new Wire(hmap, colorName, 2*0x29);
 
         selectSensor();
         cs.write(0x80, 0x03);                // R[00] = 3    to enable power
@@ -89,8 +88,11 @@ public class AdafruitColorSensor {
     }
 
     private void selectSensor() {
-        if(i2cMuxChannel != -1)
+        if(mux != null) {
             mux.write(i2cMuxChannel);
+            while(mux.responseCount() < 1);
+            mux.getResponse();
+        }
     }
 
     public int getClear() {
