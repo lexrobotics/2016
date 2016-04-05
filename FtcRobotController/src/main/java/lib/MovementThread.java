@@ -51,16 +51,16 @@ public class MovementThread implements Runnable {
         this.power = power;
     }
 
-    public int angleDist(int deg1, int deg2) {
-        int absDist = (360 + deg2 - deg1) % 360;
+    public double angleDist(double deg1, double deg2) {
+        double absDist = (360 + deg2 - deg1) % 360;
         if (absDist > 180)
             absDist -= 360;
         return absDist;
     }
 
-    private int getOffset() {
-        return angleDist(   (int) Robot.drivetrain.getActualHeading(Robot.gyroName),
-                            (int) Robot.drivetrain.getExpectedHeading()           );
+    private double getOffset() {
+        return angleDist(   Robot.drivetrain.getActualHeading(Robot.gyroName),
+                            Robot.drivetrain.getExpectedHeading()           );
     }
 
     private void stopBothMotors() {
@@ -69,14 +69,14 @@ public class MovementThread implements Runnable {
     }
 
     private void turn() throws InterruptedException {
-        int offset;
+        double offset;
 
         do {
             offset = getOffset();
             Robot.tel.addData("offset", offset);
             Robot.drivetrain.setRightMotors(0.3 * Math.signum(offset) * -1);
             Robot.drivetrain.setLeftMotors(0.3 * Math.signum(offset));
-            Thread.sleep(1);
+            Thread.sleep(10);
 
         } while (Math.abs(offset) > turnThresh && Robot.waiter.opModeIsActive() && !Thread.currentThread().isInterrupted() && !Robot.drivetrain.isAMotorZero());
     }
@@ -85,7 +85,7 @@ public class MovementThread implements Runnable {
     @Override
     public void run() {
         // Distance from goal angle
-        int offset;
+        double offset;
 
         // Prevents power from changing halfway through a loop
         double currentPower;
@@ -93,9 +93,9 @@ public class MovementThread implements Runnable {
         // Determines how much to alter power for each motor to put the robot back on track
         double correction;
 
-        synchronized (this){
+//        synchronized (this){
             currentPower = power;
-        }
+//        }
 
         double maxOutput = Math.min(1 - Math.abs(currentPower), Math.abs(currentPower));
 //        PID correctionPID = new PID(maxOutput/3.6, 0.05, 0.01);
@@ -103,7 +103,6 @@ public class MovementThread implements Runnable {
 
         pid.setMaxOutput(maxOutput);
         pid.setMinOutput(-1 * maxOutput);
-
         Robot.drivetrain.setLeftMotors(currentPower);
         Robot.drivetrain.setRightMotors(currentPower);
 

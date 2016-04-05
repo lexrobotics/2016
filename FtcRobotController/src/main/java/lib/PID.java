@@ -126,6 +126,9 @@ public class PID {
     public void recreate(double Kp, double Ki, double Kd){
         reset();
         this.Kp = Kp;
+        this.Ki = Ki;
+        this.Kd = Kd;
+
     }
 
     public boolean setMinOutput(double minOutput) {

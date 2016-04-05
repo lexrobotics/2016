@@ -35,19 +35,19 @@ public class RedPath extends LinearOpMode {
         //initial turn
         Robot.drivetrain.dumbGyroTurn(0, .7, 45);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-        noodle.setPower(-1);
-        redDoor.setPosition(0);
+//        noodle.setPower(-1);
+//        redDoor.setPosition(0);
         Thread.sleep(20);
 
         //first movement
-        Robot.drivetrain.moveDistanceWithCorrections(0.6, 55);
-        Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.2, 0.75, 0, 4);
+        Robot.drivetrain.moveDistanceWithCorrections(0.6, 45);
+        Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.6, 0.75, 0, 4);
         redDoor.setPosition(1);
         Thread.sleep(10);
 
         //turn to parallel
         Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
-        noodle.setPower(1);
+//        noodle.setPower(1);
         Thread.sleep(100);
 
         //turn to tillWhite

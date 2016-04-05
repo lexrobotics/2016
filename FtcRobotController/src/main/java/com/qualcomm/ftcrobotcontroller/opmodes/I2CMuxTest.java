@@ -18,9 +18,9 @@ public class I2CMuxTest extends LinearOpMode {
         telemetry.addData("status", "init'ing");
         mux = new Wire(hardwareMap, "mux", 2*0x70);
         telemetry.addData("status", "mux initialized");
-        color1 = new AdafruitColorSensor(hardwareMap, "color1", "cdim", 0, 0, mux);
+        color1 = new AdafruitColorSensor(hardwareMap, "ground", "cdim", -1, 0, mux);
         telemetry.addData("status", "mux, color1 initialized");
-        color2 = new AdafruitColorSensor(hardwareMap, "color2", "cdim", 0, 1, mux);
+        color2 = new AdafruitColorSensor(hardwareMap, "beacon", "cdim", -1, 1, mux);
         telemetry.addData("status", "waiting for start");
 
         while(opModeIsActive()) {

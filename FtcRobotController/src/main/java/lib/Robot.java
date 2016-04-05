@@ -55,6 +55,9 @@ public class Robot {
 
     // Allows us to detect when the opmode has stopped.
     public static LinearOpMode waiter;
+    private static AdafruitColorSensor groundColorSensor;
+    private static AdafruitColorSensor beaconColorSensor;
+    private static Wire mux;
 
     // Prevents instantiation
     private Robot(){}
@@ -71,6 +74,7 @@ public class Robot {
         Robot.waiter = waiter;
         Robot.drivetrain = drivetrain;
         Robot.gyroName = gyroName;
+//        Robot.mux = new Wire()
     }
 
     public static void registerServo(String servoName, double initial_position) {

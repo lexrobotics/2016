@@ -27,8 +27,8 @@ public class BluePath extends LinearOpMode {
 
         boolean armTimeOut;
 
-        Servo blueDoor;
-        blueDoor = hardwareMap.servo.get("blueDoor");
+        Servo redDoor;
+        redDoor = hardwareMap.servo.get("redDoor");
         int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
         Robot.delayWithCountdown(delayTime);
@@ -37,21 +37,21 @@ public class BluePath extends LinearOpMode {
         Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
 
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-        noodle.setPower(-1);
-        blueDoor.setPosition(1);
+//        noodle.setPower(-1);
+        redDoor.setPosition(1);
         Thread.sleep(20);
 
         //Initial Move
         Robot.drivetrain.moveDistanceWithCorrections(-0.6, 55);
         Robot.tillLimitSwitch("rightLimit", "rightLimitServo", -0.2, 0.25, 1, 4);
-        blueDoor.setPosition(0);
+        redDoor.setPosition(0);
         Thread.sleep(10);
-        noodle.setPower(0);
+//        noodle.setPower(0);
 
         //Big Turn
         Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
 
-        noodle.setPower(1);
+//        noodle.setPower(1);
 
         //TillWhite
         SensorState.ColorType dominant = Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "blue");

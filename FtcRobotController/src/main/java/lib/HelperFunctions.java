@@ -55,8 +55,8 @@ public class HelperFunctions {
     }
     public static void movementThreadCalibration(LinearOpMode op) throws InterruptedException {
         while(op.opModeIsActive()) {
-            Robot.drivetrain.moveDistanceWithCorrections(0.6,36);
-            Robot.drivetrain.moveDistanceWithCorrections(-0.6, 36);
+            Robot.drivetrain.moveDistanceWithCorrections(-0.6,36);
+            Robot.drivetrain.moveDistanceWithCorrections(0.6, 36);
 
         }
     }
