@@ -32,8 +32,8 @@ public class BotInit {
         Robot.registerMotor("liftStageTwo");
 
         Robot.registerServo("divider", 0.5);
-        Robot.registerServo("rightZipline", 0);
-        Robot.registerServo("leftZipline", 1);
+        Robot.registerServo("rightZipline", 0.8);
+        Robot.registerServo("leftZipline", 0.4);
 
         Robot.registerServo("buttonPusher", 0.5);
         Robot.registerServo("climberDropper", 1);

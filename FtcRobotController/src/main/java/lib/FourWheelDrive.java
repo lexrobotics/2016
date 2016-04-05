@@ -77,9 +77,9 @@ public class FourWheelDrive extends DriveTrain{
 
     public boolean isAMotorZero() {
         return (
-                frontLeftMotor.getPower() == 0 ||
-                frontRightMotor.getPower() == 0 ||
-                backLeftMotor.getPower() == 0 ||
+                frontLeftMotor.getPower() == 0 &&
+                frontRightMotor.getPower() == 0 &&
+                backLeftMotor.getPower() == 0 &&
                 backRightMotor.getPower() == 0
         );
     }

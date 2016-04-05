@@ -455,9 +455,11 @@ public class SensorState implements Runnable{
     // Returns red if red is dominant over blue,
     // blue if blue is dominant over red,
     // and if they're equal, we return none.
-    public synchronized ColorType redVsBlue(String name) {
-        ColorSensor sen_obj = (ColorSensor) sensorContainers.get(name).sensor;
-        int r = sen_obj.red(), b = sen_obj.blue(), g = sen_obj.green();
+    public synchronized ColorType redVsBlue(String name) throws InterruptedException {
+        Robot.beaconColorSensor.isColorUpdate();
+        int r = Robot.beaconColorSensor.getRed();
+        int g = Robot.beaconColorSensor.getGreen();
+        int b = Robot.beaconColorSensor.getBlue();
 
         if (r > b) {
             return ColorType.RED;

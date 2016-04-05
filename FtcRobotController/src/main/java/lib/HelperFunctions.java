@@ -14,9 +14,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Created by lhscompsci on 1/11/16.
  */
 public class HelperFunctions {
-    public static void bot2SensorPrint(LinearOpMode op){
-        ColorSensor beacon = Robot.hmap.colorSensor.get("beacon");
-//        AdafruitColorSensor ground = new AdafruitColorSensor(Robot.hmap,"ground","cdim",5);
+    public static void bot2SensorPrint(LinearOpMode op) throws InterruptedException{
+
         try {
             op.waitOneFullHardwareCycle();
         } catch (InterruptedException e) {
@@ -25,15 +24,17 @@ public class HelperFunctions {
 //        ground.setLed(true);
         while(op.opModeIsActive()){
             Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
-//            Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
-//            if (ground.isColorUpdate())
-//                Robot.tel.addData("ground r", ground.getRed() + "  g: " + ground.getGreen() + "  b: " + ground.getBlue() + "  alpha: " + ground.getClear());
+
+//            if(Robot.beaconColorSensor.isColorUpdate())
+//                Robot.tel.addData("beacon r", Robot.beaconColorSensor.getRed() + "  g: " + Robot.beaconColorSensor.getGreen() + "  b: " + Robot.beaconColorSensor.getBlue() + "  alpha: " + Robot.beaconColorSensor.getClear());
+            if(Robot.groundColorSensor.isColorUpdate())
+                Robot.tel.addData("ground r", Robot.groundColorSensor.getRed() + "  g: " + Robot.groundColorSensor.getGreen() + "  b: " + Robot.groundColorSensor.getBlue() + "  alpha: " + Robot.groundColorSensor.getClear());
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("hall",Robot.hmap.digitalChannel.get("hall1").getState());
             Robot.tel.addData("armBackStop",Robot.hmap.digitalChannel.get("compressLimit").getState());
             Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());
-            Robot.tel.addData("right limit",Robot.hmap.digitalChannel.get("rightLimit").getState());
+            Robot.tel.addData("rear limit",Robot.hmap.digitalChannel.get("rearLimit").getState());
             ((FourWheelDrive) Robot.drivetrain).outputEncoders();
             try {
                 Thread.sleep(10);

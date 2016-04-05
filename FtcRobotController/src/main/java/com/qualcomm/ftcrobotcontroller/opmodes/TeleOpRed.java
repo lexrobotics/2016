@@ -20,15 +20,15 @@ public class TeleOpRed extends TeleOp {
     public void loop() {
         super.loop();
 
-        if (gamepad2.x) {
-            redDoor.setPosition(0);
-        } else if (gamepad2.b) {
+        if (gamepad2.b) {
             blueDoor.setPosition(1);
+        } else if (gamepad2.x) {
+            redDoor.setPosition(0);
         } else if (gamepad2.y) {
             blueDoor.setPosition(.55);
         } else {
-            redDoor.setPosition(1);
             blueDoor.setPosition(0);
+            redDoor.setPosition(1);
         }
     }
 }

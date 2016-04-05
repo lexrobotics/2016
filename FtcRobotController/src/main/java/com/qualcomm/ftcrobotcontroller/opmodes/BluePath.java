@@ -42,14 +42,17 @@ public class BluePath extends LinearOpMode {
         Thread.sleep(20);
 
         //Initial Move
+        Robot.setSkirtPosition(0.1);
+
         Robot.drivetrain.moveDistanceWithCorrections(-0.6, 55);
-        Robot.tillLimitSwitch("rightLimit", "rightLimitServo", -0.2, 0.25, 1, 4);
+        Robot.tillLimitSwitch("rearLimit", "rightLimitServo", -0.2, 0.25, 1, 4, true);
         redDoor.setPosition(0);
         Thread.sleep(10);
 //        noodle.setPower(0);
 
-        //Big Turn
-        Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
+        // Turn
+        Robot.drivetrain.dumbGyroTurn(0, 0.3, 10);
+        Robot.drivetrain.dumbGyroTurn(-0.7, 0, 35);
 
 //        noodle.setPower(1);
 

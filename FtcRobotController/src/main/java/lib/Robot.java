@@ -55,8 +55,8 @@ public class Robot {
 
     // Allows us to detect when the opmode has stopped.
     public static LinearOpMode waiter;
-    private static AdafruitColorSensor groundColorSensor;
-    private static AdafruitColorSensor beaconColorSensor;
+    public static AdafruitColorSensor groundColorSensor;
+    public static AdafruitColorSensor beaconColorSensor;
     private static Wire mux;
 
     // Prevents instantiation
@@ -66,7 +66,7 @@ public class Robot {
                              Telemetry tel,
                              LinearOpMode waiter,
                              DriveTrain drivetrain,
-                             String gyroName) {
+                             String gyroName) throws InterruptedException {
         Robot.hmap = hmap;
         Robot.tel = tel;
         Robot.servos = new HashMap<String, Servo>();
@@ -74,7 +74,10 @@ public class Robot {
         Robot.waiter = waiter;
         Robot.drivetrain = drivetrain;
         Robot.gyroName = gyroName;
-//        Robot.mux = new Wire()
+        Robot.mux = new Wire(hmap, "mux", 2*0x70);
+        groundColorSensor = new AdafruitColorSensor(hmap, "ground", "cdim", -1, 0, mux);
+//        beaconColorSensor = new AdafruitColorSensor(hmap, "beacon", "cdim", -1, 1, mux);
+
     }
 
     public static void registerServo(String servoName, double initial_position) {
@@ -161,6 +164,17 @@ public class Robot {
                                          int killTime // Time until the function is ended
                                         ) throws InterruptedException {
 
+        tillLimitSwitch(limitName,servoName,power,positionActive,positionInactive,killTime, false);
+    }
+    public static void tillLimitSwitch  (String limitName,
+                                         String servoName,
+                                         double power,
+                                         double positionActive,
+                                         double positionInactive,
+                                         int killTime,
+                                          boolean inverted
+    ) throws InterruptedException {
+
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         hmap.servo.get(servoName).setPosition(positionActive);
         Thread.sleep(100);
@@ -168,7 +182,7 @@ public class Robot {
 
         timer.reset();
 
-        while (!hmap.digitalChannel.get(limitName).getState() && timer.time() < killTime && waiter.opModeIsActive()){
+        while (hmap.digitalChannel.get(limitName).getState() == inverted && timer.time() < killTime && waiter.opModeIsActive()){
             waiter.waitOneFullHardwareCycle();
         }
 
@@ -273,20 +287,17 @@ public class Robot {
 
     public static double delaySet(String potName,String switchName) throws InterruptedException {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
-        ColorSensor beacon = Robot.hmap.colorSensor.get("beacon");
-//        ColorSensor ground = Robot.hmap.colorSensor.get("ground");
 
         int pot = 0;
         while(beaconToucher.getState() && !waiter.opModeIsActive() ) {
-            pot = (int) Math.floor((1023 - hmap.analogInput.get(potName).getValue())/1023.0 * 15.0);
             tel.addData("Delay", pot);
-            Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
+//            Robot.tel.addData("beacon r", beacon.red() + "  g: " + beacon.green() + "  b: " + beacon.blue() + "  alpha: " + beacon.alpha());
 //            Robot.tel.addData("ground r", ground.red() + "  g: " + ground.green() + "  b: " + ground.blue() + "  alpha: " + ground.alpha());
             Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());
-            Robot.tel.addData("right limit",Robot.hmap.digitalChannel.get("rightLimit").getState());
+            Robot.tel.addData("right limit",Robot.hmap.digitalChannel.get("rearLimit").getState());
 
 
             Thread.sleep(10);
@@ -351,7 +362,6 @@ public class Robot {
         int maxBlue = 0;
 
 
-        AdafruitColorSensor ground = new AdafruitColorSensor(Robot.hmap, groundName, "cdim", 5);
         SensorState.ColorType dominant = null;
 
         waiter.waitOneFullHardwareCycle();
@@ -359,15 +369,15 @@ public class Robot {
         Thread.sleep(10);
         drivetrain.move(power, waiter);
         do {
-            while(!ground.isColorUpdate());
+            while(!groundColorSensor.isColorUpdate());
 
             if (dominant == null && (state.redVsBlue(beaconName) == SensorState.ColorType.RED || state.redVsBlue(beaconName) == SensorState.ColorType.BLUE)) {
                 dominant = state.redVsBlue(beaconName);
             }
             Thread.sleep(1);
-        } while ((ground.getRed() <= RED_THRESH ) ||
-                (ground.getGreen() <= GREEN_THRESH) ||
-                (ground.getBlue() <= BLUE_THRESH));
+        } while ((groundColorSensor.getRed() <= RED_THRESH ) ||
+                (groundColorSensor.getGreen() <= GREEN_THRESH) ||
+                (groundColorSensor.getBlue() <= BLUE_THRESH));
 
         drivetrain.stopMove();
         Thread.sleep(20);
@@ -380,14 +390,13 @@ public class Robot {
         //we tuned it to about 600 in the code
         //At meadow room with sensor print 1400-1500
         //and in code tuned to 725
-        AdafruitColorSensor ground = new AdafruitColorSensor(Robot.hmap, groundName, "cdim", 5);
         SensorState.ColorType dominant = null;
 
 
-        int RED_THRESH = 300;
-        int GREEN_THRESH = 300;
-        int BLUE_THRESH = 300;
-        while(!ground.isColorUpdate());
+        int RED_THRESH = 70;
+        int GREEN_THRESH = 70;
+        int BLUE_THRESH = 70;
+        while(!groundColorSensor.isColorUpdate());
         int prevRed = 0;
         int prevGreen = 0;
         int prevBlue = 0;
@@ -396,10 +405,10 @@ public class Robot {
         int blueDiff;
 
         for (int i = 0; i < 10; i++){
-            while (!ground.isColorUpdate());
-            prevRed += ground.getRed();
-            prevGreen += ground.getGreen();
-            prevBlue += ground.getBlue();
+            while (!groundColorSensor.isColorUpdate());
+            prevRed += groundColorSensor.getRed();
+            prevGreen += groundColorSensor.getGreen();
+            prevBlue += groundColorSensor.getBlue();
         }
 
         prevRed /= 10;
@@ -412,22 +421,25 @@ public class Robot {
         Thread.sleep(10);
         drivetrain.move(power, waiter);
         do {
-            while(!ground.isColorUpdate());
+            while(!groundColorSensor.isColorUpdate());
 
-            if(dominant == null){
-                tempdominant = state.redVsBlue(beaconName);
-                if ((tempdominant == SensorState.ColorType.RED || tempdominant == SensorState.ColorType.BLUE)) {
-                    dominant = state.redVsBlue(beaconName);
-                }
-            }
+//            if(dominant == null){
+//                tempdominant = state.redVsBlue(beaconName);
+//                if ((tempdominant == SensorState.ColorType.RED || tempdominant == SensorState.ColorType.BLUE)) {
+//                    dominant = state.redVsBlue(beaconName);
+//                }
+//            }
 
-            redDiff = ground.getRed() - prevRed;
-            greenDiff = ground.getGreen() - prevGreen;
-            blueDiff = ground.getBlue() - prevBlue;
+            redDiff = groundColorSensor.getRed() - prevRed;
+            greenDiff = groundColorSensor.getGreen() - prevGreen;
+            blueDiff = groundColorSensor.getBlue() - prevBlue;
+            tel.addData("red_jump", redDiff);
+            tel.addData("green_jump", greenDiff);
+            tel.addData("blue_jump", blueDiff);
 
-            prevRed = ground.getRed();
-            prevGreen = ground.getGreen();
-            prevBlue = ground.getBlue();
+            prevRed = groundColorSensor.getRed();
+            prevGreen = groundColorSensor.getGreen();
+            prevBlue = groundColorSensor.getBlue();
             Thread.sleep(20);
         } while ((redDiff <= RED_THRESH ) ||
                 (greenDiff <= GREEN_THRESH) ||
@@ -484,5 +496,10 @@ public class Robot {
 
         drivetrain.move(0);
 
+    }
+
+    public static void setSkirtPosition(double pos) {
+        Robot.setServoPosition("rightZipline", 0.8 - pos);
+        Robot.setServoPosition("rightZipline", 0.4 + pos);
     }
 }

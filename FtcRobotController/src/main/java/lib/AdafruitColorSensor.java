@@ -17,14 +17,14 @@ public class AdafruitColorSensor {
 
     private int clear, red, green, blue;
 
-    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel) {
+    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel) throws InterruptedException {
         this(hmap, colorName, cdimName, ledChannel, -1, null);
     }
 
-    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel, int i2cMuxChannel, Wire mux) {
+    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel, int i2cMuxChannel, Wire mux) throws InterruptedException {
+        led = ledChannel;
         this.mux = mux;
         this.i2cMuxChannel = i2cMuxChannel;
-        led = ledChannel;
         if(led != -1) {
             cdim = hmap.deviceInterfaceModule.get(cdimName);
             cdim.setDigitalChannelMode(led, DigitalChannelController.Mode.OUTPUT);
@@ -32,11 +32,12 @@ public class AdafruitColorSensor {
 
         cs = new Wire(hmap, colorName, 2*0x29);
 
-        selectSensor();
+//        selectSensor();
+        Thread.sleep(10);
         cs.write(0x80, 0x03);                // R[00] = 3    to enable power
         cs.requestFrom(0x92, 1);            // R[12]        is the device ID
-        cs.write(0x8F, 0x02);                // R[0F] = 2    to set gain 16
-        cs.write(0x81, 0xEC);                // R[01] = EC   to set integration time to 20* 2.4 ms
+        cs.write(0x8F, 0x03);                // R[0F] = 2    to set gain 16
+        cs.write(0x81, 0xFF);                // R[01] = EC   to set integration time to 20* 2.4 ms
         // 256 - 20 = 236 = 0xEC
 
         // start polling color sensor
@@ -48,8 +49,9 @@ public class AdafruitColorSensor {
         this.cdim.setDigitalChannelState(led, on);
     }
 
-    public boolean isColorUpdate() {
-        selectSensor();
+    public boolean isColorUpdate() throws InterruptedException{
+//        selectSensor();
+//        Thread.sleep(10);
         boolean isNew = false;
         if (cs.responseCount() > 0) {
             cs.getResponse();
@@ -92,8 +94,8 @@ public class AdafruitColorSensor {
     }
 
     private void selectSensor() {
-        if(mux != null) {
-            mux.write(0, 1 << i2cMuxChannel);
+        if(i2cMuxChannel >= 0 && i2cMuxChannel <= 7 && mux != null) {
+            mux.write(0, 1<<i2cMuxChannel);
             while(mux.responseCount() < 1);
             mux.getResponse();
         }
