@@ -17,20 +17,20 @@ public class AdafruitColorSensor {
 
     private int clear, red, green, blue;
 
-    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel) {
-        this(hmap, colorName, cdimName, ledChannel, -1, "");
+    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel) throws InterruptedException {
+        this(hmap, colorName, cdimName, ledChannel, -1, null);
     }
 
-    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel, int i2cMuxChannel, String muxName) {
+    public AdafruitColorSensor(HardwareMap hmap, String colorName, String cdimName, int ledChannel, int i2cMuxChannel, Wire mux) throws InterruptedException {
         led = ledChannel;
+        this.i2cMuxChannel = i2cMuxChannel;
         cdim = hmap.deviceInterfaceModule.get(cdimName);
         cdim.setDigitalChannelMode(led, DigitalChannelController.Mode.OUTPUT);
 
-        cs = new Wire(hmap, colorName, i2cMuxChannel);
-        if (i2cMuxChannel != -1)
-            mux = new Wire(hmap, muxName, 0x70);
+        cs = new Wire(hmap, colorName, 2*0x29);
 
-        selectSensor();
+//        selectSensor();
+//        Thread.sleep(10);
         cs.write(0x80, 0x03);                // R[00] = 3    to enable power
         cs.requestFrom(0x92, 1);            // R[12]        is the device ID
         cs.write(0x8F, 0x02);                // R[0F] = 2    to set gain 16
@@ -45,8 +45,9 @@ public class AdafruitColorSensor {
         this.cdim.setDigitalChannelState(led, on);
     }
 
-    public boolean isColorUpdate() {
-        selectSensor();
+    public boolean isColorUpdate() throws InterruptedException{
+//        selectSensor();
+//        Thread.sleep(10);
         boolean isNew = false;
         if (cs.responseCount() > 0) {
             cs.getResponse();
@@ -89,8 +90,9 @@ public class AdafruitColorSensor {
     }
 
     private void selectSensor() {
-        if(i2cMuxChannel != -1)
-            mux.write(i2cMuxChannel);
+        if(i2cMuxChannel >= 0 && i2cMuxChannel <= 7) {
+            mux.write(0, 1 << i2cMuxChannel);
+        }
     }
 
     public int getClear() {

@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Created by lhscompsci on 1/11/16.
  */
 public class HelperFunctions {
-    public static void bot2SensorPrint(LinearOpMode op){
+    public static void bot2SensorPrint(LinearOpMode op) throws InterruptedException{
         ColorSensor beacon = Robot.hmap.colorSensor.get("beacon");
         AdafruitColorSensor ground = new AdafruitColorSensor(Robot.hmap,"ground","cdim",5);
         try {

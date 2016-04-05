@@ -20,7 +20,7 @@ public class TeleOpRed extends OpMode {
     DcMotor rightFrontDrive, rightRearDrive;
     DcMotor noodler, armTilter, liftStageOne, liftStageTwo;
     Servo divider, rightZipline, leftZipline, buttonPusher, climberDropper;
-    Servo redDoor;// blueDoor;
+    Servo blueDoor, redDoor;
     Servo rightLimitServo, leftLimitServo;
 
     DigitalChannel compressLimit;
@@ -97,7 +97,7 @@ public class TeleOpRed extends OpMode {
         climberDropper = hardwareMap.servo.get("climberDropper");
 
         redDoor = hardwareMap.servo.get("redDoor");
-//        blueDoor = hardwareMap.servo.get("blueDoor");
+        blueDoor = hardwareMap.servo.get("blueDoor");
 
         armLock = hardwareMap.servo.get("armLock");
 
@@ -113,7 +113,7 @@ public class TeleOpRed extends OpMode {
         buttonPusher.setPosition(0.5);
         climberDropper.setPosition(1);
         redDoor.setPosition(1);
-//        blueDoor.setPosition(0);
+        blueDoor.setPosition(0);
         divider.setPosition(0.5);
         armLock.setPosition(1);
 
@@ -135,11 +135,10 @@ public class TeleOpRed extends OpMode {
         double rightPower;
 
 //
-        if(gamepad1.left_trigger >= .1) {
+        if (gamepad1.left_trigger >= .1) {
             leftPower = scaleInput(-gamepad1.left_stick_y) / 2.125;
             rightPower = scaleInput(-gamepad1.right_stick_y) / 2.125;
-        }
-        else{
+        } else {
             leftPower = scaleInput(-gamepad1.left_stick_y);
             rightPower = scaleInput(-gamepad1.right_stick_y);
         }
@@ -170,25 +169,22 @@ public class TeleOpRed extends OpMode {
             noodler.setPower(0);
         }
 
-        if(gamepad2.back){
+        if (gamepad2.back) {
             climberDropper.setPosition(0);
             climbersDumped = true;
-        }
-        else if(climbersDumped) {
-            if (arm_locked){
+        } else if (climbersDumped) {
+            if (arm_locked) {
                 climberDropper.setPosition(0.7);
-            } else if(climbersDumped){
+            } else if (climbersDumped) {
                 climberDropper.setPosition(0.5);
             }
-        }
-        else {
+        } else {
             climberDropper.setPosition(1);
         }
 
         if (gamepad2.left_trigger >= .1) {
             liftStageOne.setPower(-gamepad2.left_trigger);
-        }
-        else if (gamepad2.left_bumper) {
+        } else if (gamepad2.left_bumper) {
             liftStageOne.setPower(1);
         } else {
             liftStageOne.setPower(0);
@@ -196,52 +192,47 @@ public class TeleOpRed extends OpMode {
 
         if (gamepad2.right_trigger >= .1) {
             liftStageTwo.setPower(gamepad2.right_trigger);
-        }
-        else if (gamepad2.right_bumper) {
+        } else if (gamepad2.right_bumper) {
             liftStageTwo.setPower(-1);
-        }
-        else {
+        } else {
             liftStageTwo.setPower(0);
         }
 
         // dpad
         if (gamepad2.dpad_left) {
             divider.setPosition(1);
-        }
-        else if (gamepad2.dpad_right) {
+        } else if (gamepad2.dpad_right) {
             divider.setPosition(0);
-        }
-        else {
+        } else {
             divider.setPosition(.5);
         }
 
 
-        if(gamepad2.right_stick_x > 0.7) {
+        if (gamepad2.right_stick_x > 0.7) {
             rightZipline.setPosition(0.95);
             rightZiplineActivated = false;
-        }
-        else if(gamepad2.right_stick_x < -0.7) {
+        } else if (gamepad2.right_stick_x < -0.7) {
             rightZipline.setPosition(0);
             rightZiplineActivated = true;
         }
-        if(gamepad2.left_stick_x > 0.7) {
+        if (gamepad2.left_stick_x > 0.7) {
             leftZipline.setPosition(1);
             leftZiplineActivated = false;
-        }
-        else if(gamepad2.left_stick_x < -0.7) {
+        } else if (gamepad2.left_stick_x < -0.7) {
             leftZipline.setPosition(0.05);
             rightZiplineActivated = false;
         }
 
 
-        if (gamepad2.x) {
+        if (gamepad2.b) {
+            blueDoor.setPosition(1);
+        } else if (gamepad2.x) {
             redDoor.setPosition(0);
-//            blueDoor.setPosition(1);
-        } else if (gamepad2.b) {
-            redDoor.setPosition(0.5);
+        } else if (gamepad2.y) {
+            blueDoor.setPosition(0.5);
         } else {
+            blueDoor.setPosition(0);
             redDoor.setPosition(1);
-//            blueDoor.setPosition(0);
         }
 
 

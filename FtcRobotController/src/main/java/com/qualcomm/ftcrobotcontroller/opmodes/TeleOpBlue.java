@@ -20,7 +20,7 @@ public class TeleOpBlue extends OpMode {
     DcMotor rightFrontDrive, rightRearDrive;
     DcMotor noodler, armTilter, liftStageOne, liftStageTwo;
     Servo divider, rightZipline, leftZipline, buttonPusher, climberDropper;
-    Servo blueDoor; //, redDoor;
+    Servo redDoor, blueDoor;
     Servo rightLimitServo, leftLimitServo;
 
     DigitalChannel compressLimit;
@@ -96,7 +96,7 @@ public class TeleOpBlue extends OpMode {
         buttonPusher = hardwareMap.servo.get("buttonPusher");
         climberDropper = hardwareMap.servo.get("climberDropper");
 
-//        redDoor = hardwareMap.servo.get("redDoor");
+        redDoor = hardwareMap.servo.get("redDoor");
         blueDoor = hardwareMap.servo.get("blueDoor");
 
         armLock = hardwareMap.servo.get("armLock");
@@ -112,7 +112,7 @@ public class TeleOpBlue extends OpMode {
         rightZipline.setPosition(0);
         buttonPusher.setPosition(0.5);
         climberDropper.setPosition(1);
-//        redDoor.setPosition(1);
+        redDoor.setPosition(1);
         blueDoor.setPosition(0);
         divider.setPosition(0.5);
         armLock.setPosition(1);
@@ -237,8 +237,11 @@ public class TeleOpBlue extends OpMode {
         if (gamepad2.x) {
             blueDoor.setPosition(1);
         } else if (gamepad2.b) {
-            blueDoor.setPosition(0.5);
+            redDoor.setPosition(0);
+        } else if(gamepad2.y) {
+            redDoor.setPosition(.5);
         } else {
+            redDoor.setPosition(1);
             blueDoor.setPosition(0);
         }
 

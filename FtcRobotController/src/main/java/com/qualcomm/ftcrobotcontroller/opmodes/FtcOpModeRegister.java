@@ -75,9 +75,10 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("SensorPrint", SensorPrint.class);
         manager.register("I2CMuxTest", I2CMuxTest.class);
 
-        // manager.register("pidCalibration", pidCalibration.class);
-        manager.register("TeleOpRed", TeleOpRed.class);
         manager.register("TeleOpBlue", TeleOpBlue.class);
+        manager.register("TeleOpRed", TeleOpRed.class);
+//        // manager.register("pidCalibration", pidCalibration.class);
+
        // manager.register("pidCalibration", pidCalibration.class);
     }
 }
