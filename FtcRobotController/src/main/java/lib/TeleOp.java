@@ -1,4 +1,4 @@
-package com.qualcomm.ftcrobotcontroller.opmodes;
+package lib;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -20,7 +20,7 @@ public class TeleOp extends OpMode {
     DcMotor rightFrontDrive, rightRearDrive;
     DcMotor noodler, armTilter, liftStageOne, liftStageTwo;
     Servo divider, rightZipline, leftZipline, buttonPusher, climberDropper;
-    Servo redDoor, blueDoor;
+    public Servo redDoor, blueDoor;
     Servo rightLimitServo, leftLimitServo;
 
     DigitalChannel compressLimit;
@@ -108,7 +108,7 @@ public class TeleOp extends OpMode {
         armTilter.setPower(0);
         liftStageOne.setPower(0);
         liftStageTwo.setPower(0);
-        leftZipline.setPosition(1);
+        leftZipline.setPosition(0.4);
         rightZipline.setPosition(0);
         buttonPusher.setPosition(0.5);
         climberDropper.setPosition(1);
@@ -134,7 +134,7 @@ public class TeleOp extends OpMode {
         double leftPower;
         double rightPower;
 
-//
+
         if(gamepad1.left_trigger >= .1) {
             leftPower = scaleInput(-gamepad1.left_stick_y) / 2.125;
             rightPower = scaleInput(-gamepad1.right_stick_y) / 2.125;
@@ -216,32 +216,22 @@ public class TeleOp extends OpMode {
         }
 
 
-        if(gamepad2.right_stick_x > 0.7) {
-            rightZipline.setPosition(0.95);
-            rightZiplineActivated = false;
-        }
-        else if(gamepad2.right_stick_x < -0.7) {
-            rightZipline.setPosition(0);
-            rightZiplineActivated = true;
-        }
-        if(gamepad2.left_stick_x > 0.7) {
-            leftZipline.setPosition(1);
-            leftZiplineActivated = false;
-        }
-        else if(gamepad2.left_stick_x < -0.7) {
-            leftZipline.setPosition(0.05);
-            rightZiplineActivated = false;
-        }
-
-
-        if (gamepad2.x) {
-            redDoor.setPosition(0);
-            blueDoor.setPosition(1);
-        } else {
-            redDoor.setPosition(1);
-            blueDoor.setPosition(0);
-        }
-
+//        if(gamepad2.right_stick_x > 0.7) {
+//            rightZipline.setPosition(0.4);
+//            rightZiplineActivated = false;
+//        }
+//        else if(gamepad2.right_stick_x < -0.7) {
+//            rightZipline.setPosition(0);
+//            rightZiplineActivated = true;
+//        }
+//        if(gamepad2.left_stick_x > 0.7) {
+//            leftZipline.setPosition(.4);
+//            leftZiplineActivated = false;
+//        }
+//        else if(gamepad2.left_stick_x < -0.7) {
+//            leftZipline.setPosition(0.05);
+//            leftZiplineActivated = false;
+//        }
 
         if(gamepad2.start) {
             buttonPusher.setPosition(0.7); // retract button pusher
@@ -305,6 +295,12 @@ public class TeleOp extends OpMode {
 
         if (compressLimit.getState()) {
             armEncoderReset();
+            rightZipline.setPosition(0.05);
+            leftZipline.setPosition(0.35);
+        }
+        else{
+            rightZipline.setPosition(0.4);
+            leftZipline.setPosition(0);
         }
 
         telemetry.addData("rightPower, leftPower", Double.toString(rightPower).concat(Double.toString(leftPower)));

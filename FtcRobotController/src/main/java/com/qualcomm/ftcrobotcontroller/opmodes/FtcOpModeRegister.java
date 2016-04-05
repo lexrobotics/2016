@@ -34,6 +34,8 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
 
+import lib.TeleOp;
+
 /**
  * Register Op Modes
  */
@@ -68,17 +70,23 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("BluePath", BluePath.class);
         manager.register("BluePathScoot", BluePathScoot.class);
         manager.register("BluePathWide", BluePathWide.class);
-        manager.register("BluePathWideNoTurn", BluePathWideNoTurn.class);
+        //manager.register("BluePathWideNoTurn", BluePathWideNoTurn.class);
         manager.register("BluePathWideScoot", BluePathWideScoot.class);
         manager.register("IMUTest", IMUTest.class);
 
         manager.register("SensorPrint", SensorPrint.class);
         manager.register("I2CMuxTest", I2CMuxTest.class);
 
+<<<<<<< HEAD
         manager.register("TeleOpBlue", TeleOpBlue.class);
         manager.register("TeleOpRed", TeleOpRed.class);
 //        // manager.register("pidCalibration", pidCalibration.class);
 
        // manager.register("pidCalibration", pidCalibration.class);
+=======
+        manager.register("TeleOpRed", TeleOpRed.class);
+        manager.register("TeleOpBlue", TeleOpBlue.class);
+        manager.register("pidCalibration", pidCalibration.class);
+>>>>>>> c937d2f13f8e45e60653733fdf8d6c5b84688e72
     }
 }

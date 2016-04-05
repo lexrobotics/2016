@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import lib.Bno055;
+
 
 import java.util.HashMap;
 
@@ -94,7 +96,7 @@ public class SensorState implements Runnable{
     }
 
     // Types of sensors
-    public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER }
+    public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER, I2C_DEVICE, IMU }
 
     // Names of colors. Can also convert back and forth from the names to their index in this enum, for
     // single values or arrays of values.
@@ -133,6 +135,7 @@ public class SensorState implements Runnable{
     // Allows recovery of all sensors of a certain type.
     private HashMap<SensorType, SensorContainer[]> types_inv;
     private HardwareMap hmap;
+    private HashMap<String, Bno055> imus;
 
     private DigitalChannel usPin;
     private boolean usPinWasSet;
@@ -147,6 +150,7 @@ public class SensorState implements Runnable{
     public SensorState(HardwareMap hmap, int milli_interval, int nano_interval) {
         this.hmap = hmap;
         maps = new HashMap<SensorType, HardwareMap.DeviceMapping>();
+        imus = new HashMap<String, Bno055>();
         sensorContainers = new HashMap<String, SensorContainer>();
         types_inv = new HashMap<SensorType, SensorContainer[]>();
 
@@ -159,12 +163,16 @@ public class SensorState implements Runnable{
         maps.put(SensorType.GYRO, hmap.gyroSensor);
         maps.put(SensorType.COLOR, hmap.colorSensor);
         maps.put(SensorType.ENCODER, hmap.dcMotor);
+        maps.put(SensorType.I2C_DEVICE, hmap.i2cDevice);
+
 
         types_inv.put(SensorType.ULTRASONIC, new SensorContainer[0]);
         types_inv.put(SensorType.LIGHT, new SensorContainer[0]);
         types_inv.put(SensorType.GYRO, new SensorContainer[0]);
         types_inv.put(SensorType.COLOR, new SensorContainer[0]);
         types_inv.put(SensorType.ENCODER, new SensorContainer[0]);
+        types_inv.put(SensorType.I2C_DEVICE, new SensorContainer[0]);
+
 
         usPinWasSet = false;
     }
@@ -193,31 +201,37 @@ public class SensorState implements Runnable{
      * @param data_length   The number of sensor readings to store for the sensor
      */
     public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length){
-        // Get underlying sensor object for the sensor
-        Object sensor_obj = maps.get(type).get(name);
 
-        // Make a SensorContainer to wrap around the object
-        SensorContainer sen = new SensorContainer(sensor_obj, type, name, update, data_length);
+        if (type == SensorType.IMU) {
+            Bno055 bonbon = new Bno055(Robot.hmap, name);
 
-        if (type == SensorType.GYRO) {
-            ((GyroSensor) sensor_obj).calibrate();
-            ElapsedTime timer = new ElapsedTime();
-            timer.reset();
-
-            // There is always a gap of a few milliseconds before a gyro starts calibrating.
-            // This needs to be waited out, otherwise a call to isCalibrating() could return a
-            // misleading result.
             try {
-                while (!((GyroSensor) sensor_obj).isCalibrating() && timer.time() < 0.3) {
-                    Thread.sleep(1);
+                bonbon.init();
+
+                while(bonbon.isInitActive()){
+                    bonbon.init_loop();
+                    Robot.tel.addData("initting","yay");
                 }
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
-        }
 
-        sensorContainers.put(name, sen);
-        updateTypesInv(sen);
+            bonbon.startSchedule(Bno055.BnoPolling.SENSOR, 100);     // 10 Hz
+            bonbon.startSchedule(Bno055.BnoPolling.FUSION, 33);      // 30 Hz
+            bonbon.startSchedule(Bno055.BnoPolling.TEMP, 200);       // 5 Hz
+            bonbon.startSchedule(Bno055.BnoPolling.CALIB, 250);      // 4 H
+            bonbon.startSchedule(Bno055.BnoPolling.EULER, 15);
+            imus.put(name,bonbon);
+        }
+        else {      // Get underlying sensor object for the sensor
+            Object sensor_obj = maps.get(type).get(name);
+
+            // Make a SensorContainer to wrap around the object
+            SensorContainer sen = new SensorContainer(sensor_obj, type, name, update, data_length);
+
+            sensorContainers.put(name, sen);
+            updateTypesInv(sen);
+        }
     }
 
     /**
@@ -329,6 +343,11 @@ public class SensorState implements Runnable{
      * Immediately return a value for the given sensor, without waiting for another run().
      */
     public synchronized double getSensorReading(String name){
+        if(imus.get(name) != null ){
+            Bno055 bonbon = imus.get(name);
+            bonbon.loop();
+            return bonbon.eulerX();
+        }
         if(!sensorContainers.keySet().contains(name)){
             throw new RuntimeException("SensorState.getSensorReading: sensor " + name + " not registered.");
         }
@@ -458,11 +477,14 @@ public class SensorState implements Runnable{
      */
     private double getSensorReading(SensorContainer sen){
         double value;
+        Bno055 bonbon;
 
         synchronized (this) {
             switch (sen.type) {
                 case GYRO:
-                    return ((GyroSensor) sen.sensor).getHeading();
+                    bonbon = (Bno055) sen.sensor;
+                    bonbon.loop();
+                    return (bonbon).eulerZ() / 16.0;
 
                 case ENCODER:
                     return ((DcMotor) sen.sensor).getCurrentPosition();
@@ -522,6 +544,7 @@ public class SensorState implements Runnable{
                 for (SensorContainer sen : sensorContainers.values()) {
                     synchronized (this) {
                         sen.filter.update(getSensorReading(sen));
+                        //loop the B NPo
                     }
                 }
 

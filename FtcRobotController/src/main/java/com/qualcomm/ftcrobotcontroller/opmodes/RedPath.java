@@ -31,20 +31,7 @@ public class RedPath extends LinearOpMode {
         waitForStart();
         Robot.delayWithCountdown(delayTime);
 
-        GyroSensor hero = hardwareMap.gyroSensor.get("hero");
-        ElapsedTime timer = new ElapsedTime();
-        hero.calibrate();
-        timer.reset();
-        while (!hero.isCalibrating() && opModeIsActive() && timer.time() < 0.5){
-            Thread.sleep(1);
-        }
-        while(hero.isCalibrating() && opModeIsActive()){
-            Thread.sleep(1);
-        }
 
-//        while (Robot.state.gyroIsCalibrating("hero") == true) {
-//            waitOneFullHardwareCycle();
-//        }
         //initial turn
         Robot.drivetrain.dumbGyroTurn(0, .7, 45);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
@@ -79,7 +66,7 @@ public class RedPath extends LinearOpMode {
         }
 
         dominant = Robot.oppositeDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
-            Robot.dumpClimbers();
+        Robot.dumpClimbers();
         telemetry.addData("Color detected", dominant);
         if(dominant == SensorState.ColorType.BLUE) {
             Robot.pushButton("beaconToucher", -1);
@@ -87,8 +74,8 @@ public class RedPath extends LinearOpMode {
         else if(dominant == SensorState.ColorType.RED) {
             Robot.pushButton("beaconToucher", 1);
         }
-        else{
-        }
+
+
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();
         Robot.retractButtonPusher();
