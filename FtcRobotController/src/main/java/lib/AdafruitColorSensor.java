@@ -32,12 +32,12 @@ public class AdafruitColorSensor {
 
         cs = new Wire(hmap, colorName, 2*0x29);
 
-//        selectSensor();
+        selectSensor();
         Thread.sleep(10);
         cs.write(0x80, 0x03);                // R[00] = 3    to enable power
         cs.requestFrom(0x92, 1);            // R[12]        is the device ID
-        cs.write(0x8F, 0x03);                // R[0F] = 2    to set gain 16
-        cs.write(0x81, 0xFF);                // R[01] = EC   to set integration time to 20* 2.4 ms
+        cs.write(0x8F, 0x02);                // R[0F] = 2    to set gain 16
+        cs.write(0x81, 0xEC);                // R[01] = EC   to set integration time to 20* 2.4 ms
         // 256 - 20 = 236 = 0xEC
 
         // start polling color sensor
@@ -50,8 +50,8 @@ public class AdafruitColorSensor {
     }
 
     public boolean isColorUpdate() throws InterruptedException{
-//        selectSensor();
-//        Thread.sleep(10);
+        selectSensor();
+        Thread.sleep(10);
         boolean isNew = false;
         if (cs.responseCount() > 0) {
             cs.getResponse();

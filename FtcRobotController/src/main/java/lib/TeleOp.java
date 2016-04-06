@@ -108,8 +108,8 @@ public class TeleOp extends OpMode {
         armTilter.setPower(0);
         liftStageOne.setPower(0);
         liftStageTwo.setPower(0);
-        leftZipline.setPosition(0.4);
-        rightZipline.setPosition(0.8);
+        leftZipline.setPosition(0.2);
+        rightZipline.setPosition(0.75);
         buttonPusher.setPosition(0.5);
         climberDropper.setPosition(1);
         redDoor.setPosition(1);

@@ -80,5 +80,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("TeleOpRed", TeleOpRed.class);
         manager.register("TeleOpBlue", TeleOpBlue.class);
         manager.register("pidCalibration", pidCalibration.class);
+        manager.register("servoCalibration", servoCalibration.class);
+
     }
 }

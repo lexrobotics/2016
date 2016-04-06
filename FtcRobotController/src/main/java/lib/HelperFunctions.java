@@ -25,8 +25,8 @@ public class HelperFunctions {
         while(op.opModeIsActive()){
             Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
 
-//            if(Robot.beaconColorSensor.isColorUpdate())
-//                Robot.tel.addData("beacon r", Robot.beaconColorSensor.getRed() + "  g: " + Robot.beaconColorSensor.getGreen() + "  b: " + Robot.beaconColorSensor.getBlue() + "  alpha: " + Robot.beaconColorSensor.getClear());
+            if(Robot.beaconColorSensor.isColorUpdate())
+                Robot.tel.addData("beacon r", Robot.beaconColorSensor.getRed() + "  g: " + Robot.beaconColorSensor.getGreen() + "  b: " + Robot.beaconColorSensor.getBlue() + "  alpha: " + Robot.beaconColorSensor.getClear());
             if(Robot.groundColorSensor.isColorUpdate())
                 Robot.tel.addData("ground r", Robot.groundColorSensor.getRed() + "  g: " + Robot.groundColorSensor.getGreen() + "  b: " + Robot.groundColorSensor.getBlue() + "  alpha: " + Robot.groundColorSensor.getClear());
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
@@ -81,24 +81,59 @@ public class HelperFunctions {
 
     }
 
-    public static void calibrateServo(String name, double safeStart, HardwareMap hmap, Gamepad gamepad) throws InterruptedException{
+    public static void calibrateServo(String name, double safeStart, HardwareMap hmap, Gamepad gamepad, LinearOpMode waiter, Telemetry tel) throws InterruptedException{
         Servo s = hmap.servo.get(name);
         s.setPosition(safeStart);
         double position = safeStart;
 
-        while (true) {
-            if (gamepad.dpad_left){
+        while (waiter.opModeIsActive()) {
+            if (gamepad.dpad_left&&position>.01){
                 position -= 0.01;
             }
 
-            if (gamepad.dpad_right){
+            if (gamepad.dpad_right && position<0.99){
                 position += 0.01;
             }
 
             s.setPosition(position);
-            Robot.tel.addData("Position", position);
+            tel.addData("Position", position);
 
-            Thread.sleep(1);
+            Thread.sleep(200);
+        }
+    }
+
+    public static void calibrateServos(String name1, String name2, double safeStart1, double safeStart2, HardwareMap hmap, Gamepad gamepad, LinearOpMode waiter, Telemetry tel) throws InterruptedException{
+        Servo s1 = hmap.servo.get(name1);
+        Servo s2 = hmap.servo.get(name2);
+        s1.setPosition(safeStart1);
+        s2.setPosition(safeStart2);
+        double position1 = safeStart1;
+        double position2 = safeStart2;
+
+        while (waiter.opModeIsActive()) {
+            if (gamepad.dpad_left && position1>.01){
+                position1 -= 0.01;
+            }
+
+            if (gamepad.dpad_right && position1<0.99){
+                position1 += 0.01;
+            }
+
+            if (gamepad.dpad_down && position2>.01){
+                position2 -= 0.01;
+            }
+
+            if (gamepad.dpad_up && position2<0.99){
+                position2 += 0.01;
+            }
+
+
+            s1.setPosition(position1);
+            tel.addData("Position 1", position1);
+            s2.setPosition(position2);
+            tel.addData("Position 2", position2);
+
+            Thread.sleep(200);
         }
     }
 }

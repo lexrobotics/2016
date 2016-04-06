@@ -99,7 +99,7 @@ public class MovementThread implements Runnable {
 
         double maxOutput = Math.min(1 - Math.abs(currentPower), Math.abs(currentPower));
 //        PID correctionPID = new PID(maxOutput/3.6, 0.05, 0.01);
-        pid.recreate(maxOutput / KpDivisor, Ki, Kd);
+        pid.recreate(KpDivisor, Ki, Kd);
 
         pid.setMaxOutput(maxOutput);
         pid.setMinOutput(-1 * maxOutput);

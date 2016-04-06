@@ -76,7 +76,7 @@ public class Robot {
         Robot.gyroName = gyroName;
         Robot.mux = new Wire(hmap, "mux", 2*0x70);
         groundColorSensor = new AdafruitColorSensor(hmap, "ground", "cdim", -1, 0, mux);
-//        beaconColorSensor = new AdafruitColorSensor(hmap, "beacon", "cdim", -1, 1, mux);
+        beaconColorSensor = new AdafruitColorSensor(hmap, "beacon", "cdim", -1, 1, mux);
 
     }
 
@@ -297,7 +297,7 @@ public class Robot {
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("left limit", Robot.hmap.digitalChannel.get("leftLimit").getState());
-            Robot.tel.addData("right limit",Robot.hmap.digitalChannel.get("rearLimit").getState());
+            Robot.tel.addData("right limit", Robot.hmap.digitalChannel.get("rearLimit").getState());
 
 
             Thread.sleep(10);
@@ -423,12 +423,12 @@ public class Robot {
         do {
             while(!groundColorSensor.isColorUpdate());
 
-//            if(dominant == null){
-//                tempdominant = state.redVsBlue(beaconName);
-//                if ((tempdominant == SensorState.ColorType.RED || tempdominant == SensorState.ColorType.BLUE)) {
-//                    dominant = state.redVsBlue(beaconName);
-//                }
-//            }
+            if(dominant == null){
+                tempdominant = state.redVsBlue(beaconName);
+                if ((tempdominant == SensorState.ColorType.RED || tempdominant == SensorState.ColorType.BLUE)) {
+                    dominant = state.redVsBlue(beaconName);
+                }
+            }
 
             redDiff = groundColorSensor.getRed() - prevRed;
             greenDiff = groundColorSensor.getGreen() - prevGreen;
@@ -498,8 +498,13 @@ public class Robot {
 
     }
 
-    public static void setSkirtPosition(double pos) {
-        Robot.setServoPosition("rightZipline", 0.8 - pos);
-        Robot.setServoPosition("rightZipline", 0.4 + pos);
+    public static void openSkirts() {
+        Robot.setServoPosition("rightZipline", 0.43);
+        Robot.setServoPosition("leftZipline", 0.5);
+    }
+
+    public static void closeSkirts() {
+        Robot.setServoPosition("rightZipline", 0.88);
+        Robot.setServoPosition("leftZipline", 0.11);
     }
 }

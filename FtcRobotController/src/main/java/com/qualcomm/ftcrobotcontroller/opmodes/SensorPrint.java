@@ -21,7 +21,7 @@ public class SensorPrint extends LinearOpMode{
     public void runOpMode() throws InterruptedException{
         BotInit.bot2(hardwareMap, telemetry, this);
         waitForStart();
-//        Robot.tillWhite(0.2, "ground", "beacon");
+ //        Robot.tillWhite(0.2, "ground", "beacon");
         HelperFunctions.bot2SensorPrint(this);
 //        Robot.tillWhite(0.175, "ground", "beacon", "red");
 

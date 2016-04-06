@@ -1,6 +1,7 @@
 package lib;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * Created by luke on 10/7/15.
@@ -109,8 +110,8 @@ public class DriveTrain {
     public void move(double power, LinearOpMode waiter){
         if(!thread_running) {
 
-//            mover = new MovementThread(power, 1, 10, 2, 0.001, 0.01);
-            mover = new MovementThread(power, 1, 10, 3.6, 0.05, 0.01);
+//            mover = new MovementThread(power, 1, 10, .14, 0.05, 0);
+            mover = new MovementThread(power, 1, 10, .1, 0, 0);
 
             move_thread = new Thread(mover);
             move_thread.start();
@@ -221,6 +222,32 @@ public class DriveTrain {
         return direction * dScale;
     }
 
+    public void pidGyroTurn(boolean leftPower, boolean rightPower, double angle) throws InterruptedException {
+        expectedHeading = (expectedHeading + angle + 360) % 360;
+
+        PID turnPID = new PID(0.75,0.05,0,false,0.5);
+        turnPID.setMaxOutput(1);
+        turnPID.setMinOutput(-1);
+        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+        timer.reset();
+        do{
+            double correction = turnPID.updateWithError(angleDist(this.getActualHeading("hero"), this.getExpectedHeading()));
+            if (leftPower) {
+                setLeftMotors(correction*Math.signum(angle));
+            }
+            if(rightPower){
+                setRightMotors(-correction*Math.signum(angle));
+            }
+        } while(turnPID.isAtTarget() && timer.time()<1.2);
+        setLeftMotors(0);
+        setRightMotors(0);
+
+    }
+    public void pidGyroTurn(double angle) throws InterruptedException {
+        pidGyroTurn(true,true,angle);
+
+    }
+
     // NEVER MAKE THE ANGLE NEGATIVE. To turn in the negative direction, make the power negative.
     public void dumbGyroTurn(double power, double angle) throws InterruptedException {
         expectedHeading = (expectedHeading + Math.signum(power) * angle + 360) % 360;
@@ -228,7 +255,7 @@ public class DriveTrain {
         setLeftMotors(power);
         setRightMotors(-power);
 
-        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 3 && Robot.waiter.opModeIsActive()){
+        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 0.75 && Robot.waiter.opModeIsActive()){
             Robot.waiter.waitOneFullHardwareCycle();
         }
 
@@ -248,7 +275,7 @@ public class DriveTrain {
         setLeftMotors(powerLeft);
         setRightMotors(powerRight);
 
-        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 2 && Robot.waiter.opModeIsActive()){
+        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 0.75 && Robot.waiter.opModeIsActive()){
             Robot.waiter.waitOneFullHardwareCycle();
         }
 
