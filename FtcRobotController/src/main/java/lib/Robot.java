@@ -424,9 +424,9 @@ public class Robot {
             while(!groundColorSensor.isColorUpdate());
 
             if(dominant == null){
-                tempdominant = state.redVsBlue(beaconName);
+                tempdominant = state.redVsBlueJumpThresh(beaconName);
                 if ((tempdominant == SensorState.ColorType.RED || tempdominant == SensorState.ColorType.BLUE)) {
-                    dominant = state.redVsBlue(beaconName);
+                    dominant = tempdominant;
                 }
             }
 

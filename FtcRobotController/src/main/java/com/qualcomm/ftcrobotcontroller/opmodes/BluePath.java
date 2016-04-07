@@ -24,37 +24,35 @@ import lib.SensorState;
 public class BluePath extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
-
+//
         boolean armTimeOut;
-
+//
         Servo redDoor;
         redDoor = hardwareMap.servo.get("redDoor");
-        int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
+//        int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
-        Robot.delayWithCountdown(delayTime);
+//        Robot.delayWithCountdown(delayTime);
 
         //initial turn
         Robot.drivetrain.pidGyroTurn(false, true, 45);
-
+//
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
 //        noodle.setPower(-1);
         redDoor.setPosition(1);
         Thread.sleep(20);
-
-        //Initial Move
+//
+//        //Initial Move
         Robot.closeSkirts();
+        Thread.sleep(20);
 
-        Robot.drivetrain.moveDistanceWithCorrections(-0.8, 55);
-        Robot.tillLimitSwitch("rearLimit", "rightLimitServo", -0.175, 0.25, 1, 4, true);
-        redDoor.setPosition(0);
-        Thread.sleep(10);
+        Robot.drivetrain.moveDistanceWithCorrections(-0.8, 70);
+        Robot.tillLimitSwitch("rearLimit", "rightLimitServo", -0.3, 0.25, 1, 4, true);
 //        noodle.setPower(0);
 
         // Turn
-        Robot.drivetrain.pidGyroTurn(false, true, -10);
-
-        Robot.drivetrain.pidGyroTurn(true, false, -35);
-
+        Robot.drivetrain.pidGyroTurn(false, true, -15);
+        telemetry.addData("done with", "first turn");
+        Robot.drivetrain.pidGyroTurn(true, false, -30);
 //        noodle.setPower(1);
 
         //TillWhite

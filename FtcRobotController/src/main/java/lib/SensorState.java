@@ -69,7 +69,7 @@ import java.util.HashMap;
  * ARE EITHER CONSTANT OR ONLY MODIFIED AND RETURNED WITHIN SENSORSTATE.
  */
 
-public class SensorState implements Runnable{
+public class SensorState implements Runnable {
     public static SensorState state;
 
     /**
@@ -96,30 +96,34 @@ public class SensorState implements Runnable{
     }
 
     // Types of sensors
-    public enum SensorType { GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER, I2C_DEVICE, IMU }
+    public enum SensorType {
+        GYRO, ULTRASONIC, COLOR, LIGHT, ENCODER, I2C_DEVICE, IMU
+    }
 
     // Names of colors. Can also convert back and forth from the names to their index in this enum, for
     // single values or arrays of values.
-    public enum ColorType{ RED, BLUE, WHITE, CLEAR, NONE, NOTCONNECTED;
-        public static int toInt(ColorType c){
+    public enum ColorType {
+        RED, BLUE, WHITE, CLEAR, NONE, NOTCONNECTED;
+
+        public static int toInt(ColorType c) {
             return c.ordinal();
         }
 
-        public static int[] toInt(ColorType[] c){
+        public static int[] toInt(ColorType[] c) {
             int[] newArr = new int[c.length];
-            for (int a = 0; a < c.length; a++){
+            for (int a = 0; a < c.length; a++) {
                 newArr[a] = toInt(c[a]);
             }
             return newArr;
         }
 
-        public static ColorType toColor(int i){
+        public static ColorType toColor(int i) {
             return values()[i];
         }
 
-        public static ColorType[] toColor(int[] i){
+        public static ColorType[] toColor(int[] i) {
             ColorType[] newArr = new ColorType[i.length];
-            for (int a = 0; a < i.length; a++){
+            for (int a = 0; a < i.length; a++) {
                 newArr[a] = toColor(i[a]);
             }
             return newArr;
@@ -192,15 +196,15 @@ public class SensorState implements Runnable{
      * Registers a sensor by creating a SensorContainer around it and adding the SensorContainer to
      * the internal HashMaps.
      * Special cases:
-     *  - Calibrates a gyro
-     *  - Disables the LED of a color sensor.
+     * - Calibrates a gyro
+     * - Disables the LED of a color sensor.
      *
-     * @param name          The name of the sensor to register, as recorded in the config
-     * @param type          The type of the sensor to register, either GYRO, ULTRASONIC, COLOR, LIGHT, or ENCODER
-     * @param update        Whether or not to update the sensor on each pass
-     * @param data_length   The number of sensor readings to store for the sensor
+     * @param name        The name of the sensor to register, as recorded in the config
+     * @param type        The type of the sensor to register, either GYRO, ULTRASONIC, COLOR, LIGHT, or ENCODER
+     * @param update      Whether or not to update the sensor on each pass
+     * @param data_length The number of sensor readings to store for the sensor
      */
-    public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length){
+    public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length) {
 
         if (type == SensorType.IMU) {
             Bno055 bonbon = new Bno055(Robot.hmap, name);
@@ -208,9 +212,9 @@ public class SensorState implements Runnable{
             try {
                 bonbon.init();
 
-                while(bonbon.isInitActive()){
+                while (bonbon.isInitActive()) {
                     bonbon.init_loop();
-                    Robot.tel.addData("initting","yay");
+                    Robot.tel.addData("initting", "yay");
                 }
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
@@ -221,9 +225,8 @@ public class SensorState implements Runnable{
             bonbon.startSchedule(Bno055.BnoPolling.TEMP, 200);       // 5 Hz
             bonbon.startSchedule(Bno055.BnoPolling.CALIB, 250);      // 4 H
             bonbon.startSchedule(Bno055.BnoPolling.EULER, 15);
-            imus.put(name,bonbon);
-        }
-        else {      // Get underlying sensor object for the sensor
+            imus.put(name, bonbon);
+        } else {      // Get underlying sensor object for the sensor
             Object sensor_obj = maps.get(type).get(name);
 
             // Make a SensorContainer to wrap around the object
@@ -238,12 +241,12 @@ public class SensorState implements Runnable{
      * The ultrasonics can interfere with each other if they fall out of sync. The pin lets us
      * notify them in a consistent way, if we're using multiple.
      *
-     * @param pin_name      The name of the digitalChannel in the config that connects to the ultrasonics
+     * @param pin_name The name of the digitalChannel in the config that connects to the ultrasonics
      */
-    public void setUltrasonicPin(String pin_name){
+    public void setUltrasonicPin(String pin_name) {
         if (!this.usPinWasSet) {
             this.usPin = hmap.digitalChannel.get(pin_name);
-            if (this.usPin == null){
+            if (this.usPin == null) {
                 throw new RuntimeException("setUltrasonicPin(): pin name not found in HardwareMap.");
             }
             this.usPinWasSet = true;
@@ -253,8 +256,8 @@ public class SensorState implements Runnable{
     /**
      * Determine whether a sensor's values will be updated or not on each loop.
      */
-    public void colorLightToggle(String color_name, boolean toggle){
-        if (!sensorContainers.keySet().contains(color_name)){
+    public void colorLightToggle(String color_name, boolean toggle) {
+        if (!sensorContainers.keySet().contains(color_name)) {
             throw new RuntimeException("colorLightToggle(): Color sensor not found.");
         }
         ((ColorSensor) sensorContainers.get(color_name).sensor).enableLed(toggle);
@@ -263,7 +266,7 @@ public class SensorState implements Runnable{
     /**
      * Updates the types_inv HashMap.
      */
-    private void updateTypesInv(SensorContainer sen){
+    private void updateTypesInv(SensorContainer sen) {
         SensorContainer[] old_sensors = types_inv.get(sen.type);        // Pull out the old array of sensors
         int old_length = old_sensors.length;
 
@@ -291,17 +294,17 @@ public class SensorState implements Runnable{
     /**
      * Returns true if the given gyro is currently calibrating, and therefore can't give good values.
      */
-    public synchronized boolean gyroIsCalibrating(String gyro_name){
+    public synchronized boolean gyroIsCalibrating(String gyro_name) {
         if (!sensorContainers.keySet().contains(gyro_name))
             throw new RuntimeException("SensorState.gyroIsCalibrating: gyro " + gyro_name + " not registered.");
-        return ((GyroSensor)sensorContainers.get(gyro_name).sensor).isCalibrating();
+        return ((GyroSensor) sensorContainers.get(gyro_name).sensor).isCalibrating();
     }
 
     /**
      * Returns true if all the values of the filter array have been filled, allowing averaging.
      */
-    public synchronized boolean filterIsFilled(String name){
-        if (!sensorContainers.keySet().contains(name)){
+    public synchronized boolean filterIsFilled(String name) {
+        if (!sensorContainers.keySet().contains(name)) {
             throw new RuntimeException("SensorState.filterIsFilled: sensor " + name + " not registered.");
         }
         return sensorContainers.get(name).filter.isFilled();
@@ -310,8 +313,8 @@ public class SensorState implements Runnable{
     /**
      * Returns true if all registered sensors have had their filters filled.
      */
-    public synchronized boolean allFiltersFilled(){
-        for (SensorContainer sen: sensorContainers.values()){
+    public synchronized boolean allFiltersFilled() {
+        for (SensorContainer sen : sensorContainers.values()) {
             if (!sen.filter.isFilled())
                 return false;
         }
@@ -321,8 +324,8 @@ public class SensorState implements Runnable{
     /**
      * Change the length of the specified filter
      */
-    public synchronized void changeFilterLength(String name, int fl){
-        if(!sensorContainers.keySet().contains(name)){
+    public synchronized void changeFilterLength(String name, int fl) {
+        if (!sensorContainers.keySet().contains(name)) {
             throw new RuntimeException("SensorState.changeFilterLength: sensor " + name + " not registered.");
         }
         sensorContainers.get(name).filter.changeFilter_length(fl);
@@ -332,8 +335,8 @@ public class SensorState implements Runnable{
      * These two are the public wrappers around the private getDominantColor and getSensorReading functions.
      * Allows us to access by name only in the public functions, and be more efficient by accessing with SensorContainers privately.
      */
-    public synchronized ColorType getColorData(String name){
-        if(!sensorContainers.keySet().contains(name)){
+    public synchronized ColorType getColorData(String name) {
+        if (!sensorContainers.keySet().contains(name)) {
             throw new RuntimeException("SensorState.getColorData: color sensor " + name + " not registered.");
         }
         return getDominantColor(sensorContainers.get(name));
@@ -342,13 +345,13 @@ public class SensorState implements Runnable{
     /**
      * Immediately return a value for the given sensor, without waiting for another run().
      */
-    public synchronized double getSensorReading(String name){
-        if(imus.get(name) != null ){
+    public synchronized double getSensorReading(String name) {
+        if (imus.get(name) != null) {
             Bno055 bonbon = imus.get(name);
             bonbon.loop();
             return bonbon.eulerX();
         }
-        if(!sensorContainers.keySet().contains(name)){
+        if (!sensorContainers.keySet().contains(name)) {
             throw new RuntimeException("SensorState.getSensorReading: sensor " + name + " not registered.");
         }
         return getSensorReading(sensorContainers.get(name));
@@ -358,8 +361,8 @@ public class SensorState implements Runnable{
      * Start or stop updating the sensor values. Might want to use to prevent interference, or save
      * cpu cycles.
      */
-    public synchronized void changeUpdateStatus(String name, boolean update){
-        if (!sensorContainers.keySet().contains(name)){
+    public synchronized void changeUpdateStatus(String name, boolean update) {
+        if (!sensorContainers.keySet().contains(name)) {
             throw new RuntimeException("SensorState.changeUpdateStatus: sensor " + name + " not registered.");
         }
         sensorContainers.get(name).update = update;
@@ -370,8 +373,8 @@ public class SensorState implements Runnable{
      * Clones to avoid sync issues, Should therefore be deleted after use.
      * Returns the filter object of the given sensor.
      */
-    public synchronized Filter getFilter(String name){
-        if (!sensorContainers.keySet().contains(name)){
+    public synchronized Filter getFilter(String name) {
+        if (!sensorContainers.keySet().contains(name)) {
             throw new RuntimeException("SensorState.getFilter: sensor " + name + " not registered.");
         }
         return sensorContainers.get(name).filter.clone();
@@ -381,7 +384,7 @@ public class SensorState implements Runnable{
      * Using the most recent chronological sensor data, average the last several readings
      */
     public synchronized double getAvgSensorData(String name) {
-        if(!sensorContainers.keySet().contains(name)){
+        if (!sensorContainers.keySet().contains(name)) {
             throw new RuntimeException("SensorState.getAvgSensorData: sensor " + name + " not registered.");
         }
         return sensorContainers.get(name).filter.getAvg();
@@ -390,8 +393,8 @@ public class SensorState implements Runnable{
     /**
      * Get a String[] array of all sensor names belonging to sensors of a certain type.
      */
-    public synchronized String[] getSensorsFromType(SensorType type){
-        if (!types_inv.keySet().contains(type)){
+    public synchronized String[] getSensorsFromType(SensorType type) {
+        if (!types_inv.keySet().contains(type)) {
             throw new RuntimeException("SensorState.getSensorsFromType: type " + type + " not found in registered sensors.");
         }
         SensorContainer[] sens = types_inv.get(type);
@@ -416,7 +419,7 @@ public class SensorState implements Runnable{
     /**
      * Get the most important color visible to the sensor
      *
-     * @return          The most dominant color visible, as a SensorState.ColorType
+     * @return The most dominant color visible, as a SensorState.ColorType
      */
     private ColorType getDominantColor(SensorContainer sen) {
         ColorSensor sen_obj = (ColorSensor) sen.sensor;
@@ -436,7 +439,7 @@ public class SensorState implements Runnable{
     /**
      * Get the most important color visible to the sensor
      *
-     * @return          The most dominant color visible, as a SensorState.ColorType
+     * @return The most dominant color visible, as a SensorState.ColorType
      */
     private ColorType getDominantColor(ColorSensor sen_obj) {
         int r = sen_obj.red(), b = sen_obj.blue(), g = sen_obj.green();
@@ -455,6 +458,7 @@ public class SensorState implements Runnable{
     // Returns red if red is dominant over blue,
     // blue if blue is dominant over red,
     // and if they're equal, we return none.
+
     public synchronized ColorType redVsBlue(String name) throws InterruptedException {
         Robot.beaconColorSensor.isColorUpdate();
         int r = Robot.beaconColorSensor.getRed();
@@ -465,13 +469,34 @@ public class SensorState implements Runnable{
             return ColorType.RED;
         } else if (r < b) {
             return ColorType.BLUE;
-        } else if(r==255 && b==255 && g==255){
+        } else if (r == 255 && b == 255 && g == 255) {
 
             return ColorType.NOTCONNECTED;
         } else {
             return ColorType.NONE;
         }
     }
+    public synchronized ColorType redVsBlueJumpThresh(String name) throws InterruptedException {
+        final int DIFF_THRESH = 50;
+
+        Robot.beaconColorSensor.isColorUpdate();
+
+        int r = Robot.beaconColorSensor.getRed();
+        int b = Robot.beaconColorSensor.getBlue();
+        if(Math.abs(r-b)> DIFF_THRESH) {
+            if(r>b){
+                return ColorType.RED;
+            }
+            else{
+                return ColorType.BLUE;
+            }
+        }
+        else{
+            return ColorType.NONE;
+        }
+    }
+
+
 
     /**
      * Returns a single sensor reading immediately.
