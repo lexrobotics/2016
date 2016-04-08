@@ -57,7 +57,8 @@ public class Robot {
     public static LinearOpMode waiter;
     public static AdafruitColorSensor groundColorSensor;
     public static AdafruitColorSensor beaconColorSensor;
-    private static Wire mux;
+//    private static Wire mux;
+    public static Wire mux;
 
     // Prevents instantiation
     private Robot(){}
@@ -74,9 +75,7 @@ public class Robot {
         Robot.waiter = waiter;
         Robot.drivetrain = drivetrain;
         Robot.gyroName = gyroName;
-        Robot.mux = new Wire(hmap, "mux", 2*0x70);
-        groundColorSensor = new AdafruitColorSensor(hmap, "ground", "cdim", -1, 0, mux);
-        beaconColorSensor = new AdafruitColorSensor(hmap, "beacon", "cdim", -1, 1, mux);
+
 
     }
 
@@ -164,7 +163,7 @@ public class Robot {
                                          int killTime // Time until the function is ended
                                         ) throws InterruptedException {
 
-        tillLimitSwitch(limitName,servoName,power,positionActive,positionInactive,killTime, false);
+        tillLimitSwitch(limitName, servoName, power, positionActive, positionInactive, killTime, false);
     }
     public static void tillLimitSwitch  (String limitName,
                                          String servoName,
@@ -326,14 +325,11 @@ public class Robot {
         }
     }
     public static SensorState.ColorType sameDominantColorFusion(SensorState.ColorType runUp, SensorState.ColorType atBeacon){
-        if(runUp == SensorState.ColorType.NONE){
+        if(atBeacon != SensorState.ColorType.NONE){
             return atBeacon;
-        }
-        if(atBeacon == SensorState.ColorType.NONE){
-            return runUp;
         }
         else{
-            return atBeacon;
+            return runUp;
         }
     }
 
@@ -390,8 +386,17 @@ public class Robot {
         //we tuned it to about 600 in the code
         //At meadow room with sensor print 1400-1500
         //and in code tuned to 725
+
+        Robot.servos.get("buttonPusher").setPosition(0); // press button pusher
+        Thread.sleep(400);
+        Robot.servos.get("buttonPusher").setPosition(0.5);
+
+
         SensorState.ColorType dominant = null;
 
+        Robot.mux = new Wire(hmap, "mux", 2*0x70);
+        groundColorSensor = new AdafruitColorSensor(hmap, "ground", "cdim", -1, 0, mux);
+        beaconColorSensor = new AdafruitColorSensor(hmap, "beacon", "cdim", -1, 1, mux);
 
         int RED_THRESH = 70;
         int GREEN_THRESH = 70;
@@ -400,9 +405,9 @@ public class Robot {
         int prevRed = 0;
         int prevGreen = 0;
         int prevBlue = 0;
-        int redDiff;
-        int greenDiff;
-        int blueDiff;
+        int redDiff = 0;
+        int greenDiff = 0;
+        int blueDiff = 0;
 
         for (int i = 0; i < 10; i++){
             while (!groundColorSensor.isColorUpdate());
@@ -421,31 +426,38 @@ public class Robot {
         Thread.sleep(10);
         drivetrain.move(power, waiter);
         do {
-            while(!groundColorSensor.isColorUpdate());
-
-            if(dominant == null){
-                tempdominant = state.redVsBlueJumpThresh(beaconName);
-                if ((tempdominant == SensorState.ColorType.RED || tempdominant == SensorState.ColorType.BLUE)) {
-                    dominant = tempdominant;
+            if(groundColorSensor.isColorUpdate()) {
+                if(dominant == null){
+                    tempdominant = state.redVsBlueJumpThresh(beaconName);
+                    if ((tempdominant == SensorState.ColorType.RED || tempdominant == SensorState.ColorType.BLUE)) {
+                        dominant = tempdominant;
+                    }
                 }
+
+                redDiff = groundColorSensor.getRed() - prevRed;
+                greenDiff = groundColorSensor.getGreen() - prevGreen;
+                blueDiff = groundColorSensor.getBlue() - prevBlue;
+                tel.addData("red_jump", redDiff);
+                tel.addData("green_jump", greenDiff);
+                tel.addData("blue_jump", blueDiff);
+
+                prevRed = groundColorSensor.getRed();
+                prevGreen = groundColorSensor.getGreen();
+                prevBlue = groundColorSensor.getBlue();
             }
-
-            redDiff = groundColorSensor.getRed() - prevRed;
-            greenDiff = groundColorSensor.getGreen() - prevGreen;
-            blueDiff = groundColorSensor.getBlue() - prevBlue;
-            tel.addData("red_jump", redDiff);
-            tel.addData("green_jump", greenDiff);
-            tel.addData("blue_jump", blueDiff);
-
-            prevRed = groundColorSensor.getRed();
-            prevGreen = groundColorSensor.getGreen();
-            prevBlue = groundColorSensor.getBlue();
             Thread.sleep(20);
         } while ((redDiff <= RED_THRESH ) ||
                 (greenDiff <= GREEN_THRESH) ||
                 (blueDiff <= BLUE_THRESH));
 
         drivetrain.stopMove();
+
+//        while (waiter.opModeIsActive()) {
+//            tel.addData("red_jump", redDiff);
+//            tel.addData("green_jump", greenDiff);
+//            tel.addData("blue_jump", blueDiff);
+//        }
+
         Thread.sleep(20);
         return dominant;
     }

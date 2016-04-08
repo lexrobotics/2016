@@ -477,23 +477,24 @@ public class SensorState implements Runnable {
         }
     }
     public synchronized ColorType redVsBlueJumpThresh(String name) throws InterruptedException {
-        final int DIFF_THRESH = 50;
+        final int DIFF_THRESH = 20;
 
-        Robot.beaconColorSensor.isColorUpdate();
+        if (Robot.beaconColorSensor.isColorUpdate()){
 
-        int r = Robot.beaconColorSensor.getRed();
-        int b = Robot.beaconColorSensor.getBlue();
-        if(Math.abs(r-b)> DIFF_THRESH) {
-            if(r>b){
-                return ColorType.RED;
-            }
-            else{
-                return ColorType.BLUE;
+            int r = Robot.beaconColorSensor.getRed();
+            int b = Robot.beaconColorSensor.getBlue();
+            if (Math.abs(r - b) > DIFF_THRESH) {
+                if (r > b) {
+                    return ColorType.RED;
+                } else {
+                    return ColorType.BLUE;
+                }
+            } else {
+                return ColorType.NONE;
             }
         }
-        else{
-            return ColorType.NONE;
-        }
+        return ColorType.NONE;
+
     }
 
 

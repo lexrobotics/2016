@@ -82,5 +82,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("pidCalibration", pidCalibration.class);
         manager.register("servoCalibration", servoCalibration.class);
 
+        manager.register("TwoWheelDrive", dimitriIsAWhinyChief.class);
+
     }
 }

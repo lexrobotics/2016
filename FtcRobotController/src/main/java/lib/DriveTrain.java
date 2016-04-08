@@ -111,7 +111,7 @@ public class DriveTrain {
         if(!thread_running) {
 
 //            mover = new MovementThread(power, 1, 10, .14, 0.05, 0);
-            mover = new MovementThread(power, 1, 10, .1, 0.02, 0);
+            mover = new MovementThread(power, 1, 10, .1, 0.02, 0.015);
 
             move_thread = new Thread(mover);
             move_thread.start();

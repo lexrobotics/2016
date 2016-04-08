@@ -76,7 +76,7 @@ public class MovementThread implements Runnable {
             Robot.tel.addData("offset", offset);
             Robot.drivetrain.setRightMotors(0.3 * Math.signum(offset) * -1);
             Robot.drivetrain.setLeftMotors(0.3 * Math.signum(offset));
-            Thread.sleep(10);
+            Thread.sleep(50);
 
         } while (Math.abs(offset) > turnThresh && Robot.waiter.opModeIsActive() && !Thread.currentThread().isInterrupted() && !Robot.drivetrain.isAMotorZero());
     }
@@ -114,6 +114,7 @@ public class MovementThread implements Runnable {
             if(currentPower == 0){
                 stopBothMotors();
                 Thread.currentThread().interrupt();
+                break;
             }
 
             Robot.tel.addData("expHead: " + Robot.drivetrain.getExpectedHeading() + " active: " + Robot.waiter.opModeIsActive(), "");

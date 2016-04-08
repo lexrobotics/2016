@@ -50,13 +50,13 @@ public class BluePath extends LinearOpMode {
 //        noodle.setPower(0);
 
         // Turn
-        Robot.drivetrain.pidGyroTurn(false, true, -15);
+        Robot.drivetrain.pidGyroTurn(false, true, -10);
         telemetry.addData("done with", "first turn");
-        Robot.drivetrain.pidGyroTurn(true, false, -30);
+        Robot.drivetrain.pidGyroTurn(true, false, -35);
 //        noodle.setPower(1);
 
         //TillWhite
-        SensorState.ColorType dominant = Robot.tillWhiteJumpThresh(-0.2, "ground", "beacon", "blue");
+        SensorState.ColorType dominant = Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "blue");
         noodle.setPower(0);
         armTimeOut = Robot.extendTillBeacon("beaconToucher");
 
@@ -69,8 +69,13 @@ public class BluePath extends LinearOpMode {
 
 
 
-        dominant = Robot.sameDominantColorFusion(dominant, Robot.state.redVsBlue("beacon"));
+        dominant = Robot.sameDominantColorFusion(dominant, Robot.state.redVsBlueJumpThresh("beacon"));
         Robot.dumpClimbers();
+
+        for (int i = 0; i < 20; i++){
+            Robot.tel.addData(dominant + "", "");
+            Thread.sleep(100);
+        }
 
         //PushButton
         if(dominant == SensorState.ColorType.BLUE) {

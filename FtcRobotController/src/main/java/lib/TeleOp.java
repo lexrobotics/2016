@@ -64,6 +64,7 @@ public class TeleOp extends OpMode {
     int target;
 
     @Override
+
     public void init() {
         tiltPID = new PID(PROPORTIONAL, INTEGRAL, DERIVATIVE, false, THRESHOLD);
         tiltPID.setMinOutput(-1);
@@ -125,6 +126,17 @@ public class TeleOp extends OpMode {
         hallEnd = hardwareMap.digitalChannel.get("hall1");
         compressLimit = hardwareMap.digitalChannel.get("compressLimit");
         armEncoderReset();
+        closeSkirts();
+    }
+    public void openSkirts() {
+        rightZipline.setPosition(0.43);
+        leftZipline.setPosition(0.5);
+    }
+
+    public  void closeSkirts() {
+        rightZipline.setPosition(0.88);
+        leftZipline.setPosition(0.11);
+
     }
 
     @Override
@@ -295,12 +307,10 @@ public class TeleOp extends OpMode {
 
         if (compressLimit.getState()) {
             armEncoderReset();
-            rightZipline.setPosition(0.05);
-            leftZipline.setPosition(0.35);
+            closeSkirts();
         }
         else{
-            rightZipline.setPosition(0.4);
-            leftZipline.setPosition(0);
+            openSkirts();
         }
 
         telemetry.addData("rightPower, leftPower", Double.toString(rightPower).concat(Double.toString(leftPower)));

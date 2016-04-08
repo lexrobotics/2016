@@ -52,6 +52,7 @@ public class AdafruitColorSensor {
     public boolean isColorUpdate() throws InterruptedException{
         selectSensor();
         Thread.sleep(10);
+
         boolean isNew = false;
         if (cs.responseCount() > 0) {
             cs.getResponse();
@@ -93,7 +94,7 @@ public class AdafruitColorSensor {
         return isNew;
     }
 
-    private void selectSensor() {
+    public void selectSensor() {
         if(i2cMuxChannel >= 0 && i2cMuxChannel <= 7 && mux != null) {
             mux.write(0, 1<<i2cMuxChannel);
             while(mux.responseCount() < 1);
