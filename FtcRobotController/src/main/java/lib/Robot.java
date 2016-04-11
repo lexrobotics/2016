@@ -163,7 +163,7 @@ public class Robot {
                                          int killTime // Time until the function is ended
                                         ) throws InterruptedException {
 
-        tillLimitSwitch(limitName, servoName, power, positionActive, positionInactive, killTime, false);
+        tillLimitSwitch(limitName, servoName, power, positionActive, positionInactive, killTime, 0.05, false);
     }
     public static void tillLimitSwitch  (String limitName,
                                          String servoName,
@@ -171,18 +171,23 @@ public class Robot {
                                          double positionActive,
                                          double positionInactive,
                                          int killTime,
-                                          boolean inverted
+                                         double pressTimeOut,
+                                         boolean inverted
     ) throws InterruptedException {
 
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+        ElapsedTime pressTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         hmap.servo.get(servoName).setPosition(positionActive);
-        Thread.sleep(100);
         drivetrain.move(power, waiter);
 
         timer.reset();
+        pressTimer.reset();
 
-        while (hmap.digitalChannel.get(limitName).getState() == inverted && timer.time() < killTime && waiter.opModeIsActive()){
+        while (pressTimer.time() < pressTimeOut && timer.time() < killTime && waiter.opModeIsActive()){
             waiter.waitOneFullHardwareCycle();
+            if(hmap.digitalChannel.get(limitName).getState() == inverted) {
+                pressTimer.reset();
+            }
         }
 
         hmap.servo.get(servoName).setPosition(positionInactive);
@@ -387,10 +392,6 @@ public class Robot {
         //At meadow room with sensor print 1400-1500
         //and in code tuned to 725
 
-        Robot.servos.get("buttonPusher").setPosition(0); // press button pusher
-        Thread.sleep(400);
-        Robot.servos.get("buttonPusher").setPosition(0.5);
-
 
         SensorState.ColorType dominant = null;
 
@@ -398,9 +399,9 @@ public class Robot {
         groundColorSensor = new AdafruitColorSensor(hmap, "ground", "cdim", -1, 0, mux);
         beaconColorSensor = new AdafruitColorSensor(hmap, "beacon", "cdim", -1, 1, mux);
 
-        int RED_THRESH = 70;
-        int GREEN_THRESH = 70;
-        int BLUE_THRESH = 70;
+        int RED_THRESH = 100;
+        int GREEN_THRESH = 100;
+        int BLUE_THRESH = 100;
         while(!groundColorSensor.isColorUpdate());
         int prevRed = 0;
         int prevGreen = 0;
@@ -409,16 +410,17 @@ public class Robot {
         int greenDiff = 0;
         int blueDiff = 0;
 
-        for (int i = 0; i < 10; i++){
-            while (!groundColorSensor.isColorUpdate());
+        for (int i = 0; i < 5; i++){
+            groundColorSensor.isColorUpdate();
             prevRed += groundColorSensor.getRed();
             prevGreen += groundColorSensor.getGreen();
             prevBlue += groundColorSensor.getBlue();
+            Thread.sleep(10);
         }
 
-        prevRed /= 10;
-        prevGreen /= 10;
-        prevBlue /= 10;
+        prevRed /= 5;
+        prevGreen /= 5;
+        prevBlue /= 5;
 
         SensorState.ColorType tempdominant;
         waiter.waitOneFullHardwareCycle();

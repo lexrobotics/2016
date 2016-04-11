@@ -225,22 +225,29 @@ public class DriveTrain {
     public void pidGyroTurn(boolean leftPower, boolean rightPower, double angle) throws InterruptedException {
         expectedHeading = (expectedHeading + angle + 360) % 360;
 
-        PID turnPID = new PID(0.025,0.01,0,false,0.75);
+//        PID turnPID = new PID(0.03,0.01,0,false,0.75);
+        PID turnPID = new PID(0.1,0,0,false,0.75);
+
         turnPID.setMaxOutput(1);
         turnPID.setMinOutput(-1);
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         timer.reset();
         setLeftMotors(0);
         setRightMotors(0);
-        do{
-            double correction = turnPID.updateWithError(angleDist(this.getActualHeading("hero"), this.getExpectedHeading()));
-            if (leftPower) {
-                setLeftMotors(correction);
-            }
-            if(rightPower){
-                setRightMotors(-correction);
-            }
-        } while(!turnPID.isAtTarget() && timer.time()<1);
+        do {
+            do {
+                double correction = turnPID.updateWithError(angleDist(this.getActualHeading("hero"), this.getExpectedHeading()));
+                if (leftPower) {
+                    setLeftMotors(scaleInput(correction));
+                }
+                if (rightPower) {
+                    setRightMotors(scaleInput(-correction));
+                }
+                Thread.sleep(10);
+            } while (!turnPID.isAtTarget() && timer.time() < 1);
+            Thread.sleep(10);
+        }while(!turnPID.isAtTarget() && timer.time() < 1);
+
         setLeftMotors(0);
         setRightMotors(0);
 

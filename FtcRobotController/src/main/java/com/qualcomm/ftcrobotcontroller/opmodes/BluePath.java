@@ -36,8 +36,6 @@ public class BluePath extends LinearOpMode {
         //initial turn
         Robot.drivetrain.pidGyroTurn(false, true, 45);
 //
-        DcMotor noodle = hardwareMap.dcMotor.get("noodler");
-//        noodle.setPower(-1);
         redDoor.setPosition(1);
         Thread.sleep(20);
 //
@@ -45,19 +43,15 @@ public class BluePath extends LinearOpMode {
         Robot.closeSkirts();
         Thread.sleep(20);
 
-        Robot.drivetrain.moveDistanceWithCorrections(-0.8, 70);
-        Robot.tillLimitSwitch("rearLimit", "rightLimitServo", -0.3, 0.25, 1, 4, true);
-//        noodle.setPower(0);
+        Robot.drivetrain.moveDistanceWithCorrections(-0.8, 60, false);
+        Robot.tillLimitSwitch("rearLimit", "rightLimitServo", -0.3, 0.25, 1, 5, 0.2, true);
 
         // Turn
         Robot.drivetrain.pidGyroTurn(false, true, -10);
-        telemetry.addData("done with", "first turn");
         Robot.drivetrain.pidGyroTurn(true, false, -35);
-//        noodle.setPower(1);
 
         //TillWhite
-        SensorState.ColorType dominant = Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "blue");
-        noodle.setPower(0);
+        Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "blue");
         armTimeOut = Robot.extendTillBeacon("beaconToucher");
 
         if(armTimeOut){
@@ -69,20 +63,17 @@ public class BluePath extends LinearOpMode {
 
 
 
-        dominant = Robot.sameDominantColorFusion(dominant, Robot.state.redVsBlueJumpThresh("beacon"));
+        SensorState.ColorType dominant = Robot.state.redVsBlueJumpThresh("beacon");
         Robot.dumpClimbers();
 
-        for (int i = 0; i < 20; i++){
             Robot.tel.addData(dominant + "", "");
-            Thread.sleep(100);
-        }
 
         //PushButton
         if(dominant == SensorState.ColorType.BLUE) {
-            Robot.pushButton("beaconToucher", 1);
+            Robot.pushButton("beaconToucher", -1);
         }
         else if(dominant == SensorState.ColorType.RED) {
-            Robot.pushButton("beaconToucher", -1);
+            Robot.pushButton("beaconToucher", 1);
         }
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();
