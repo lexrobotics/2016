@@ -33,16 +33,18 @@ public class MovementThread implements Runnable {
     private double power;
     private double turnThresh;
     private PID pid;
-    private double KpDivisor, Ki, Kd;
+    private double Kp, Ki, Kd;
+    public double divisor;
 
-    public MovementThread (double power, int min, int turn, double KpDivisor, double Ki, double Kd) {
+    public MovementThread (double power, int min, int turn, double Kp, double Ki, double Kd) {
         this.power = power;
 
         turnThresh = turn;
 
-        this.KpDivisor = KpDivisor;
+        this.Kp = Kp;
         this.Ki = Ki;
         this.Kd = Kd;
+        this.divisor = 1;
 
         pid = new PID(0, 0, 0);
     }
@@ -99,7 +101,7 @@ public class MovementThread implements Runnable {
 
         double maxOutput = Math.min(1 - Math.abs(currentPower), Math.abs(currentPower));
 //        PID correctionPID = new PID(maxOutput/3.6, 0.05, 0.01);
-        pid.recreate(KpDivisor, Ki, Kd);
+        pid.recreate(Kp, Ki, Kd);
 
         pid.setMaxOutput(maxOutput);
         pid.setMinOutput(-1 * maxOutput);
@@ -117,16 +119,14 @@ public class MovementThread implements Runnable {
                 break;
             }
 
-            Robot.tel.addData("expHead: " + Robot.drivetrain.getExpectedHeading() + " active: " + Robot.waiter.opModeIsActive(), "");
-
             try {
                 offset = getOffset();
                 Robot.tel.addData("offset", offset);
 
                 if (Math.abs(offset) < turnThresh && !Robot.drivetrain.isAMotorZero()) {
                     correction = pid.updateWithError(offset);
-                    Robot.drivetrain.setLeftMotors(currentPower + correction);
-                    Robot.drivetrain.setRightMotors(currentPower - correction);
+                    Robot.drivetrain.setLeftMotors(currentPower + (correction/divisor));
+                    Robot.drivetrain.setRightMotors(currentPower - (correction/divisor));
                 }
 
                 // The offset is too great, so we have to stop and do a controlled turn back to the right value.

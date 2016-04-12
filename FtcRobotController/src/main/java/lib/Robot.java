@@ -427,6 +427,7 @@ public class Robot {
         //
         Thread.sleep(10);
         drivetrain.move(power, waiter);
+        drivetrain.mover.divisor = 1.5;
         do {
             if(groundColorSensor.isColorUpdate()) {
                 if(dominant == null){
@@ -453,6 +454,7 @@ public class Robot {
                 (blueDiff <= BLUE_THRESH));
 
         drivetrain.stopMove();
+        drivetrain.mover.divisor = 1;
 
 //        while (waiter.opModeIsActive()) {
 //            tel.addData("red_jump", redDiff);

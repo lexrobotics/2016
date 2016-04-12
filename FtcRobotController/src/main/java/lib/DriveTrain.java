@@ -85,11 +85,11 @@ public class DriveTrain {
         distance = (distance / wheel_circumference) * 1120;
 
         move(power, Robot.waiter);
-
         while (Math.abs(getEncoders()) < distance && Robot.waiter.opModeIsActive()) {
             Robot.waiter.waitOneFullHardwareCycle();
         }
         this.stopMove();
+
     }
     public void moveDistanceWithCorrections(double power, double distance, boolean stop) throws InterruptedException {
         // 1120 ticks in the encoder

@@ -21,6 +21,11 @@ public class HelperFunctions {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        Robot.mux = new Wire(Robot.hmap, "mux", 2*0x70);
+        Robot.groundColorSensor = new AdafruitColorSensor(Robot.hmap, "ground", "cdim", -1, 0, Robot.mux);
+        Robot.beaconColorSensor = new AdafruitColorSensor(Robot.hmap, "beacon", "cdim", -1, 1, Robot.mux);
+
 //        ground.setLed(true);
         while(op.opModeIsActive()){
             Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
