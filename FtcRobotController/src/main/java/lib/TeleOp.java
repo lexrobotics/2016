@@ -7,7 +7,8 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-        import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import lib.PID;
 
@@ -60,6 +61,8 @@ public class TeleOp extends OpMode {
     private final double INTEGRAL = 0.0000;
     private final double DERIVATIVE = 0;
     private final double THRESHOLD = 75;
+    ElapsedTime timer;
+    boolean timerbool = true;
 
     int target;
 
@@ -76,6 +79,7 @@ public class TeleOp extends OpMode {
         a_was_down = true;
         twoAWasDown = true;
         oneY_was_down = true;
+        timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
         leftFrontDrive = hardwareMap.dcMotor.get("leftFrontDrive");
         leftRearDrive = hardwareMap.dcMotor.get("leftRearDrive");
@@ -116,7 +120,7 @@ public class TeleOp extends OpMode {
         redDoor.setPosition(1);
         blueDoor.setPosition(0);
         divider.setPosition(0.5);
-        armLock.setPosition(1);
+        armLock.setPosition(.6);
 
         leftLimitServo.setPosition(0);
         rightLimitServo.setPosition(1);
@@ -138,9 +142,12 @@ public class TeleOp extends OpMode {
         leftZipline.setPosition(0.11);
 
     }
-
     @Override
     public void loop() {
+        if(timerbool){
+            timer.reset();
+            timerbool = false;
+        }
         gamepad1.setJoystickDeadzone(0.1f);
         gamepad2.setJoystickDeadzone(0.1f);
         double leftPower;
@@ -252,12 +259,19 @@ public class TeleOp extends OpMode {
             buttonPusher.setPosition(0.5); // stop button pusher
         }
 
-        if (gamepad1.y) {
+        if (gamepad1.x && gamepad1.y) {
             if (oneY_was_down){
                 arm_locked = !arm_locked;
                 oneY_was_down = false;
             }
-        } else {
+        }
+        else if (gamepad1.a) {
+            if (!oneY_was_down) {
+                arm_locked = !arm_locked;
+                oneY_was_down = true;
+            }
+        }
+        else {
             oneY_was_down = true;
         }
 
@@ -271,9 +285,9 @@ public class TeleOp extends OpMode {
         }
 
         if (arm_locked) {
-            armLock.setPosition(0.6);
+            armLock.setPosition(0.4);
         } else {
-            armLock.setPosition(1);
+            armLock.setPosition(.6);
         }
 
         if (Math.abs(gamepad2.left_stick_y) > 0.3) {
