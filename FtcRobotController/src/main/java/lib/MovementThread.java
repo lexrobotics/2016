@@ -2,6 +2,7 @@ package lib;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.util.Range;
 
 
 
@@ -76,8 +77,8 @@ public class MovementThread implements Runnable {
         do {
             offset = getOffset();
             Robot.tel.addData("offset", offset);
-            Robot.drivetrain.setRightMotors(0.3 * Math.signum(offset) * -1);
-            Robot.drivetrain.setLeftMotors(0.3 * Math.signum(offset));
+            Robot.drivetrain.setRightMotors(0.4 * Math.signum(offset) * -1);
+            Robot.drivetrain.setLeftMotors(0.4 * Math.signum(offset));
             Thread.sleep(50);
 
         } while (Math.abs(offset) > turnThresh && Robot.waiter.opModeIsActive() && !Thread.currentThread().isInterrupted() && !Robot.drivetrain.isAMotorZero());
@@ -99,7 +100,7 @@ public class MovementThread implements Runnable {
             currentPower = power;
 //        }
 
-        double maxOutput = Math.min(1 - Math.abs(currentPower), Math.abs(currentPower));
+        double maxOutput = Math.abs(currentPower);
 //        PID correctionPID = new PID(maxOutput/3.6, 0.05, 0.01);
         pid.recreate(Kp, Ki, Kd);
 
@@ -125,8 +126,8 @@ public class MovementThread implements Runnable {
 
                 if (Math.abs(offset) < turnThresh && !Robot.drivetrain.isAMotorZero()) {
                     correction = pid.updateWithError(offset);
-                    Robot.drivetrain.setLeftMotors(currentPower + (correction/divisor));
-                    Robot.drivetrain.setRightMotors(currentPower - (correction/divisor));
+                    Robot.drivetrain.setLeftMotors(Range.clip(currentPower + (correction / divisor), -1, 1));
+                    Robot.drivetrain.setRightMotors(Range.clip(currentPower - (correction/divisor),-1,1));
                 }
 
                 // The offset is too great, so we have to stop and do a controlled turn back to the right value.

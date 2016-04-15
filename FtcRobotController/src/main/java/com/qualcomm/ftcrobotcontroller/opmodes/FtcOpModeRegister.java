@@ -70,8 +70,8 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("------", NullOp.class);
 
         manager.register("RedDefensive", DefensiveRedPath.class);
-        manager.register("BlueDefensive", DefensiveBluePath.class);
         manager.register("RedWideDefensive", DefensiveRedWidePath.class);
+        manager.register("BlueDefensive", DefensiveBluePath.class);
         manager.register("BlueWideDefensive", DefensiveBlueWidePath.class);
 
         manager.register("-------", NullOp.class);
@@ -86,13 +86,14 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("TeleOpRed", TeleOpRed.class);
         manager.register("TeleOpBlue", TeleOpBlue.class);
 
-        manager.register("--------", NullOp.class);
+        manager.register("---------", NullOp.class);
 
         manager.register("SensorPrint", SensorPrint.class);
 
 
-        //manager.register("pidCalibration", pidCalibration.class);
-        //manager.register("servoCalibration", servoCalibration.class);
+        manager.register("pidCalibration", pidCalibration.class);
+        //manager.register("servo
+        // Calibration", servoCalibration.class);
         //manager.register("TwoWheelDrive", dimitriIsAWhinyChief.class);
         //manager.register("I2CMuxTest", I2CMuxTest.class);
         //manager.register("TeleOp", TeleOp.class);

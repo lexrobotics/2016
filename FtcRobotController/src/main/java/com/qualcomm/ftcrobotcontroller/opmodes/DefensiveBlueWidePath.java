@@ -20,15 +20,16 @@ public class DefensiveBlueWidePath extends LinearOpMode {
 
         waitForStart();
 
-        Robot.drivetrain.pidGyroTurn(false, true, 45);
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
+
         Robot.closeSkirts();
         Thread.sleep(20);
 
         //Initial Move
         Robot.drivetrain.moveDistanceWithCorrections(-0.8, 70, false);
 
-        Robot.drivetrain.pidGyroTurn(true, false, -180);
-        Robot.drivetrain.pidGyroTurn(false, true, -90);
+        Robot.drivetrain.dumbGyroTurn(0.7, 0, 180);
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 90);
 
         while(timer.time() < 10) {
             Thread.sleep(1);

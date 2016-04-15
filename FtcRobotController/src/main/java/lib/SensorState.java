@@ -211,10 +211,9 @@ public class SensorState implements Runnable {
 
             try {
                 bonbon.init();
-
                 while (bonbon.isInitActive()) {
                     bonbon.init_loop();
-                    Robot.tel.addData("initting", "yay");
+
                 }
             } catch (InterruptedException ex) {
                 ex.printStackTrace();

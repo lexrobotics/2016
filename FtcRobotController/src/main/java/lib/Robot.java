@@ -271,8 +271,8 @@ public class Robot {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
 
         ElapsedTime presstimer = new ElapsedTime();
-        Robot.drivetrain.move(direction * 0.15, Robot.waiter);
-        while((presstimer.time() <= 0.15) && Robot.waiter.opModeIsActive()) {
+        Robot.drivetrain.move(direction * .175, Robot.waiter);
+        while((presstimer.time() <= .15) && Robot.waiter.opModeIsActive()) {
             Robot.tel.addData("timer", presstimer.time());
             if(beaconToucher.getState() == false) { // switch is depressed :(
                 Robot.servos.get("buttonPusher").setPosition(0.25); // less gently push, but still kinda gently

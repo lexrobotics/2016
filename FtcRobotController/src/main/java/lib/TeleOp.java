@@ -120,7 +120,7 @@ public class TeleOp extends OpMode {
         redDoor.setPosition(1);
         blueDoor.setPosition(0);
         divider.setPosition(0.5);
-        armLock.setPosition(.6);
+        armLock.setPosition(1);
 
         leftLimitServo.setPosition(0);
         rightLimitServo.setPosition(1);
@@ -285,9 +285,9 @@ public class TeleOp extends OpMode {
         }
 
         if (arm_locked) {
-            armLock.setPosition(0.4);
+            armLock.setPosition(0.6);
         } else {
-            armLock.setPosition(.6);
+            armLock.setPosition(1);
         }
 
         if (Math.abs(gamepad2.left_stick_y) > 0.3) {

@@ -16,12 +16,14 @@ public class DefensiveRedPath extends LinearOpMode {
         BotInit.bot2(hardwareMap, telemetry, this);
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         waitForStart();
+        timer.reset();
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
 
-        Robot.drivetrain.pidGyroTurn(false, true, -45);
         Robot.drivetrain.moveDistanceWithCorrections(0.8, 40, false);
-        Robot.drivetrain.pidGyroTurn(false, true, 22);
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 22);
+
         Robot.drivetrain.moveDistanceWithCorrections(.8, 30);
-        Robot.drivetrain.pidGyroTurn(false, true, 23);
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 23);
         while(timer.time() < 10) {
             Thread.sleep(1);
         }

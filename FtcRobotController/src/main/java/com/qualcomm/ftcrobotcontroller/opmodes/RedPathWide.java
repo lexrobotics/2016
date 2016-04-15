@@ -26,11 +26,11 @@ public class RedPathWide extends LinearOpMode {
         waitForStart();
 
 
-        Robot.drivetrain.pidGyroTurn(false, true, -45);
+        Robot.drivetrain.dumbGyroTurn(0, .7, 45);
         Robot.drivetrain.moveDistanceWithCorrections(0.6, 100, false);
         Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.3, 0.8, 0, 4);
 
-        Robot.drivetrain.pidGyroTurn(false, true, 45);
+        Robot.drivetrain.dumbGyroTurn(0.4, 45);
 
         Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "red");
 

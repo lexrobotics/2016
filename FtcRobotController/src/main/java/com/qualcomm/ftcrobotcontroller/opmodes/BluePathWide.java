@@ -29,18 +29,18 @@ public class BluePathWide extends LinearOpMode {
         waitForStart();
 
         //initial turn
-        Robot.drivetrain.pidGyroTurn(false, true, 45);
+
+        Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
         Robot.closeSkirts();
         Thread.sleep(20);
 
         //Initial Move
-        Robot.drivetrain.moveDistanceWithCorrections(-0.8, 90, false);
+        Robot.drivetrain.moveDistanceWithCorrections(-1, 90, false);
         Robot.tillLimitSwitch("rearLimit", "rightLimitServo", -0.3, 0.25, 1, 5, 0.2, true);
         blueDoor.setPosition(0);
 
         //Big Turn
-        Robot.drivetrain.pidGyroTurn(false, true, -10);
-        Robot.drivetrain.pidGyroTurn(true, false, -35);
+        Robot.drivetrain.dumbGyroTurn(-0.4, 0.4, 43);
         //        Thread.sleep(100);
 
         //TillWhite

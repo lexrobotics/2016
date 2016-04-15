@@ -89,8 +89,8 @@ public class DriveTrain {
             Robot.waiter.waitOneFullHardwareCycle();
         }
         this.stopMove();
-
     }
+
     public void moveDistanceWithCorrections(double power, double distance, boolean stop) throws InterruptedException {
         // 1120 ticks in the encoder
         resetEncoders();
@@ -110,8 +110,8 @@ public class DriveTrain {
     public void move(double power, LinearOpMode waiter){
         if(!thread_running) {
 
-//            mover = new MovementThread(power, 1, 10, .14, 0.05, 0);
-            mover = new MovementThread(power, 1, 10, .1, 0.02, 0.015);
+            mover = new MovementThread(power, 1, 10, .1, 0, 0);
+//            mover = new MovementThread(power, 1, 10, .2, 0.02, 02);
 
             move_thread = new Thread(mover);
             move_thread.start();
@@ -226,7 +226,7 @@ public class DriveTrain {
         expectedHeading = (expectedHeading + angle + 360) % 360;
 
 //        PID turnPID = new PID(0.03,0.01,0,false,0.75);
-        PID turnPID = new PID(0.1,0,0,false,0.75);
+        PID turnPID = new PID(0.1,0.01,0,false,0);
 
         turnPID.setMaxOutput(1);
         turnPID.setMinOutput(-1);
@@ -234,8 +234,8 @@ public class DriveTrain {
         timer.reset();
         setLeftMotors(0);
         setRightMotors(0);
-        do {
             do {
+                Robot.tel.addData("turn",angleDist(this.getActualHeading("hero"), this.getExpectedHeading()));
                 double correction = turnPID.updateWithError(angleDist(this.getActualHeading("hero"), this.getExpectedHeading()));
                 if (leftPower) {
                     setLeftMotors(scaleInput(correction));
@@ -244,9 +244,8 @@ public class DriveTrain {
                     setRightMotors(scaleInput(-correction));
                 }
                 Thread.sleep(10);
-            } while (!turnPID.isAtTarget() && timer.time() < 1);
-            Thread.sleep(10);
-        }while(!turnPID.isAtTarget() && timer.time() < 1);
+            } while (!turnPID.isAtTarget() && timer.time() < 1.5);
+
 
         setLeftMotors(0);
         setRightMotors(0);
@@ -259,17 +258,7 @@ public class DriveTrain {
 
     // NEVER MAKE THE ANGLE NEGATIVE. To turn in the negative direction, make the power negative.
     public void dumbGyroTurn(double power, double angle) throws InterruptedException {
-        expectedHeading = (expectedHeading + Math.signum(power) * angle + 360) % 360;
-
-        setLeftMotors(power);
-        setRightMotors(-power);
-
-        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 0.75 && Robot.waiter.opModeIsActive()){
-            Robot.waiter.waitOneFullHardwareCycle();
-        }
-
-        setLeftMotors(0);
-        setRightMotors(0);
+       dumbGyroTurn(power, power, angle);
     }
 
     public void dumbGyroTurn(double powerLeft, double powerRight, double angle) throws InterruptedException {
@@ -281,11 +270,14 @@ public class DriveTrain {
 
         expectedHeading = (expectedHeading + sign * angle + 360) % 360;
 
+        ElapsedTime turntimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+        turntimer.reset();
+
         setLeftMotors(powerLeft);
         setRightMotors(powerRight);
 
-        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 0.75 && Robot.waiter.opModeIsActive()){
-            Robot.waiter.waitOneFullHardwareCycle();
+        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 4 && Robot.waiter.opModeIsActive() && turntimer.time()<1) {
+            Thread.sleep(10);
         }
 
         setLeftMotors(0);

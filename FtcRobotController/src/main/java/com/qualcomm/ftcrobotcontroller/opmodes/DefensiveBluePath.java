@@ -17,19 +17,19 @@ public class DefensiveBluePath extends LinearOpMode {
         BotInit.bot2(hardwareMap, telemetry, this);
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         waitForStart();
+        timer.reset();
 
-        Robot.drivetrain.pidGyroTurn(false, true, 45);
-
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
         Robot.closeSkirts();
         Thread.sleep(20);
 
         Robot.drivetrain.moveDistanceWithCorrections(-0.8, 50, false);
-        Robot.drivetrain.pidGyroTurn(false, true, 30);
-        Robot.drivetrain.pidGyroTurn(true, false, 15);
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 30);
+        Robot.drivetrain.dumbGyroTurn(0.7, 0, 15);
 
         Robot.drivetrain.moveDistanceWithCorrections(-0.8, 30, false);
-        Robot.drivetrain.pidGyroTurn(false, true, 125);
-        Robot.drivetrain.pidGyroTurn(true, false, 55);
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 125);
+        Robot.drivetrain.dumbGyroTurn(0.7, 0, 55);
 
         while (timer.time() < 10) {
             Thread.sleep(1);

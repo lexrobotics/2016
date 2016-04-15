@@ -20,11 +20,14 @@ public class DefensiveRedWidePath extends LinearOpMode {
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
         waitForStart();
+        timer.reset();
 
-        Robot.drivetrain.pidGyroTurn(false, true, -45);
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
+
         Robot.drivetrain.moveDistanceWithCorrections(0.6, 80, false);
 
-        Robot.drivetrain.pidGyroTurn(false, true, 45);
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
+
         while(timer.time() < 10) {
             Thread.sleep(1);
         }

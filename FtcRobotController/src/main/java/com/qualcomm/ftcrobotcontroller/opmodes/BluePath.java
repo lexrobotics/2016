@@ -27,28 +27,24 @@ public class BluePath extends LinearOpMode {
 //
         boolean armTimeOut;
 //
-        Servo redDoor;
-        redDoor = hardwareMap.servo.get("redDoor");
+
 //        int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
         waitForStart();
 //        Robot.delayWithCountdown(delayTime);
 
         //initial turn
-        Robot.drivetrain.pidGyroTurn(false, true, 45);
+        Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
 //
-        redDoor.setPosition(1);
-        Thread.sleep(20);
 //
 //        //Initial Move
         Robot.closeSkirts();
         Thread.sleep(20);
 
-        Robot.drivetrain.moveDistanceWithCorrections(-0.8, 60, false);
+        Robot.drivetrain.moveDistanceWithCorrections(-1, 60, false);
         Robot.tillLimitSwitch("rearLimit", "rightLimitServo", -0.3, 0.25, 1, 5, 0.2, true);
 
         // Turn
-        Robot.drivetrain.pidGyroTurn(false, true, -10);
-        Robot.drivetrain.pidGyroTurn(true, false, -35);
+        Robot.drivetrain.dumbGyroTurn(-0.4, 0.4, 43);
 
         //TillWhite
         Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "blue");
