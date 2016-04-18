@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DigitalChannelController;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -207,10 +208,23 @@ public class SensorState implements Runnable {
     public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length) {
 
         if (type == SensorType.IMU) {
+            Robot.hmap.digitalChannel.get("imureset").setMode(DigitalChannelController.Mode.OUTPUT);
+            Robot.hmap.digitalChannel.get("imureset").setState(false);
+            try{
+                Thread.sleep(100);
+                Robot.hmap.digitalChannel.get("imureset").setState(true);
+
+                Thread.sleep(2000);
+
+            }
+            catch (InterruptedException ex){
+
+            }
             Bno055 bonbon = new Bno055(Robot.hmap, name);
 
             try {
                 bonbon.init();
+                Thread.sleep(200);
                 while (bonbon.isInitActive()) {
                     bonbon.init_loop();
 

@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import lib.BotInit;
 import lib.DriveTrain;
 import lib.FourWheelDrive;
+import lib.Menu;
 import lib.Robot;
 import lib.HelperFunctions;
 import lib.SensorState;
@@ -27,10 +28,10 @@ public class RedPath extends LinearOpMode {
         BotInit.bot2(hardwareMap, telemetry, this);
         Servo redDoor;
         redDoor = hardwareMap.servo.get("redDoor");
-//        int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
+        Menu menu = new Menu();
+        menu.run();
         waitForStart();
-//        Robot.delayWithCountdown(delayTime);
-
+        menu.delay();
 
         //initial turn
         Robot.drivetrain.dumbGyroTurn(0, .7, 45);
@@ -75,6 +76,12 @@ public class RedPath extends LinearOpMode {
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();
         Robot.retractButtonPusher();
+
+        int scoot = menu.getScoot();
+        if(scoot == Menu.SCOOT_FORWARD)
+            Robot.drivetrain.moveDistanceWithCorrections(0.8, 24);
+        else if(scoot == Menu.SCOOT_BACKWARDS)
+            Robot.drivetrain.moveDistanceWithCorrections(-0.8, 24);
     }
 
     @Override

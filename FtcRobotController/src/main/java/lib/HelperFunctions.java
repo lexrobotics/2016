@@ -22,18 +22,18 @@ public class HelperFunctions {
             e.printStackTrace();
         }
 
-        Robot.mux = new Wire(Robot.hmap, "mux", 2*0x70);
-        Robot.groundColorSensor = new AdafruitColorSensor(Robot.hmap, "ground", "cdim", -1, 0, Robot.mux);
-        Robot.beaconColorSensor = new AdafruitColorSensor(Robot.hmap, "beacon", "cdim", -1, 1, Robot.mux);
+//        Robot.mux = new Wire(Robot.hmap, "mux", 2*0x70);
+//        Robot.groundColorSensor = new AdafruitColorSensor(Robot.hmap, "ground", "cdim", -1, 0, Robot.mux);
+//        Robot.beaconColorSensor = new AdafruitColorSensor(Robot.hmap, "beacon", "cdim", -1, 1, Robot.mux);
 
 //        ground.setLed(true);
         while(op.opModeIsActive()){
             Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
 
-            if(Robot.beaconColorSensor.isColorUpdate())
-                Robot.tel.addData("beacon r", Robot.beaconColorSensor.getRed() + "  g: " + Robot.beaconColorSensor.getGreen() + "  b: " + Robot.beaconColorSensor.getBlue() + "  alpha: " + Robot.beaconColorSensor.getClear());
-            if(Robot.groundColorSensor.isColorUpdate())
-                Robot.tel.addData("ground r", Robot.groundColorSensor.getRed() + "  g: " + Robot.groundColorSensor.getGreen() + "  b: " + Robot.groundColorSensor.getBlue() + "  alpha: " + Robot.groundColorSensor.getClear());
+//            if(Robot.beaconColorSensor.isColorUpdate())
+//                Robot.tel.addData("beacon r", Robot.beaconColorSensor.getRed() + "  g: " + Robot.beaconColorSensor.getGreen() + "  b: " + Robot.beaconColorSensor.getBlue() + "  alpha: " + Robot.beaconColorSensor.getClear());
+//            if(Robot.groundColorSensor.isColorUpdate())
+//                Robot.tel.addData("ground r", Robot.groundColorSensor.getRed() + "  g: " + Robot.groundColorSensor.getGreen() + "  b: " + Robot.groundColorSensor.getBlue() + "  alpha: " + Robot.groundColorSensor.getClear());
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("hall",Robot.hmap.digitalChannel.get("hall1").getState());
@@ -65,25 +65,6 @@ public class HelperFunctions {
             Robot.drivetrain.moveDistanceWithCorrections(0.6, 36);
 
         }
-    }
-
-    public static void testGyroCalibration(String name, HardwareMap hmap, Telemetry tel, LinearOpMode op) {
-        GyroSensor g = hmap.gyroSensor.get(name);
-        ElapsedTime timer = new ElapsedTime();
-        boolean calibrated = false;
-
-        g.calibrate();
-
-        while (g.isCalibrating() && op.opModeIsActive()) {
-            tel.addData("Calibrating time", timer.time());
-            calibrated = true;
-        }
-
-        while (op.opModeIsActive()) {
-            tel.addData("Ever calibrated", calibrated);
-            tel.addData("Hero are you with us?", g.getHeading());
-        }
-
     }
 
     public static void calibrateServo(String name, double safeStart, HardwareMap hmap, Gamepad gamepad, LinearOpMode waiter, Telemetry tel) throws InterruptedException{

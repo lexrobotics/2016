@@ -43,9 +43,6 @@ public class DriveTrain {
     protected double expectedHeading;
     protected final double TURN_SCALAR = 0.23;
 
-    public double getActualHeading(String name) {
-        return Robot.state.getSensorReading(name);
-    }
 
     public double getExpectedHeading() { return expectedHeading; }
 
@@ -110,7 +107,7 @@ public class DriveTrain {
     public void move(double power, LinearOpMode waiter){
         if(!thread_running) {
 
-            mover = new MovementThread(power, 1, 10, .1, 0, 0);
+            mover = new MovementThread(power, 1, 10, .075, 0, 0);
 //            mover = new MovementThread(power, 1, 10, .2, 0.02, 02);
 
             move_thread = new Thread(mover);
@@ -235,8 +232,8 @@ public class DriveTrain {
         setLeftMotors(0);
         setRightMotors(0);
             do {
-                Robot.tel.addData("turn",angleDist(this.getActualHeading("hero"), this.getExpectedHeading()));
-                double correction = turnPID.updateWithError(angleDist(this.getActualHeading("hero"), this.getExpectedHeading()));
+                Robot.tel.addData("turn",angleDist(Robot.state.getSensorReading("hero"), this.getExpectedHeading()));
+                double correction = turnPID.updateWithError(angleDist(Robot.state.getSensorReading("hero"), this.getExpectedHeading()));
                 if (leftPower) {
                     setLeftMotors(scaleInput(correction));
                 }

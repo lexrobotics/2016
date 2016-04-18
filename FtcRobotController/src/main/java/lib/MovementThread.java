@@ -62,7 +62,7 @@ public class MovementThread implements Runnable {
     }
 
     private double getOffset() {
-        return angleDist(   Robot.drivetrain.getActualHeading(Robot.gyroName),
+        return angleDist(   Robot.state.getSensorReading("hero"),
                             Robot.drivetrain.getExpectedHeading()           );
     }
 

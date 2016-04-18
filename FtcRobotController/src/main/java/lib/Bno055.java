@@ -191,7 +191,7 @@ public class Bno055 {
     private Wire        gs;                     // Gyro Sensor
     private ArrayList<ScheduleItem> schedule;
 
-    private InitStates  initState;              // Multistep initialization
+    private InitStates  initState = InitStates.START;              // Multistep initialization
     private boolean     stateIsStarting;        // Local state during initialization
     private long        startTime;              // Timeout control for init_gs
     private long        delayStart;             // Delay starting time

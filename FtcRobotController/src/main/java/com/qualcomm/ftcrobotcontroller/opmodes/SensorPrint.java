@@ -21,45 +21,7 @@ public class SensorPrint extends LinearOpMode{
     public void runOpMode() throws InterruptedException{
         BotInit.bot2(hardwareMap, telemetry, this);
         waitForStart();
- //        Robot.tillWhite(0.2, "ground", "beacon");
         HelperFunctions.bot2SensorPrint(this);
-//        Robot.tillWhite(0.175, "ground", "beacon", "red");
-
-//        GyroSensor g = hardwareMap.gyroSensor.get("hero");
-//        ElapsedTime timer = new ElapsedTime();
-//        timer.reset();
-//        boolean calibrated = false;
-//        boolean calibrationGapExists = false;
-//        double calibrationGapTime = -1;
-//
-//        g.calibrate();
-//
-//        while ((!g.isCalibrating()) && opModeIsActive()){
-//            telemetry.addData("Not calibrating", timer.time());
-//            calibrationGapExists = true;
-//            Thread.sleep(0, 1);
-//        }
-//
-//        calibrationGapTime = timer.time();
-//
-//
-//        // now waits for the duration of calibration
-//        while (g.isCalibrating() && opModeIsActive()) {
-//            telemetry.addData("Calibrating time", timer.time());
-//            calibrated = true;
-//            Thread.sleep(1);
-//        }
-//
-//        // ending: constantly displays whether it successfully calibrated, and the rotation to test.
-//        while (opModeIsActive()) {
-//            telemetry.addData("Ever calibrated?", calibrated);
-//            telemetry.addData("Is there a calibration gap?", calibrationGapExists);
-//            telemetry.addData("Time to start calibration", calibrationGapTime);
-//            telemetry.addData("Hero", g.getHeading());
-//            Thread.sleep(1);
-//        }
-
-//        looking for true, true, to confirm theorry
 
 
     }

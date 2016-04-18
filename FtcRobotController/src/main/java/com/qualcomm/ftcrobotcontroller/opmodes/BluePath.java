@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.Hardware;
 import lib.BotInit;
 import lib.DriveTrain;
 import lib.FourWheelDrive;
+import lib.Menu;
 import lib.Robot;
 import lib.HelperFunctions;
 import lib.SensorState;
@@ -29,8 +30,11 @@ public class BluePath extends LinearOpMode {
 //
 
 //        int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
+        Menu menu = new Menu();
+        menu.run();
         waitForStart();
-//        Robot.delayWithCountdown(delayTime);
+        menu.delay();
+        //        Robot.delayWithCountdown(delayTime);
 
         //initial turn
         Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
@@ -74,6 +78,11 @@ public class BluePath extends LinearOpMode {
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();
         Robot.retractButtonPusher();
+        int scoot = menu.getScoot();
+        if(scoot == Menu.SCOOT_FORWARD)
+            Robot.drivetrain.moveDistanceWithCorrections(-0.8, 24);
+        else if(scoot == Menu.SCOOT_BACKWARDS)
+            Robot.drivetrain.moveDistanceWithCorrections(0.8, 24);
 
     }
 
