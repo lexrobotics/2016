@@ -16,30 +16,35 @@ public class DefensiveBlueWidePath extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
         waitForStart();
-        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
         waitForStart();
+        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+
+        timer.reset();
+
+        Robot.drivetrain.dumbGyroTurn(0.7, 0, 45);
+        Thread.sleep(100);
+        Robot.drivetrain.moveDistanceWithCorrections(1, 110);
+        Thread.sleep(100);
 
         Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
+        Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
 
-        Robot.closeSkirts();
-        Thread.sleep(20);
+        Thread.sleep(100);
 
-        //Initial Move
-        Robot.drivetrain.moveDistanceWithCorrections(-0.8, 70, false);
+        telemetry.addData("timer", timer.time());
+        while(timer.time()<10) {
+            telemetry.addData("timer",timer.time());
 
-        Robot.drivetrain.dumbGyroTurn(0.7, 0, 180);
-        Robot.drivetrain.dumbGyroTurn(0, 0.7, 90);
-
-        while(timer.time() < 10) {
             Thread.sleep(1);
         }
         Robot.drivetrain.move(.65,this);
-        while(timer.time() < 29) {
+        while(timer.time() < 29 && opModeIsActive()) {
             Thread.sleep(1);
         }
         Robot.drivetrain.stopMove();
     }
+
     @Override
     public void runOpMode()  {
         try {

@@ -18,24 +18,26 @@ public class DefensiveBluePath extends LinearOpMode {
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         waitForStart();
         timer.reset();
+        Robot.drivetrain.dumbGyroTurn(0.7, 0, 45);
 
-        Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
-        Robot.closeSkirts();
-        Thread.sleep(20);
+        Robot.drivetrain.moveDistanceWithCorrections(1, 60);
+        Thread.sleep(100);
+        Robot.drivetrain.dumbGyroTurn(-0.7, 0, 22);
+        Thread.sleep(100);
 
-        Robot.drivetrain.moveDistanceWithCorrections(-0.8, 50, false);
-        Robot.drivetrain.dumbGyroTurn(0, 0.7, 30);
-        Robot.drivetrain.dumbGyroTurn(0.7, 0, 15);
+        Robot.drivetrain.moveDistanceWithCorrections(1, 30);
+        Thread.sleep(100);
 
-        Robot.drivetrain.moveDistanceWithCorrections(-0.8, 30, false);
-        Robot.drivetrain.dumbGyroTurn(0, 0.7, 125);
-        Robot.drivetrain.dumbGyroTurn(0.7, 0, 55);
+        Robot.drivetrain.dumbGyroTurn(-0.7, 0, 65);
+        Robot.drivetrain.moveDistanceWithCorrections(1, 18);
 
-        while (timer.time() < 10) {
+        Thread.sleep(100);
+
+        while(timer.time() < 10 && opModeIsActive() ) {
             Thread.sleep(1);
         }
-        Robot.drivetrain.move(.65, this);
-        while (timer.time() < 29) {
+        Robot.drivetrain.move(.65,this);
+        while(timer.time() < 29 && opModeIsActive()) {
             Thread.sleep(1);
         }
         Robot.drivetrain.stopMove();

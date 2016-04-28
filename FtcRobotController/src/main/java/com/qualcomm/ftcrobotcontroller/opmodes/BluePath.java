@@ -2,21 +2,12 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 
 import android.util.Log;
 
+import com.qualcomm.ftcrobotcontroller.R;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.GyroSensor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Hardware;
 
 import lib.BotInit;
-import lib.DriveTrain;
-import lib.FourWheelDrive;
 import lib.Menu;
 import lib.Robot;
-import lib.HelperFunctions;
 import lib.SensorState;
 
 /**
@@ -25,45 +16,49 @@ import lib.SensorState;
 public class BluePath extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
-//
-        boolean armTimeOut;
-//
 
-//        int delayTime = (int)Robot.delaySet("delayDial","beaconToucher");
+        boolean armTimeOut;
+
+        //menu
         Menu menu = new Menu();
         menu.run();
         waitForStart();
         menu.delay();
-        //        Robot.delayWithCountdown(delayTime);
 
         //initial turn
-        Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
-//
-//
-//        //Initial Move
+        Robot.drivetrain.dumbGyroTurn(0, -0.7, 44);
+
+        //Initial Move
         Robot.closeSkirts();
         Thread.sleep(20);
 
         Robot.drivetrain.moveDistanceWithCorrections(-1, 60, false);
-        Robot.tillLimitSwitch("rearLimit", "rightLimitServo", -0.3, 0.25, 1, 5, 0.2, true);
+        Robot.tillLimitSwitch("rearLimit", "rightLimitServo", -0.3, 0.25, 1, 3, 0.2, true);
+
+        // Pre-extend button pusher
+        new Thread(new Robot.ExtendButtonPusherThread()).start();
 
         // Turn
         Robot.drivetrain.dumbGyroTurn(-0.4, 0.4, 43);
 
+        SensorState.ColorType dominant;
+
         //TillWhite
-        Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "blue");
+        Robot.tillWhiteJumpThresh(-0.19, "ground", "beacon", "blue");
         armTimeOut = Robot.extendTillBeacon("beaconToucher");
 
         if(armTimeOut){
             Robot.retractButtonPusher();
             Thread.sleep(10);
-            Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "blue");
+            Robot.tillWhiteJumpThresh(-0.19, "ground", "beacon", "blue");
             Robot.extendTillBeacon("beaconToucher");
         }
 
+        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+        Thread.sleep(200);
+        dominant = Robot.state.redVsBlueJumpThresh("beacon");
+        Robot.servos.get("buttonPusher").setPosition(0.5);
 
-
-        SensorState.ColorType dominant = Robot.state.redVsBlueJumpThresh("beacon");
         Robot.dumpClimbers();
 
             Robot.tel.addData(dominant + "", "");
@@ -77,13 +72,17 @@ public class BluePath extends LinearOpMode {
         }
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();
-        Robot.retractButtonPusher();
+        new Thread(new Robot.RetractButtonPusherThread()).start();
+        Thread.sleep(500);
         int scoot = menu.getScoot();
         if(scoot == Menu.SCOOT_FORWARD)
-            Robot.drivetrain.moveDistanceWithCorrections(-0.8, 24);
+            Robot.drivetrain.moveDistanceWithCorrections(-0.67, 48);
         else if(scoot == Menu.SCOOT_BACKWARDS)
-            Robot.drivetrain.moveDistanceWithCorrections(0.8, 24);
-
+            Robot.drivetrain.moveDistanceWithCorrections(0.8, 30);
+        else if(scoot == Menu.SCOOT_DEFENSE) {
+            Robot.drivetrain.dumbGyroTurn(0.7 , 135);
+            Robot.drivetrain.moveDistanceWithCorrections(1, 72);
+        }
     }
 
     public void runOpMode() throws InterruptedException{

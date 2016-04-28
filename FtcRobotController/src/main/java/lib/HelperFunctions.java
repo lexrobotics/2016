@@ -22,18 +22,18 @@ public class HelperFunctions {
             e.printStackTrace();
         }
 
-//        Robot.mux = new Wire(Robot.hmap, "mux", 2*0x70);
-//        Robot.groundColorSensor = new AdafruitColorSensor(Robot.hmap, "ground", "cdim", -1, 0, Robot.mux);
-//        Robot.beaconColorSensor = new AdafruitColorSensor(Robot.hmap, "beacon", "cdim", -1, 1, Robot.mux);
+        Wire mux = new Wire(op.hardwareMap, "mux", 2*0x70);
+        AdafruitColorSensor groundColorSensor = new AdafruitColorSensor(op.hardwareMap, "ground", "cdim", -1, 0, mux);
+        AdafruitColorSensor beaconColorSensor = new AdafruitColorSensor(op.hardwareMap, "beacon", "cdim", -1, 1, mux);
 
 //        ground.setLed(true);
         while(op.opModeIsActive()){
             Robot.tel.addData("gyro", Robot.state.getSensorReading("hero"));
 
-//            if(Robot.beaconColorSensor.isColorUpdate())
-//                Robot.tel.addData("beacon r", Robot.beaconColorSensor.getRed() + "  g: " + Robot.beaconColorSensor.getGreen() + "  b: " + Robot.beaconColorSensor.getBlue() + "  alpha: " + Robot.beaconColorSensor.getClear());
-//            if(Robot.groundColorSensor.isColorUpdate())
-//                Robot.tel.addData("ground r", Robot.groundColorSensor.getRed() + "  g: " + Robot.groundColorSensor.getGreen() + "  b: " + Robot.groundColorSensor.getBlue() + "  alpha: " + Robot.groundColorSensor.getClear());
+            if(beaconColorSensor.isColorUpdate())
+                Robot.tel.addData("beacon r", beaconColorSensor.getRed() + "  g: " + beaconColorSensor.getGreen() + "  b: " + beaconColorSensor.getBlue() + "  alpha: " + beaconColorSensor.getClear());
+            if(groundColorSensor.isColorUpdate())
+                Robot.tel.addData("ground r", groundColorSensor.getRed() + "  g: " + groundColorSensor.getGreen() + "  b: " + groundColorSensor.getBlue() + "  alpha: " + groundColorSensor.getClear());
 //            Robot.tel.addData("beacon RedVsBlue", Robot.state.redVsBlue("beacon"));
             Robot.tel.addData("beacon limit",Robot.hmap.digitalChannel.get("beaconToucher").getState());
             Robot.tel.addData("hall",Robot.hmap.digitalChannel.get("hall1").getState());
@@ -61,7 +61,7 @@ public class HelperFunctions {
     }
     public static void movementThreadCalibration(LinearOpMode op) throws InterruptedException {
         while(op.opModeIsActive()) {
-            Robot.drivetrain.moveDistanceWithCorrections(-0.6,36);
+            Robot.drivetrain.moveDistanceWithCorrections(-0.6, 36);
             Robot.drivetrain.moveDistanceWithCorrections(0.6, 36);
 
         }

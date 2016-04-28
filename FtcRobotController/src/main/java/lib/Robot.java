@@ -182,13 +182,14 @@ public class Robot {
 
         timer.reset();
         pressTimer.reset();
-
+        drivetrain.mover.divisor = 1.5;
         while (pressTimer.time() < pressTimeOut && timer.time() < killTime && waiter.opModeIsActive()){
             waiter.waitOneFullHardwareCycle();
             if(hmap.digitalChannel.get(limitName).getState() == inverted) {
                 pressTimer.reset();
             }
         }
+        drivetrain.mover.divisor = 1;
 
         hmap.servo.get(servoName).setPosition(positionInactive);
         drivetrain.stopMove();
@@ -236,9 +237,53 @@ public class Robot {
         return timeOutReached;
     }
 
+    public static void partiallyRetractButtonPusher() throws InterruptedException {
+        Robot.servos.get("buttonPusher").setPosition(1);
+        Thread.sleep(500);
+        Robot.servos.get("buttonPusher").setPosition(0.5);
+    }
+
+    public static class ExtendButtonPusherThread implements Runnable {
+        @Override
+        public void run() {
+            Robot.servos.get("buttonPusher").setPosition(0);
+            try {
+                Thread.sleep(1500);
+            }
+            catch(InterruptedException ie) {
+                ie.printStackTrace();
+            }
+            Robot.servos.get("buttonPusher").setPosition(0.5);
+        }
+    }
+    public static class RetractButtonPusherThread implements Runnable {
+        @Override
+        public void run() {
+            DigitalChannel endStop = hmap.digitalChannel.get("buttonPusherEndStop");
+            Robot.servos.get("climberDropper").setPosition(0.8);
+            Robot.servos.get("buttonPusher").setPosition(1);
+
+            ElapsedTime pressTimer = new ElapsedTime();
+            pressTimer.reset();
+
+            while(!endStop.getState() && Robot.waiter.opModeIsActive() && pressTimer.time() <= 7) {
+                Robot.servos.get("buttonPusher").setPosition(1);
+                try {
+                    Thread.sleep(1);
+                }
+                catch(InterruptedException ie) {
+                    break;
+                }
+            }
+
+            Robot.servos.get("buttonPusher").setPosition(0.5);
+            Robot.servos.get("climberDropper").setPosition(1);
+        }
+    }
+
     public static void retractButtonPusher() throws InterruptedException {
         DigitalChannel endStop = hmap.digitalChannel.get("buttonPusherEndStop");
-
+        Robot.servos.get("climberDropper").setPosition(0.8);
         Robot.servos.get("buttonPusher").setPosition(1);
 
         ElapsedTime pressTimer = new ElapsedTime();
@@ -250,6 +295,7 @@ public class Robot {
         }
 
         Robot.servos.get("buttonPusher").setPosition(0.5);
+        Robot.servos.get("climberDropper").setPosition(1);
     }
 
     public static SensorState.ColorType tillColor(String sensorName, int direction) throws InterruptedException{
@@ -271,11 +317,11 @@ public class Robot {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
 
         ElapsedTime presstimer = new ElapsedTime();
-        Robot.drivetrain.move(direction * .175, Robot.waiter);
-        while((presstimer.time() <= .15) && Robot.waiter.opModeIsActive()) {
+        Robot.drivetrain.move(direction * .2, Robot.waiter);
+        while((presstimer.time() <= .2) && Robot.waiter.opModeIsActive()) {
             Robot.tel.addData("timer", presstimer.time());
             if(beaconToucher.getState() == false) { // switch is depressed :(
-                Robot.servos.get("buttonPusher").setPosition(0.25); // less gently push, but still kinda gently
+                Robot.servos.get("buttonPusher").setPosition(0.2); // less gently push, but still kinda gently
                 presstimer.reset(); // hold presstimer at 0
             }
             else { // switch is open

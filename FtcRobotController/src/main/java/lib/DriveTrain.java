@@ -107,8 +107,8 @@ public class DriveTrain {
     public void move(double power, LinearOpMode waiter){
         if(!thread_running) {
 
-            mover = new MovementThread(power, 1, 10, .075, 0, 0);
-//            mover = new MovementThread(power, 1, 10, .2, 0.02, 02);
+//            mover = new MovementThread(power, 1, 10, .175, 0, 0);
+            mover = new MovementThread(power, 1, 5, .125, 0.01, 0);
 
             move_thread = new Thread(mover);
             move_thread.start();
@@ -255,14 +255,17 @@ public class DriveTrain {
 
     // NEVER MAKE THE ANGLE NEGATIVE. To turn in the negative direction, make the power negative.
     public void dumbGyroTurn(double power, double angle) throws InterruptedException {
-       dumbGyroTurn(power, power, angle);
+        if(angle > 0)
+            dumbGyroTurn(power, -power, angle);
+        else
+            dumbGyroTurn(-power, power, angle);
     }
 
     public void dumbGyroTurn(double powerLeft, double powerRight, double angle) throws InterruptedException {
-        int sign = -1;
+        int sign = 1;
 
         if (powerLeft > powerRight){
-            sign = 1;
+            sign = -1;
         }
 
         expectedHeading = (expectedHeading + sign * angle + 360) % 360;
@@ -273,7 +276,7 @@ public class DriveTrain {
         setLeftMotors(powerLeft);
         setRightMotors(powerRight);
 
-        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 4 && Robot.waiter.opModeIsActive() && turntimer.time()<1) {
+        while (Math.abs(angleDist(expectedHeading, Robot.state.getSensorReading(Robot.gyroName))) > 4 && Robot.waiter.opModeIsActive() && turntimer.time()<2.5) {
             Thread.sleep(10);
         }
 

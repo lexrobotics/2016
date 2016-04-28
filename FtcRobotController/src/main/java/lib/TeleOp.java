@@ -206,18 +206,22 @@ public class TeleOp extends OpMode {
 
         if (gamepad2.left_trigger >= .1) {
             liftStageOne.setPower(-gamepad2.left_trigger);
+            climbersDumped = true;
         }
         else if (gamepad2.left_bumper) {
             liftStageOne.setPower(1);
+            climbersDumped = true;
         } else {
             liftStageOne.setPower(0);
         }
 
         if (gamepad2.right_trigger >= .1) {
             liftStageTwo.setPower(gamepad2.right_trigger);
+            climbersDumped = true;
         }
         else if (gamepad2.right_bumper) {
             liftStageTwo.setPower(-1);
+            climbersDumped = true;
         }
         else {
             liftStageTwo.setPower(0);
@@ -259,20 +263,11 @@ public class TeleOp extends OpMode {
             buttonPusher.setPosition(0.5); // stop button pusher
         }
 
-        if (gamepad1.x && gamepad1.y) {
-            if (oneY_was_down){
-                arm_locked = !arm_locked;
-                oneY_was_down = false;
-            }
+        if (gamepad1.left_bumper && gamepad1.y) {
+            arm_locked = true;
         }
-        else if (gamepad1.a) {
-            if (!oneY_was_down) {
-                arm_locked = !arm_locked;
-                oneY_was_down = true;
-            }
-        }
-        else {
-            oneY_was_down = true;
+        else if (gamepad1.left_bumper && gamepad1.x) {
+            arm_locked = false;
         }
 
         if (gamepad2.a) {
@@ -415,5 +410,6 @@ public class TeleOp extends OpMode {
         else {
             armTilt(0, false);
         }
+
     }
 }

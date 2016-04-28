@@ -1,5 +1,6 @@
 package lib;
 
+import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -140,7 +141,8 @@ public class SensorState implements Runnable {
     // Allows recovery of all sensors of a certain type.
     private HashMap<SensorType, SensorContainer[]> types_inv;
     private HardwareMap hmap;
-    private HashMap<String, Bno055> imus;
+    private HashMap<String, AdafruitIMU> imus;
+    volatile double[] rollAngle = new double[2], pitchAngle = new double[2], yawAngle = new double[2];
 
     private DigitalChannel usPin;
     private boolean usPinWasSet;
@@ -155,7 +157,7 @@ public class SensorState implements Runnable {
     public SensorState(HardwareMap hmap, int milli_interval, int nano_interval) {
         this.hmap = hmap;
         maps = new HashMap<SensorType, HardwareMap.DeviceMapping>();
-        imus = new HashMap<String, Bno055>();
+        imus = new HashMap<String, AdafruitIMU>();
         sensorContainers = new HashMap<String, SensorContainer>();
         types_inv = new HashMap<SensorType, SensorContainer[]>();
 
@@ -208,36 +210,15 @@ public class SensorState implements Runnable {
     public synchronized void registerSensor(String name, SensorType type, boolean update, int data_length) {
 
         if (type == SensorType.IMU) {
-            Robot.hmap.digitalChannel.get("imureset").setMode(DigitalChannelController.Mode.OUTPUT);
-            Robot.hmap.digitalChannel.get("imureset").setState(false);
-            try{
-                Thread.sleep(100);
-                Robot.hmap.digitalChannel.get("imureset").setState(true);
-
-                Thread.sleep(2000);
-
-            }
-            catch (InterruptedException ex){
-
-            }
-            Bno055 bonbon = new Bno055(Robot.hmap, name);
-
+            AdafruitIMU bonbon = null;
             try {
-                bonbon.init();
-                Thread.sleep(200);
-                while (bonbon.isInitActive()) {
-                    bonbon.init_loop();
-
-                }
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
+                bonbon = new AdafruitIMU(Robot.hmap, "hero"
+                        , (byte)(AdafruitIMU.BNO055_ADDRESS_A * 2)
+                        , (byte)AdafruitIMU.OPERATION_MODE_IMU);
+            } catch (RobotCoreException e) {
+                e.printStackTrace();
             }
-
-            bonbon.startSchedule(Bno055.BnoPolling.SENSOR, 100);     // 10 Hz
-            bonbon.startSchedule(Bno055.BnoPolling.FUSION, 33);      // 30 Hz
-            bonbon.startSchedule(Bno055.BnoPolling.TEMP, 200);       // 5 Hz
-            bonbon.startSchedule(Bno055.BnoPolling.CALIB, 250);      // 4 H
-            bonbon.startSchedule(Bno055.BnoPolling.EULER, 15);
+            bonbon.startIMU();
             imus.put(name, bonbon);
         } else {      // Get underlying sensor object for the sensor
             Object sensor_obj = maps.get(type).get(name);
@@ -360,9 +341,9 @@ public class SensorState implements Runnable {
      */
     public synchronized double getSensorReading(String name) {
         if (imus.get(name) != null) {
-            Bno055 bonbon = imus.get(name);
-            bonbon.loop();
-            return bonbon.eulerX();
+            AdafruitIMU bonbon = imus.get(name);
+            bonbon.getIMUGyroAngles(rollAngle, pitchAngle, yawAngle);
+            return yawAngle[0];
         }
         if (!sensorContainers.keySet().contains(name)) {
             throw new RuntimeException("SensorState.getSensorReading: sensor " + name + " not registered.");

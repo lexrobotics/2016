@@ -62,8 +62,8 @@ public class MovementThread implements Runnable {
     }
 
     private double getOffset() {
-        return angleDist(   Robot.state.getSensorReading("hero"),
-                            Robot.drivetrain.getExpectedHeading()           );
+        return angleDist(   Robot.drivetrain.getExpectedHeading() ,
+                            Robot.state.getSensorReading("hero")           );
     }
 
     private void stopBothMotors() {
@@ -77,8 +77,8 @@ public class MovementThread implements Runnable {
         do {
             offset = getOffset();
             Robot.tel.addData("offset", offset);
-            Robot.drivetrain.setRightMotors(0.4 * Math.signum(offset) * -1);
-            Robot.drivetrain.setLeftMotors(0.4 * Math.signum(offset));
+            Robot.drivetrain.setRightMotors(0.3 * Math.signum(offset) * -1);
+            Robot.drivetrain.setLeftMotors(0.3 * Math.signum(offset));
             Thread.sleep(50);
 
         } while (Math.abs(offset) > turnThresh && Robot.waiter.opModeIsActive() && !Thread.currentThread().isInterrupted() && !Robot.drivetrain.isAMotorZero());
@@ -124,18 +124,24 @@ public class MovementThread implements Runnable {
                 offset = getOffset();
                 Robot.tel.addData("offset", offset);
 
-                if (Math.abs(offset) < turnThresh && !Robot.drivetrain.isAMotorZero()) {
+                if (/*Math.abs(offset) < turnThresh &&*/ !Robot.drivetrain.isAMotorZero()) {
                     correction = pid.updateWithError(offset);
+                    Robot.tel.addData("correction", correction);
                     Robot.drivetrain.setLeftMotors(Range.clip(currentPower + (correction / divisor), -1, 1));
                     Robot.drivetrain.setRightMotors(Range.clip(currentPower - (correction/divisor),-1,1));
                 }
+                else {
+                    Robot.drivetrain.setLeftMotors(currentPower);
+                    Robot.drivetrain.setRightMotors(currentPower);
+                }
 
                 // The offset is too great, so we have to stop and do a controlled turn back to the right value.
-                else if (Math.abs(offset) > turnThresh) {
-                    Thread.sleep(100);
-                    turn();
-                    Thread.sleep(100);
-                }
+//                else if (Math.abs(offset) > turnThresh) {
+//                    Thread.sleep(100);
+//                    turn();
+//                    Thread.sleep(100);
+////                    pid.recreate(Kp, Ki, Kd);
+//                }
 
                 Thread.sleep(50);
 

@@ -17,22 +17,30 @@ public class DefensiveRedWidePath extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
         waitForStart();
-        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
         waitForStart();
+        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+
         timer.reset();
 
         Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
+        Thread.sleep(100);
+        Robot.drivetrain.moveDistanceWithCorrections(1, 110);
+        Thread.sleep(100);
 
-        Robot.drivetrain.moveDistanceWithCorrections(0.6, 80, false);
+        Robot.drivetrain.dumbGyroTurn(0.7,0, 45);
+        Robot.drivetrain.dumbGyroTurn(0.7,0, 45);
 
-        Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
+        Thread.sleep(100);
 
-        while(timer.time() < 10) {
+        telemetry.addData("timer", timer.time());
+        while(timer.time()<10) {
+            telemetry.addData("timer",timer.time());
+
             Thread.sleep(1);
         }
         Robot.drivetrain.move(.65,this);
-        while(timer.time() < 29) {
+        while(timer.time() < 29 && opModeIsActive()) {
         Thread.sleep(1);
         }
         Robot.drivetrain.stopMove();

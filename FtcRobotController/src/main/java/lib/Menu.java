@@ -38,6 +38,9 @@ public class Menu {
     public void delay() throws InterruptedException {
         for(int i=delay; i>=0; i--) {
             Robot.tel.addData("TIME UNTIL LAUNCH", i);
+            if (!Robot.waiter.opModeIsActive()){
+                throw new InterruptedException("Opmode stopped in Menu.delay()");
+            }
             Thread.sleep(1000);
         }
     }

@@ -19,16 +19,24 @@ public class DefensiveRedPath extends LinearOpMode {
         timer.reset();
         Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
 
-        Robot.drivetrain.moveDistanceWithCorrections(0.8, 40, false);
-        Robot.drivetrain.dumbGyroTurn(0, 0.7, 22);
+        Robot.drivetrain.moveDistanceWithCorrections(1, 40);
+        Thread.sleep(100);
+        Robot.drivetrain.dumbGyroTurn(0, -0.7, 22);
+        Thread.sleep(100);
 
-        Robot.drivetrain.moveDistanceWithCorrections(.8, 30);
-        Robot.drivetrain.dumbGyroTurn(0, 0.7, 23);
-        while(timer.time() < 10) {
+        Robot.drivetrain.moveDistanceWithCorrections(1, 30);
+        Thread.sleep(100);
+
+        Robot.drivetrain.dumbGyroTurn(0, -0.7, 65);
+        Robot.drivetrain.moveDistanceWithCorrections(1, 25);
+
+        Thread.sleep(100);
+
+        while(timer.time() < 10 && opModeIsActive() ) {
             Thread.sleep(1);
         }
         Robot.drivetrain.move(.65,this);
-        while(timer.time() < 29) {
+        while(timer.time() < 29 && opModeIsActive()) {
             Thread.sleep(1);
         }
         Robot.drivetrain.stopMove();

@@ -37,6 +37,8 @@ public class RedPath extends LinearOpMode {
         Robot.drivetrain.dumbGyroTurn(0, .7, 45);
         DcMotor noodle = hardwareMap.dcMotor.get("noodler");
 
+        // Pre-extend button pusher
+        new Thread(new Robot.ExtendButtonPusherThread()).start();
 
         //first movement
         Robot.drivetrain.moveDistanceWithCorrections(1, 60, false);
@@ -44,12 +46,14 @@ public class RedPath extends LinearOpMode {
         redDoor.setPosition(1);
 
         //turn to parallel
+        Robot.drivetrain.moveDistanceWithCorrections(-0.4, 3);
+        Thread.sleep(20);
         Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
 //        noodle.setPower(1);
 
         //turn to tillWhite
         SensorState.ColorType dominant;
-        Robot.tillWhiteJumpThresh(0.175, "ground", "beacon", "red");
+        Robot.tillWhiteJumpThresh(0.19, "ground", "beacon", "red");
         noodle.setPower(0);
 
         //PushButton STuff
@@ -58,11 +62,14 @@ public class RedPath extends LinearOpMode {
         if(armTimeOut){
             Robot.retractButtonPusher();
             Thread.sleep(10);
-            Robot.tillWhiteJumpThresh(0.175, "ground", "beacon", "red");
+            Robot.tillWhiteJumpThresh(0.19, "ground", "beacon", "red");
             Robot.extendTillBeacon("beaconToucher");
         }
 
+        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+        Thread.sleep(200);
         dominant = Robot.state.redVsBlueJumpThresh("beacon");
+        Robot.servos.get("buttonPusher").setPosition(0.5);
         Robot.dumpClimbers();
         telemetry.addData("Color detected", dominant);
         if(dominant == SensorState.ColorType.RED) {
@@ -75,13 +82,20 @@ public class RedPath extends LinearOpMode {
 
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();
-        Robot.retractButtonPusher();
+        new Thread(new Robot.RetractButtonPusherThread()).start();
+        Thread.sleep(500);
 
         int scoot = menu.getScoot();
         if(scoot == Menu.SCOOT_FORWARD)
-            Robot.drivetrain.moveDistanceWithCorrections(0.8, 24);
+            Robot.drivetrain.moveDistanceWithCorrections(0.67, 48);
         else if(scoot == Menu.SCOOT_BACKWARDS)
-            Robot.drivetrain.moveDistanceWithCorrections(-0.8, 24);
+            Robot.drivetrain.moveDistanceWithCorrections(-0.4, 24);
+        else if(scoot == Menu.SCOOT_DEFENSE) {
+            Robot.drivetrain.dumbGyroTurn(0.7, 0, 15);
+            Robot.drivetrain.moveDistanceWithCorrections(1, 12);
+            Robot.drivetrain.dumbGyroTurn(0.7, 0, 45);
+            Robot.drivetrain.moveDistanceWithCorrections(1, 50);
+        }
     }
 
     @Override

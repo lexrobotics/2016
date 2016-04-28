@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import lib.BotInit;
 import lib.DriveTrain;
 import lib.FourWheelDrive;
+import lib.Menu;
 import lib.Robot;
 import lib.HelperFunctions;
 import lib.SensorState;
@@ -23,27 +24,34 @@ public class RedPathWide extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
         boolean armTimeOut;
+        Menu menu = new Menu();
+        menu.run();
         waitForStart();
-
+        menu.delay();
 
         Robot.drivetrain.dumbGyroTurn(0, .7, 45);
-        Robot.drivetrain.moveDistanceWithCorrections(0.6, 100, false);
-        Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.3, 0.8, 0, 4);
+        Robot.drivetrain.moveDistanceWithCorrections(1, 100, false);
+        Robot.tillLimitSwitch("leftLimit", "leftLimitServo", 0.3, 0.75, 0, 4);
+        Robot.drivetrain.moveDistanceWithCorrections(-0.4, 3);
+        Thread.sleep(20);
+        Robot.drivetrain.dumbGyroTurn(0, -0.7, 45);
 
-        Robot.drivetrain.dumbGyroTurn(0.4, 45);
-
-        Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "red");
+        SensorState.ColorType dominant;
+        Robot.tillWhiteJumpThresh(-0.19, "ground", "beacon", "red");
 
         armTimeOut = Robot.extendTillBeacon("beaconToucher");
 
         if(armTimeOut){
             Robot.retractButtonPusher();
             Thread.sleep(10);
-            Robot.tillWhiteJumpThresh(-0.175, "ground", "beacon", "red");
+            Robot.tillWhiteJumpThresh(-0.19, "ground", "beacon", "red");
             Robot.extendTillBeacon("beaconToucher");
         }
 
-        SensorState.ColorType dominant = Robot.state.redVsBlueJumpThresh("beacon");
+        Robot.servos.get("buttonPusher").setPosition(0.2); // press button pusher
+        Thread.sleep(200);
+        dominant = Robot.state.redVsBlueJumpThresh("beacon");
+        Robot.servos.get("buttonPusher").setPosition(0.5);
         Robot.dumpClimbers();
         if(dominant == SensorState.ColorType.RED) {
             Robot.pushButton("beaconToucher", -1);
@@ -57,7 +65,18 @@ public class RedPathWide extends LinearOpMode {
         Robot.drivetrain.move(0);
         Robot.drivetrain.stopMove();
 
-        Robot.retractButtonPusher();
+        new Thread(new Robot.RetractButtonPusherThread()).start();
+        Thread.sleep(500);
+        int scoot = menu.getScoot();
+        if(scoot == Menu.SCOOT_FORWARD)
+            Robot.drivetrain.moveDistanceWithCorrections(0.67, 48);
+        else if(scoot == Menu.SCOOT_BACKWARDS)
+            Robot.drivetrain.moveDistanceWithCorrections(-0.4, 24);
+        else if(scoot == Menu.SCOOT_DEFENSE) {
+            Robot.drivetrain.dumbGyroTurn(0.7, 0, 15);
+            Robot.drivetrain.moveDistanceWithCorrections(1, 12);
+            Robot.drivetrain.dumbGyroTurn(0.7, 0, 45);
+            Robot.drivetrain.moveDistanceWithCorrections(1, 50);        }
     }
 
     @Override
