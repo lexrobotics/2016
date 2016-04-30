@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.robocol.Telemetry;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -317,12 +318,23 @@ public class Robot {
         DigitalChannel beaconToucher = hmap.digitalChannel.get(switchName);
 
         ElapsedTime presstimer = new ElapsedTime();
+        ElapsedTime totaltimer = new ElapsedTime();
+        totaltimer.reset();
         Robot.drivetrain.move(direction * .2, Robot.waiter);
+        double beforeRampUp = 1;
+        totaltimer.reset();
         while((presstimer.time() <= .2) && Robot.waiter.opModeIsActive()) {
             Robot.tel.addData("timer", presstimer.time());
             if(beaconToucher.getState() == false) { // switch is depressed :(
                 Robot.servos.get("buttonPusher").setPosition(0.2); // less gently push, but still kinda gently
                 presstimer.reset(); // hold presstimer at 0
+                if(totaltimer.time() > beforeRampUp + 5){
+                    break;
+                }
+                if(totaltimer.time()>beforeRampUp){
+                    Robot.drivetrain.move(Range.clip(direction*.2 + direction*( (totaltimer.time() - beforeRampUp)/5),-1,1),waiter);
+                }
+
             }
             else { // switch is open
                 Robot.servos.get("buttonPusher").setPosition(0); // press button pusher

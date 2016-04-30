@@ -88,6 +88,7 @@ public class FtcOpModeRegister implements OpModeRegister {
 
        // manager.register("Presentation TeleOp", judgesTeleOp.class);
         manager.register("Presentation TeleOp", judgesTeleOp2.class);
+        manager.register("pushButtonTest", pushButtonTest.class);
         //manager.register("servo
         // Calibration", servoCalibration.class);
         //manager.register("I2CMuxTest", I2CMuxTest.class);
