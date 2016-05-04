@@ -78,7 +78,7 @@ public class BluePath extends LinearOpMode {
         if(scoot == Menu.SCOOT_FORWARD)
             Robot.drivetrain.moveDistanceWithCorrections(-0.67, 48);
         else if(scoot == Menu.SCOOT_BACKWARDS) {
-            Robot.drivetrain.moveDistanceWithCorrections(-0.8, 60);
+            Robot.drivetrain.moveDistanceWithCorrections(0.6, 60);
         }
         else if(scoot == Menu.SCOOT_DEFENSE) {
             Robot.drivetrain.dumbGyroTurn(0.7 , 135);

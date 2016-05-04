@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import lib.BotInit;
+import lib.Menu;
 import lib.Robot;
 import lib.SensorState;
 
@@ -16,16 +17,20 @@ import lib.SensorState;
 public class DefensiveRedWidePath extends LinearOpMode {
     public void path() throws InterruptedException {
         BotInit.bot2(hardwareMap, telemetry, this);
+        //menu
+        Menu menu = new Menu();
+        menu.run();
         waitForStart();
 
-        waitForStart();
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
         timer.reset();
 
+        menu.delay();
+
         Robot.drivetrain.dumbGyroTurn(0, 0.7, 45);
         Thread.sleep(100);
-        Robot.drivetrain.moveDistanceWithCorrections(1, 110);
+        Robot.drivetrain.moveDistanceWithCorrections(1, 92);
         Thread.sleep(100);
 
         Robot.drivetrain.dumbGyroTurn(0.7,0, 45);
@@ -34,12 +39,13 @@ public class DefensiveRedWidePath extends LinearOpMode {
         Thread.sleep(100);
 
         telemetry.addData("timer", timer.time());
-        while(timer.time()<10) {
+        while(timer.time()<10.2) {
             telemetry.addData("timer",timer.time());
 
             Thread.sleep(1);
         }
-        Robot.drivetrain.move(.65,this);
+        Robot.drivetrain.moveDistanceWithCorrections(.65, 61);
+
         while(timer.time() < 29 && opModeIsActive()) {
         Thread.sleep(1);
         }

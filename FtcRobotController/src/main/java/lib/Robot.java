@@ -321,18 +321,18 @@ public class Robot {
         ElapsedTime totaltimer = new ElapsedTime();
         totaltimer.reset();
         Robot.drivetrain.move(direction * .2, Robot.waiter);
-        double beforeRampUp = 1;
+        final double BEFORE_RAMP_UP = 1;
         totaltimer.reset();
         while((presstimer.time() <= .2) && Robot.waiter.opModeIsActive()) {
             Robot.tel.addData("timer", presstimer.time());
             if(beaconToucher.getState() == false) { // switch is depressed :(
                 Robot.servos.get("buttonPusher").setPosition(0.2); // less gently push, but still kinda gently
                 presstimer.reset(); // hold presstimer at 0
-                if(totaltimer.time() > beforeRampUp + 5){
+                if(totaltimer.time() > BEFORE_RAMP_UP + 5){
                     break;
                 }
-                if(totaltimer.time()>beforeRampUp){
-                    Robot.drivetrain.move(Range.clip(direction*.2 + direction*( (totaltimer.time() - beforeRampUp)/5),-1,1),waiter);
+                if(totaltimer.time()>BEFORE_RAMP_UP){
+                    Robot.drivetrain.move(Range.clip(direction*.2 + direction*( (totaltimer.time() - BEFORE_RAMP_UP)/5),-1,1),waiter);
                 }
 
             }
