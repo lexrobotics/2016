@@ -34,6 +34,7 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
 
+import lib.MecanumDrive;
 import lib.TeleOp;
 
 /**
@@ -82,13 +83,15 @@ public class FtcOpModeRegister implements OpModeRegister {
         manager.register("---------", NullOp.class);
 
         manager.register("SensorPrint", SensorPrint.class);
-
+        manager.register("armTest", Lifting.class);
 
         manager.register("pidCalibration", pidCalibration.class);
 
        // manager.register("Presentation TeleOp", judgesTeleOp.class);
         manager.register("Presentation TeleOp", judgesTeleOp2.class);
         manager.register("pushButtonTest", pushButtonTest.class);
+
+        manager.register("mecanum test", MecanumDrive.class);
         //manager.register("servo
         // Calibration", servoCalibration.class);
         //manager.register("I2CMuxTest", I2CMuxTest.class);

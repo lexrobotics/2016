@@ -19,8 +19,8 @@ public class MecanumDrive extends OpMode {
         rightFrontDrive = hardwareMap.dcMotor.get("rightFrontDrive");
         rightRearDrive = hardwareMap.dcMotor.get("rightRearDrive");
 
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
     }
 
     public void loop() {
@@ -32,20 +32,20 @@ public class MecanumDrive extends OpMode {
        double rightFrontPower, rightRearPower;
        double x1, x2, y1, y2;
 
-       x1 = scaleInput(-gamepad1.left_stick_x);
-       x2 = scaleInput(-gamepad1.right_stick_x);
-       y1 = scaleInput(-gamepad1.left_stick_y);
-       y2 = scaleInput(-gamepad1.right_stick_y);
+       x2 = scaleInput(gamepad1.left_stick_x);
+       x1 = scaleInput(gamepad1.right_stick_x);
+       y2 = scaleInput(-gamepad1.left_stick_y);
+       y1 = scaleInput(-gamepad1.right_stick_y);
 
-       leftFrontPower = y1 + x2;
-       leftRearPower = y2 + x1;
-       rightFrontPower = y1 - x1;
+       leftFrontPower = y1 - x2;
+       rightFrontPower = y2 - x1;
+       leftRearPower = y1 + x2;
        rightRearPower = y2 + x1;
 
-      leftFrontDrive.setPower(leftFrontPower);
-      leftRearDrive.setPower(leftRearPower);
-      rightFrontDrive.setPower(rightFrontPower);
-      rightRearDrive.setPower(rightRearPower);
+      leftFrontDrive.setPower(scaleInput(leftFrontPower));
+      leftRearDrive.setPower(scaleInput(leftRearPower));
+      rightFrontDrive.setPower(scaleInput(rightFrontPower));
+      rightRearDrive.setPower(scaleInput(rightRearPower));
     }
 
     double scaleInput(double dVal) {
